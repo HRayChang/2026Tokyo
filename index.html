@@ -42,6 +42,12 @@ main{padding:4px 16px calc(40px + env(safe-area-inset-bottom,0))}
 .body{flex:1;min-width:0}
 .meal{display:inline-block;font-size:12px;font-weight:700;color:var(--ac);background:rgba(var(--acrgb),.14);border-radius:10px;padding:2px 9px;margin-right:4px;white-space:nowrap}
 .r1:empty,.r1:not(:has(span)){display:none}
+.card{scroll-margin-top:84px}
+.card.now{border-color:var(--ac);box-shadow:0 0 0 4px rgba(var(--acrgb),.22),0 6px 18px rgba(var(--acrgb),.35)}
+.badge.now{background:#2e9e5b}
+.where{display:block;width:100%;margin-top:10px;border:0;border-radius:16px;background:rgba(var(--acrgb),.14);color:var(--ac);padding:10px 14px;text-align:left;font-size:16px;font-weight:700}
+.where small{display:block;color:var(--sub);font-weight:500;font-size:12px;margin-top:2px}
+.fab{position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom,0));z-index:30;border:0;border-radius:24px;background:var(--ac);color:#fff;font-size:15px;font-weight:700;padding:12px 18px;box-shadow:0 6px 16px rgba(var(--acrgb),.5)}
 .time{font-weight:800;color:var(--ac);font-variant-numeric:tabular-nums;margin-right:6px}
 .badge{font-size:12px;font-weight:700;background:var(--ac);color:#fff;border-radius:10px;padding:2px 9px;margin-right:4px;white-space:nowrap}
 .title{font-weight:700;font-size:17px;margin-top:2px;word-break:break-word}
@@ -66,6 +72,7 @@ details div{white-space:pre-line;font-size:14px;color:var(--sub);margin-top:6px}
 <div class="banner"><button class="iconbtn" id="bell" title="提醒">🔔</button></div>
 <nav class="tabs" id="tabs"></nav>
 <main id="main"></main>
+<button class="fab" id="fab" style="display:none">📍 現在</button>
 
 <script>
 /* ============ 資料區（改行程只要改這裡，推上 GitHub 即自動更新） ============ */
@@ -206,7 +213,7 @@ const DAYS=[
  w(4),
  T({title:'東京Metro 有樂町線 → JR 前往橫濱',lines:['有樂町線 Y22 豐洲 往和光市方向 ➜ Y18 有樂町 D6出口','JR山手線 JY30 有樂町 往品川・澀谷方向（外環）➜ JY29 新橋','JR東海道線・橫須賀線 JT02 新橋 往品川・橫濱・小田原方向（下行）➜ JT05 橫濱','或 JO18 新橋 往橫濱・鎌倉方向（下行）➜ JO13 橫濱'],cost:'180 + 530日圓（IC卡）',dur:'約32分',dir:['豊洲駅','横浜駅']}),
  w(4),
- P({at:'19:45',rem:1,title:'Antenor 橫濱崇光店',sub:'‼️ 先付款・19:45 取貨',hrs:'10:00 - 20:00',q:'アンテノール 横浜そごう店'}),
+ P({at:'19:45',rem:1,noanchor:1,title:'Antenor 橫濱崇光店',sub:'‼️ 先付款・19:45 取貨',hrs:'10:00 - 20:00',q:'アンテノール 横浜そごう店'}),
  P({title:'HARBS LUMINE橫濱店',hrs:'10:00 - 20:30',q:'HARBS ハーブス ルミネ横浜店'}),
  w(4),
  T({title:'JR東日本 京濱東北線・根岸線',lines:['JK12 橫濱 往磯子・大船方向（南行）','➜ JK09 石川町 北口'],cost:'200日圓（IC卡）',dur:'7分',dir:['横浜駅','石川町駅']}),
@@ -268,12 +275,74 @@ const enc=encodeURIComponent;
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 const tsOf=(day,it)=>{const[y,m,d]=(it.date||day.d).split('-').map(Number);const[h,mi]=it.at.split(':').map(Number);return Date.UTC(y,m-1,d,h-(it.tz??9),mi)};
 DAYS.forEach(d=>d.items.forEach((it,i)=>{it.id=d.d+'#'+i;if(it.at)it.ts=tsOf(d,it)}));
+/* ---- 座標（約略位置，用來判斷你在哪一站附近） ---- */
+const GEO=[
+ [/桃園/,25.0777,121.2328],[/成田空港|成田国際空港|空港第2|I\.A\.S\.S/,35.7720,140.3929],
+ [/Season Hotel|モスバーガー|ハナマサ|PERTH/,35.7107,139.8135],[/スカイツリー|ソラマチ|ひつまぶし/,35.7101,139.8107],
+ [/浅草|仲見世|三鳩堂|鳴門鯛焼|OSドラッグ|牛たん|mille mele|SUKE6/,35.7116,139.7965],
+ [/豊洲市場|小田保/,35.6456,139.7843],[/ららぽーと豊洲/,35.6537,139.7926],
+ [/赤レンガ/,35.4529,139.6431],[/大さん橋/,35.4513,139.6490],[/女神橋/,35.4535,139.6420],
+ [/中華街|皇朝|江戸清/,35.4437,139.6465],[/そごう|ハーブス|炎 横浜/,35.4658,139.6223],
+ [/オニツカ/,35.6889,139.7031],[/今半/,35.6918,139.6925],[/Alpen/,35.6930,139.7010],
+ [/HUMAN MADE|On Store|NUMBER SUGAR|ガリゲット/,35.6680,139.7060],
+ [/ディズニーストア/,35.6618,139.6987],[/SHIBUYA109/,35.6595,139.6980],[/肉屋横丁/,35.6620,139.6975],
+ [/ディズニーシー/,35.6267,139.8851],[/イクスピアリ|凜や|一風堂/,35.6358,139.8830],
+ [/KITTE/,35.6797,139.7650],[/パレット|バニラビーンズ|ブリュレ|TIRAMISÙ|PISTA/,35.6815,139.7678],
+ [/成田山新勝寺/,35.7870,140.3190],[/成田駅|黒平|金時|成田山表参道|後藤|林田|ポジターノ|Flying pig/,35.7765,140.3177]
+];
+DAYS.forEach(d=>{let last=null;d.items.forEach(it=>{
+  if(it.k==='place'&&it.q){const g=GEO.find(x=>x[0].test(it.q));if(g){it.ll=[g[1],g[2]];last=it.ll}}
+  else if(it.k==='move'&&last)it.ll=last;
+})});
+const jstDate=t=>new Date(t+9*3600e3).toISOString().slice(0,10);
+function liveDayIdx(now=Date.now()){
+  const ts=d=>d.items.filter(i=>i.ts).map(i=>i.ts);
+  const lastTs=Math.max(...ts(DAYS[DAYS.length-1]));
+  if(now>lastTs+3*3600e3)return -1;
+  const i=DAYS.findIndex(d=>d.d===jstDate(now));
+  if(i>=0)return i;
+  return now>=Math.min(...ts(DAYS[0]))-3*3600e3?DAYS.length-1:-1;
+}
+const dist=(a,b,c,d)=>{const R=6371e3,r=Math.PI/180,x=(c-a)*r,y=(d-b)*r,h=Math.sin(x/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin(y/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
+let loc=null,liveInfo=null;
+/* 依「時間」框出目前可能的區段，再用「定位」選最近的一站 */
+function infer(day){
+  const now=Date.now(),its=day.items;
+  const cards=its.map((x,i)=>i).filter(i=>its[i].k==='place'||its[i].k==='move');
+  let prev=-1,next=-1;
+  for(const i of cards){if(!its[i].ts||its[i].noanchor)continue;if(its[i].ts<=now)prev=i;else{next=i;break}}
+  const start=prev>=0?prev:0,end=next>=0?next:its.length;
+  let win=cards.filter(i=>i>=start&&i<end&&!isDone(its[i].id));
+  if(!win.length){const a=cards.filter(i=>i>=end&&!isDone(its[i].id));
+    const b=a.length?a:cards.filter(i=>!isDone(its[i].id));if(!b.length)return null;win=[b[0]]}
+  let pick=win[0],d=null,mode='time';
+  if(loc){
+    const ds=win.filter(i=>its[i].ll).map(i=>({i,d:dist(loc.lat,loc.lng,its[i].ll[0],its[i].ll[1])}));
+    if(ds.length){const m=Math.min(...ds.map(x=>x.d));
+      if(m<3000){const best=ds.find(x=>x.d<=m+150);pick=best.i;d=best.d;mode='geo'}else mode='far'}
+  }
+  return {item:its[pick],mode,d};
+}
+function whereHtml(){
+  if(!liveInfo)return '';
+  const f=d=>d<1000?Math.round(d/10)*10+' 公尺':(d/1000).toFixed(1)+' 公里';
+  const note=liveInfo.mode==='geo'?'依定位＋時間，距離約 '+f(liveInfo.d):liveInfo.mode==='far'?'不在行程地點附近，依時間推測':(loc?'依時間推測':'依時間推測（未取得定位）');
+  return `<button class="where" data-now="1">📍 現在：${esc(liveInfo.item.title)}<small>${note}</small></button>`;
+}
+function goNow(smooth){const el=document.querySelector('.card.now')||document.querySelector('.card.next');if(el)el.scrollIntoView({block:'start',behavior:smooth?'smooth':'auto'})}
+function locate(){return new Promise(res=>{if(!navigator.geolocation)return res(null);
+  navigator.geolocation.getCurrentPosition(p=>res({lat:p.coords.latitude,lng:p.coords.longitude}),()=>res(null),{timeout:8000,maximumAge:120000})})}
+function startLive(){
+  const li=liveDayIdx();if(li<0){render();return}
+  cur=li;render();goNow(false);const y0=scrollY;
+  locate().then(p=>{if(!p)return;loc=p;const stay=Math.abs(scrollY-y0)<40;render();if(stay)goNow(false)});
+}
+
 const mapUrl=q=>'https://www.google.com/maps/search/?api=1&query='+enc(q);
 const dirUrl=(a,b)=>'https://www.google.com/maps/dir/?api=1&origin='+enc(a)+'&destination='+enc(b)+'&travelmode=transit';
 const isDone=id=>store.get('done:'+id)==='1';
 let cur=0,hideDone=store.get('hide')==='1';
-(function pick(){const t=new Date(),s=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
-  const i=DAYS.findIndex(d=>d.d===s);cur=i>=0?i:(s>DAYS[DAYS.length-1].d?DAYS.length-1:0)})();
+(function pick(){const li=liveDayIdx();if(li>=0){cur=li;return}cur=jstDate(Date.now())>DAYS[DAYS.length-1].d?DAYS.length-1:0})();
 
 function renderTabs(){
   $('#tabs').innerHTML=DAYS.map((d,i)=>{const[,m,dd]=d.d.split('-');
@@ -288,15 +357,16 @@ function render(){
   const day=DAYS[cur];renderTabs();const R=document.documentElement.style;R.setProperty('--ac',day.c);R.setProperty('--acrgb',day.rgb);const tc=document.querySelector('meta[name=theme-color]');if(tc)tc.content=day.c;
   const cards=day.items.filter(i=>i.k==='place'||i.k==='move');
   const done=cards.filter(i=>isDone(i.id)).length;
-  const nextId=(cards.find(i=>!isDone(i.id))||{}).id;
+  const live=(cur===liveDayIdx());liveInfo=live?infer(day):null;
+  const nextId=liveInfo?liveInfo.item.id:(cards.find(i=>!isDone(i.id))||{}).id;
   const[,mm,dd2]=day.d.split('-');
-  let h=`<div class="dayhead"><div><span class="dd">${+mm}/${+dd2}（${day.wd}）</span><span class="em">${day.em}</span></div><div class="dn">${esc(day.name)}</div><div class="meta2">出發 ${day.start}｜完成 ${done}/${cards.length}</div></div><div class="bar"><i style="width:${cards.length?done/cards.length*100:0}%"></i></div><div id="alerts"></div>`;
+  let h=`<div class="dayhead"><div><span class="dd">${+mm}/${+dd2}（${day.wd}）</span><span class="em">${day.em}</span></div><div class="dn">${esc(day.name)}</div><div class="meta2">出發 ${day.start}｜完成 ${done}/${cards.length}</div>${whereHtml()}</div><div class="bar"><i style="width:${cards.length?done/cards.length*100:0}%"></i></div><div id="alerts"></div>`;
   day.items.forEach(it=>{
     if(it.k==='sec'){h+=`<div class="sec">${esc(it.t)}</div>`;return}
     if(it.k==='walk'){h+=`<div class="walk">🚶 步行 ${it.m} 分鐘</div>`;return}
     if(isDone(it.id)){if(!hideDone)h+=`<button class="donerow" data-undo="${it.id}"><span>✓</span><span style="text-decoration:line-through">${it.at?it.at+'　':''}${esc(it.title)}</span></button>`;return}
-    h+=`<div class="card ${it.id===nextId?'next':''}"><button class="chk" data-done="${it.id}" aria-label="完成">✓</button><div class="body">
-      <div class="r1">${it.at?'<span class="time">'+it.at+'</span>':''}${it.meal?'<span class="meal">'+({'早餐':'🍳','午餐':'🍱','晚餐':'🍽️'}[it.meal])+' '+it.meal+'</span>':''}${it.res?'<span class="badge">★ 已預約</span>':''}${it.badge&&!it.res?'<span class="badge">★ 重要</span>':''}</div>
+    h+=`<div class="card ${it.id===nextId?'next':''} ${liveInfo&&it.id===nextId?'now':''}"><button class="chk" data-done="${it.id}" aria-label="完成">✓</button><div class="body">
+      <div class="r1">${liveInfo&&it.id===nextId?'<span class="badge now">📍 現在</span>':''}${it.at?'<span class="time">'+it.at+'</span>':''}${it.meal?'<span class="meal">'+({'早餐':'🍳','午餐':'🍱','晚餐':'🍽️'}[it.meal])+' '+it.meal+'</span>':''}${it.res?'<span class="badge">★ 已預約</span>':''}${it.badge&&!it.res?'<span class="badge">★ 重要</span>':''}</div>
       <div class="title">${esc(it.title)}</div>
       ${it.sub?`<div class="sub">${esc(it.sub)}</div>`:''}
       ${it.lines?`<div class="lines">${it.lines.map(l=>`<div>${esc(l)}</div>`).join('')}</div>`:''}
@@ -309,7 +379,7 @@ function render(){
   if(day.notes.length)h+='<div class="notes">'+day.notes.map(n=>`<details><summary>${esc(n.h)}</summary><div>${esc(n.l)}</div></details>`).join('')+'</div>';
   h+=`<div class="tools"><button id="tHide">${hideDone?'顯示已完成':'隱藏已完成'}</button><button id="tIcs">📅 匯出行事曆（提前1小時提醒）</button><button id="tReset">重置本日勾選</button></div>`;
   h+='<div class="bye">'+(cur===DAYS.length-1?'Goodbye, Tokyo! ♡':"Let's go! ♡")+'</div>';
-  $('#main').innerHTML=h;checkReminders();
+  $('#main').innerHTML=h;checkReminders();$('#fab').style.display=liveDayIdx()>=0?'':'none';
 }
 document.addEventListener('click',e=>{
   const t=e.target.closest('button');if(!t)return;
@@ -319,6 +389,7 @@ document.addEventListener('click',e=>{
   else if(t.id==='tHide'){hideDone=!hideDone;store.set('hide',hideDone?'1':'0');render()}
   else if(t.id==='tReset'){if(confirm('清除本日所有完成勾選？')){DAYS[cur].items.forEach(i=>store.del('done:'+i.id));render()}}
   else if(t.id==='tIcs')exportIcs();
+  else if(t.dataset.now||t.id==='fab')startLive();
   else if(t.id==='bell')askNotif();
 });
 
@@ -372,7 +443,9 @@ if('serviceWorker' in navigator){
   navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had&&!reloaded){reloaded=true;location.reload()}});
   navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{});
 }
-render();
+let hiddenAt=0;
+document.addEventListener('visibilitychange',()=>{if(document.hidden)hiddenAt=Date.now();else if(hiddenAt&&Date.now()-hiddenAt>5*60e3)startLive()});
+startLive();
 </script>
 </body>
 </html>
