@@ -40,6 +40,8 @@ main{padding:4px 16px calc(40px + env(safe-area-inset-bottom,0))}
 .chk{flex:0 0 44px;width:44px;height:44px;border-radius:22px;border:2.5px solid var(--ac);background:transparent;color:transparent;font-size:22px;font-weight:700}
 .chk:active{background:var(--ac);color:#fff}
 .body{flex:1;min-width:0}
+.meal{display:inline-block;font-size:12px;font-weight:700;color:var(--ac);background:rgba(var(--acrgb),.14);border-radius:10px;padding:2px 9px;margin-right:4px;white-space:nowrap}
+.r1:empty,.r1:not(:has(span)){display:none}
 .time{font-weight:800;color:var(--ac);font-variant-numeric:tabular-nums;margin-right:6px}
 .badge{font-size:12px;font-weight:700;background:var(--ac);color:#fff;border-radius:10px;padding:2px 9px;margin-right:4px;white-space:nowrap}
 .title{font-weight:700;font-size:17px;margin-top:2px;word-break:break-word}
@@ -82,24 +84,22 @@ const DAYS=[
  T({at:'11:48',rem:1,title:'京成電鐵 成田Sky Access線 Access特急',lines:['11:48 KS42 成田機場 往京成上野・押上・西馬込・京急線方向','➜ 12:54 KS45 押上 A1出口'],cost:'1,194日圓（IC卡）',dur:'66分',dir:['成田空港駅','押上駅'],note:'時刻表見下方 註2'}),
  w(12),
  P({title:'寄放行李',sub:HOTEL,q:'Season Hotel 押上',badge:'‼️'}),
- sec('🍴 午餐｜牛舌之檸檬 淺草店'),
  w(3),
  T({at:'13:32',rem:1,title:'都營巴士',lines:['13:32 十間橋通 往上野松坂屋前','➜ 13:49 淺草一丁目'],cost:'210日圓（IC卡）',dur:'17分',dir:['十間橋通り バス停','浅草一丁目 バス停'],note:'時刻表見下方 註3'}),
  w(5),
- P({at:'14:00',rem:1,res:1,title:'牛舌之檸檬 淺草店',hrs:'11:30 - 15:00',q:'牛たんの檸檬 浅草店'}),
+ P({at:'14:00',rem:1,res:1,meal:'午餐',title:'牛舌之檸檬 淺草店',hrs:'11:30 - 15:00',q:'牛たんの檸檬 浅草店'}),
  P({title:'OS藥妝 淺草店',hrs:'10:00 - 19:45',q:'OSドラッグ 浅草店'}),
  P({title:'鳴門鯛燒本舖 淺草新仲見世店',hrs:'09:00 - 23:00',q:'鳴門鯛焼本舗 浅草新仲見世店'}),
  w(8),
  P({title:'仲見世商店街',hrs:'10:00 - 17:00',q:'仲見世商店街'}),
  P({title:'三鳩堂',hrs:'08:00 - 18:00',q:'三鳩堂 浅草'}),
- P({title:'淺草 mille mele（ミレメーレ）',hrs:'10:00 - 18:00',q:'浅草 mille mele ミレメーレ'}),
- sec('🍴 晚餐｜迴轉壽司 根室花丸 KITTE丸之內店'),
+ P({title:'淺草 mille mele',hrs:'10:00 - 18:00',q:'浅草 mille mele ミレメーレ'}),
  w(4),
  T({title:'東京Metro 銀座線',lines:['G19 淺草 往澀谷方向','➜ G10 京橋 5號出口'],cost:'210日圓（IC卡）',dur:'18分',dir:['浅草駅','京橋駅']}),
  w(6),
  ...gift.map((t,i)=>P({title:t,hrs:'09:30 - 20:30',q:giftQ[i]})),
  w(10),
- P({title:'迴轉壽司 根室花丸 KITTE丸之內店',hrs:'11:00 - 22:00',q:'回転寿司 根室花まる KITTE丸の内店'}),
+ P({meal:'晚餐',title:'迴轉壽司 根室花丸 KITTE丸之內店',hrs:'11:00 - 22:00',q:'回転寿司 根室花まる KITTE丸の内店'}),
  w(8),
  T({title:'東京Metro 丸之內線 → 半藏門線',lines:['丸之內線 M17 東京 往池袋方向 ➜ M18 大手町','半藏門線 Z08 大手町 往押上方向 ➜ Z14 押上 A1出口'],cost:'210日圓（IC卡）',dur:'16分',dir:['東京駅','押上駅']}),
  w(1),
@@ -139,10 +139,9 @@ const DAYS=[
  P({at:'20:30',rem:1,title:'Night High Halloween（夜間萬聖節）',hrs:'20:30 - 20:35',badge:'‼️',q:DS('ナイトハイ・ハロウィーン')}),
  P({title:'人魚礁湖',q:DS('マーメイドラグーン')}),
  P({at:'20:55',title:'【環境演出】閃耀慶典之夜',hrs:'20:55 - 21:00',badge:'‼️',q:DS('スパークリング・ジュビリー・ナイト')}),
- sec('🍴 晚餐｜稻庭烏龍麵與丼飯 金子半之助 Ikspiari店'),
  P({title:'凜屋 Ikspiari店',hrs:'11:00 - 22:30（最後點餐 21:30）',q:'凜や イクスピアリ店'}),
  P({title:'一風堂 Ikspiari店',hrs:'11:00 - 22:00（最後點餐 21:40）',q:'一風堂 イクスピアリ店'}),
- P({title:'稻庭烏龍麵與丼飯 金子半之助 Ikspiari店',hrs:'11:00 - 22:30（最後點餐 21:30）',q:'稲庭うどんと丼めし 金子半之助 イクスピアリ店'}),
+ P({meal:'晚餐',title:'稻庭烏龍麵與丼飯 金子半之助 Ikspiari店',hrs:'11:00 - 22:30（最後點餐 21:30）',q:'稲庭うどんと丼めし 金子半之助 イクスピアリ店'}),
  w(4),
  T({title:'JR東日本 京葉線',lines:['JE07 舞濱 往東京方向（上行）','➜ JE02 八丁堀 A3出口'],cost:'260日圓（IC卡）',dur:'15分',dir:['舞浜駅','八丁堀駅']}),
  w(13),
@@ -153,16 +152,14 @@ const DAYS=[
  {h:'註1｜淺草線 寶町 ➜ 押上 時刻表',l:'23:03 發 ➜ 23:17 抵達\n23:14 發 ➜ 23:28 抵達\n23:21 發 ➜ 23:35 抵達\n23:27 發 ➜ 23:41 抵達\n23:33 發 ➜ 23:47 抵達\n23:44 發 ➜ 23:58 抵達\n23:56 發 ➜ 00:10 抵達\n00:13 發 ➜ 00:27 抵達（末班）'}]},
 
 {d:'2026-10-23',c:'#3a72d8',rgb:'58,114,216',em:'🏰',wd:'五',name:'新宿・原宿・澀谷',start:'09:00',items:[
- sec('🍳 早餐｜摩斯漢堡 押上店'),
  w(9),
- P({title:'摩斯漢堡 押上店',hrs:'08:00 - 21:00',q:'モスバーガー押上店'}),
+ P({meal:'早餐',title:'摩斯漢堡 押上店',hrs:'08:00 - 21:00',q:'モスバーガー押上店'}),
  w(4),
  T({title:'都營淺草線 → 都營新宿線',lines:['淺草線 A20 押上 往西馬込・羽田機場・京急線方向 ➜ A15 東日本橋','新宿線 S09 馬喰橫山 往新宿・京王線方向 ➜ S02 新宿三丁目 E6、E7出口'],cost:'280日圓（IC卡）',dur:'25分',dir:['押上駅','新宿三丁目駅']}),
  w(3),
  P({title:'Onitsuka Tiger 新宿南',hrs:'11:00 - 20:00',q:'オニツカタイガー 新宿南'}),
- sec('🍴 午餐｜人形町今半 新宿第一生命大樓店'),
  w(22),
- P({at:'12:30',rem:1,res:1,title:'人形町今半 新宿第一生命大樓店',hrs:'11:00 - 15:00',q:'人形町今半 新宿第一生命ビル店'}),
+ P({at:'12:30',rem:1,res:1,meal:'午餐',title:'人形町今半 新宿第一生命大樓店',hrs:'11:00 - 15:00',q:'人形町今半 新宿第一生命ビル店'}),
  w(16),
  P({title:'Alpen Tokyo（Sports wear Disc.）',hrs:'11:00 - 22:00',q:'Sports wear Disc. Alpen Tokyo'}),
  w(8),
@@ -172,11 +169,10 @@ const DAYS=[
  P({title:'On Store 東京貓街',hrs:'11:00 - 19:00',q:'On Store 東京キャットストリート'}),
  P({title:'NUMBER SUGAR',hrs:'11:00 - 19:00',q:'NUMBER SUGAR 表参道'}),
  P({title:'GARIGUETTE 草莓咖啡 表參道（千層派專賣店）',hrs:'11:00 - 19:00',q:'GARIGUETTE ガリゲット カフェ 表参道 ミルフィーユ専門店'}),
- sec('🍴 晚餐｜和牛吃到飽殿堂 肉屋橫丁 澀谷宇田川町店'),
  w(20),
  P({title:'迪士尼商店 澀谷公園通店',hrs:'11:00 - 20:00',q:'ディズニーストア 渋谷公園通り店'}),
  P({title:'SHIBUYA109',hrs:'10:00 - 21:00',q:'SHIBUYA109'}),
- P({at:'19:30',rem:1,res:1,title:'和牛吃到飽殿堂 肉屋橫丁 澀谷宇田川町店',hrs:'14:00 - 23:00',q:'和牛放題の殿堂 肉屋横丁 渋谷宇田川町店'}),
+ P({at:'19:30',rem:1,res:1,meal:'晚餐',title:'和牛吃到飽殿堂 肉屋橫丁 澀谷宇田川町店',hrs:'14:00 - 23:00',q:'和牛放題の殿堂 肉屋横丁 渋谷宇田川町店'}),
  w(4),
  T({title:'東京Metro 半藏門線',lines:['Z01 澀谷 往押上方向','➜ Z14 押上 A1出口'],dir:['渋谷駅','押上駅']}),
  w(12),
@@ -184,19 +180,17 @@ const DAYS=[
 ],notes:[]},
 
 {d:'2026-10-24',c:'#f0a81c',rgb:'240,168,28',em:'⛵',wd:'六',name:'豐洲・橫濱',start:'08:00',items:[
- sec('🍳 早餐｜SUKE6 DINER'),
  w(12),
  T({title:'都營地下鐵 淺草線',lines:['A20 押上 往西馬込・羽田機場・京急線方向','➜ A18 淺草 5號出口'],cost:'180日圓（IC卡）',dur:'3分',dir:['押上駅','浅草駅']}),
  w(1),
- P({at:'08:30',rem:1,res:1,title:'SUKE6 DINER',hrs:'08:00 - 18:00',q:'SUKE6 DINER 浅草'}),
+ P({at:'08:30',rem:1,res:1,meal:'早餐',title:'SUKE6 DINER',hrs:'08:00 - 18:00',q:'SUKE6 DINER 浅草'}),
  w(1),
  P({at:'09:40',rem:1,res:1,title:'東京都觀光汽船 淺草營業所',sub:'乘船報到',q:'東京都観光汽船 浅草営業所'}),
  T({at:'10:00',rem:1,title:'東京都觀光汽船 螢月號 HOTALUNA',lines:['10:00 淺草 往台場海濱公園','➜ 11:05 台場海濱公園'],cost:'2,000日圓',dur:'65分',dir:['浅草 東京都観光汽船','お台場海浜公園']}),
  w(5),
- T({title:'百合海鷗號（ゆりかもめ線）',lines:['U07 台場 往豐洲方向','➜ U14 市場前 2A出口'],cost:'325日圓（IC卡）',dur:'13分',dir:['台場駅','市場前駅']}),
+ T({title:'百合海鷗號',lines:['U07 台場 往豐洲方向','➜ U14 市場前 2A出口'],cost:'325日圓（IC卡）',dur:'13分',dir:['台場駅','市場前駅']}),
  w(3),
- sec('🍴 午餐｜豐洲市場'),
- P({title:'豐洲市場',hrs:'05:00 - 15:00',q:'豊洲市場'}),
+ P({meal:'午餐',title:'豐洲市場',hrs:'05:00 - 15:00',q:'豊洲市場'}),
  P({title:'大和壽司 東京 豐洲市場',hrs:'06:00 - 13:00',q:'大和寿司 東京 豊洲市場'}),
  P({title:'鮨晶（Sushi Shou）豐洲市場內店',hrs:'07:00 - 14:00',q:'鮨晶 豊洲市場内店'}),
  P({title:'磯壽司',hrs:'06:30 - 15:00',q:'磯寿司 豊洲市場'}),
@@ -206,7 +200,7 @@ const DAYS=[
  P({title:'炸豬排 小田保 場內店',hrs:'06:00 - 14:00',q:'とんかつ小田保 場内店'}),
  P({title:'鳥藤 豐洲市場店',hrs:'06:30 - 12:40',q:'鳥藤 豊洲市場店'}),
  w(4),
- T({title:'百合海鷗號（ゆりかもめ線）',lines:['U14 市場前 往豐洲方向','➜ U16 豐洲 1A出口'],cost:'190日圓（IC卡）',dur:'3分',dir:['市場前駅','豊洲駅']}),
+ T({title:'百合海鷗號',lines:['U14 市場前 往豐洲方向','➜ U16 豐洲 1A出口'],cost:'190日圓（IC卡）',dur:'3分',dir:['市場前駅','豊洲駅']}),
  w(4),
  P({title:'RINGO 豐洲LaLaport 3店',hrs:'10:00 - 21:00',q:'RINGO ららぽーと豊洲'}),
  w(4),
@@ -222,7 +216,6 @@ const DAYS=[
  P({title:'豬肉包的江戶清 本店',hrs:'10:00 - 21:00',q:'ブタまんの江戸清 本店'}),
  w(14),
  P({at:'16:55',rem:1,title:'🌅 橫濱港大棧橋（夕陽）',hrs:'24小時',q:'横浜港大さん橋'}),
- sec('🍴 晚餐｜炎 橫濱店'),
  w(10),
  P({title:'橫濱紅磚倉庫',hrs:'11:00 - 20:00',q:'横浜赤レンガ倉庫'}),
  w(7),
@@ -230,7 +223,7 @@ const DAYS=[
  w(10),
  T({title:'港未來線',lines:['MM03 港未來 往橫濱・澀谷・池袋方向','➜ MM01 橫濱 西口'],cost:'200日圓（IC卡）',dur:'3分',dir:['みなとみらい駅','横浜駅']}),
  w(6),
- P({at:'20:00',rem:1,res:1,title:'炎 橫濱店',hrs:'11:00 - 24:00',q:'炎 横浜店'}),
+ P({at:'20:00',rem:1,res:1,meal:'晚餐',title:'炎 橫濱店',hrs:'11:00 - 24:00',q:'炎 横浜店'}),
  w(5),
  T({at:'22:42',rem:1,title:'京急電鐵 本線 特急 → 都營淺草線',lines:['22:42 KK37 橫濱 往泉岳寺方向','➜ 23:37 A20 押上 A1出口（直通）'],cost:'619日圓（IC卡）',dur:'51分',dir:['横浜駅','押上駅']}),
  w(12),
@@ -238,15 +231,13 @@ const DAYS=[
 ],notes:[]},
 
 {d:'2026-10-25',c:'#e8554e',rgb:'232,85,78',em:'🗼',wd:'日',name:'晴空塔・成田・返台',start:'10:00',items:[
- sec('🍳 早餐｜PERTH Sandwiches & All Day Breakfast'),
  w(7),
- P({at:'08:00',rem:1,title:'PERTH Sandwiches & All Day Breakfast',sub:'‼️ 08:00 外帶',hrs:'08:00 - 15:00',q:'PERTH Sandwiches & All Day Breakfast 押上'}),
+ P({at:'08:00',rem:1,meal:'早餐',title:'PERTH Sandwiches & All Day Breakfast',sub:'‼️ 08:00 外帶',hrs:'08:00 - 15:00',q:'PERTH Sandwiches & All Day Breakfast 押上'}),
  w(7),
  P({at:'10:00',rem:1,title:'CHECK OUT 退房',sub:HOTEL,badge:'‼️',q:'Season Hotel 押上'}),
- sec('🍴 午餐｜鰻魚三吃 名古屋備長 東京晴空塔城Solamachi店'),
  w(13),
  P({title:'東京晴空塔城',hrs:'10:00 - 21:00',q:'東京スカイツリータウン'}),
- P({title:'鰻魚三吃 名古屋備長 東京晴空塔城Solamachi店',hrs:'11:00 - 21:00',q:'ひつまぶし 名古屋 備長 東京スカイツリータウン ソラマチ店'}),
+ P({meal:'午餐',title:'鰻魚三吃 名古屋備長 東京晴空塔城Solamachi店',hrs:'11:00 - 21:00',q:'ひつまぶし 名古屋 備長 東京スカイツリータウン ソラマチ店'}),
  w(5),
  T({at:'12:57',rem:1,title:'京成電鐵 押上線 → 京成本線',lines:['12:57 KS45 押上 往成田機場・成田Sky Access線・北總線方向','➜ 京成本線 14:12 KS40 京成成田 東口'],cost:'800日圓',dur:'80分',dir:['押上駅','京成成田駅']}),
  w(5),
@@ -257,9 +248,8 @@ const DAYS=[
  P({title:'後藤糰子屋',hrs:'10:00 - 17:00',q:'後藤だんご屋 成田'}),
  P({title:'林田仙貝',hrs:'09:00 - 17:00',q:'林田のおせんべい 成田'}),
  P({title:'成田山新勝寺',hrs:'08:00 - 16:00',q:'成田山新勝寺'}),
- sec('🍴 晚餐｜披薩店 Positano'),
  w(12),
- P({title:'披薩店 Positano',hrs:'17:00 - 24:00',q:'ピッツェリア ポジターノ 成田'}),
+ P({meal:'晚餐',title:'披薩店 Positano',hrs:'17:00 - 24:00',q:'ピッツェリア ポジターノ 成田'}),
  P({at:'18:00',rem:1,res:1,title:'Flying pig N',hrs:'17:30 - 21:00（最後點餐 20:30）',q:'Flying pig N 成田'}),
  T({at:'20:10',rem:1,title:'京成電鐵 京成本線',lines:['20:10 KS40 京成成田 往成田機場方向','➜ 20:16 KS41 機場第2航廈（成田第2・第3航廈）'],cost:'280日圓（IC卡）',dur:'6分',dir:['京成成田駅','空港第2ビル駅'],note:'時刻表見下方 註2'}),
  P({title:'I.A.S.S 貴賓室（Executive Lounge）',hrs:'07:00 - 21:00',q:'I.A.S.S Executive Lounge 成田空港'}),
@@ -306,7 +296,7 @@ function render(){
     if(it.k==='walk'){h+=`<div class="walk">🚶 步行 ${it.m} 分鐘</div>`;return}
     if(isDone(it.id)){if(!hideDone)h+=`<button class="donerow" data-undo="${it.id}"><span>✓</span><span style="text-decoration:line-through">${it.at?it.at+'　':''}${esc(it.title)}</span></button>`;return}
     h+=`<div class="card ${it.id===nextId?'next':''}"><button class="chk" data-done="${it.id}" aria-label="完成">✓</button><div class="body">
-      <div><span class="time">${it.at||''}</span>${it.res?'<span class="badge">★ 已預約</span>':''}${it.badge&&!it.res?'<span class="badge">★ 重要</span>':''}</div>
+      <div class="r1">${it.at?'<span class="time">'+it.at+'</span>':''}${it.meal?'<span class="meal">'+({'早餐':'🍳','午餐':'🍱','晚餐':'🍽️'}[it.meal])+' '+it.meal+'</span>':''}${it.res?'<span class="badge">★ 已預約</span>':''}${it.badge&&!it.res?'<span class="badge">★ 重要</span>':''}</div>
       <div class="title">${esc(it.title)}</div>
       ${it.sub?`<div class="sub">${esc(it.sub)}</div>`:''}
       ${it.lines?`<div class="lines">${it.lines.map(l=>`<div>${esc(l)}</div>`).join('')}</div>`:''}
