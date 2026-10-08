@@ -12,55 +12,57 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>東京行程</title>
 <style>
-:root{--bg:#f4f1ea;--card:#fff;--tx:#1d1d1f;--sub:#6e6e73;--line:#e5e1d8;--red:#d6362f;--green:#2e9e5b;--blue:#0a6cff;--warn:#fff3d6;--warntx:#7a5200}
-@media(prefers-color-scheme:dark){:root{--bg:#111113;--card:#1c1c1f;--tx:#f2f2f4;--sub:#9a9aa1;--line:#2c2c30;--blue:#4c9aff;--warn:#3a2f10;--warntx:#ffd98a}}
+:root{--bg:#eaf5fc;--card:#ffffff;--tx:#23344d;--sub:#6a7c93;--line:#d3e5f3;--ac:#f0689a;--acrgb:240,104,154;--green:#2e9e5b;--blue:#0a6cff;--warn:#fff3d6;--warntx:#7a5200;--shadow:0 4px 14px rgba(60,120,180,.12)}
+@media(prefers-color-scheme:dark){:root{--bg:#0d1a2b;--card:#162538;--tx:#eaf3ff;--sub:#93a8c4;--line:#25384f;--blue:#6db0ff;--warn:#3a2f10;--warntx:#ffd98a;--shadow:0 4px 14px rgba(0,0,0,.35)}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 -apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif}
-header{position:sticky;top:0;z-index:10;background:var(--bg);padding:env(safe-area-inset-top,0) 0 0;border-bottom:1px solid var(--line)}
-.h1{display:flex;justify-content:space-between;align-items:center;padding:10px 16px 4px}
-.h1 b{font-size:20px}
-.iconbtn{border:0;background:var(--card);color:var(--tx);width:40px;height:40px;border-radius:20px;font-size:18px}
-.tabs{display:flex;gap:8px;overflow-x:auto;padding:6px 16px 10px;scrollbar-width:none}
+html,body{margin:0;color:var(--tx);font:16px/1.45 -apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif}
+body{background:var(--bg) linear-gradient(180deg,rgba(120,190,240,.28),rgba(120,190,240,0) 420px) no-repeat}
+.banner{position:relative;width:100%;aspect-ratio:900/338;background:url(banner.jpg) center/cover no-repeat;border-radius:0 0 26px 26px;box-shadow:var(--shadow)}
+.iconbtn{position:absolute;right:12px;top:10px;border:0;background:rgba(255,255,255,.85);color:#23344d;width:40px;height:40px;border-radius:20px;font-size:18px;backdrop-filter:blur(6px)}
+.tabs{position:sticky;top:0;z-index:10;display:flex;gap:8px;overflow-x:auto;padding:10px 14px;scrollbar-width:none;background:linear-gradient(var(--bg) 78%,rgba(0,0,0,0))}
 .tabs::-webkit-scrollbar{display:none}
-.tab{flex:0 0 auto;border:0;border-radius:14px;background:var(--card);color:var(--tx);padding:6px 14px;min-width:64px;text-align:center;line-height:1.2}
-.tab small{display:block;color:var(--sub);font-size:12px}
-.tab.on{background:var(--red);color:#fff}.tab.on small{color:#ffe0dd}
-main{padding:12px 16px calc(40px + env(safe-area-inset-bottom,0))}
-.dayinfo{display:flex;justify-content:space-between;color:var(--sub);font-size:14px;margin-bottom:6px}
-.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-bottom:12px}
-.bar i{display:block;height:100%;background:var(--green);width:0;transition:width .3s}
-.alert{background:var(--warn);color:var(--warntx);border-radius:14px;padding:10px 14px;margin-bottom:10px;font-size:15px}
-.sec{margin:18px 2px 8px;font-size:15px;color:var(--sub);font-weight:600}
-.walk{margin:2px 0 2px 24px;padding-left:14px;border-left:2px dashed var(--line);color:var(--sub);font-size:13px;line-height:26px}
-.card{display:flex;gap:12px;background:var(--card);border-radius:16px;padding:12px;margin:6px 0;box-shadow:0 1px 2px rgba(0,0,0,.05)}
-.card.next{outline:2px solid var(--red)}
-.chk{flex:0 0 44px;width:44px;height:44px;border-radius:22px;border:2px solid var(--line);background:transparent;color:transparent;font-size:22px;font-weight:700}
-.chk:active{background:var(--green);color:#fff;border-color:var(--green)}
+.tab{flex:0 0 auto;border:2px solid var(--c);border-radius:18px;background:var(--card);color:var(--tx);padding:6px 12px;min-width:84px;text-align:center;line-height:1.25;font-weight:700;font-size:15px}
+.tab small{display:block;color:var(--sub);font-size:11px;font-weight:500}
+.tab.on{background:var(--c);color:#fff;box-shadow:0 3px 10px rgba(var(--r),.45)}.tab.on small{color:rgba(255,255,255,.9)}
+main{padding:4px 16px calc(40px + env(safe-area-inset-bottom,0))}
+.dayhead{margin:6px 2px 10px}
+.dd{font:700 30px/1.1 "Snell Roundhand","Noteworthy","Chalkboard SE",cursive,sans-serif;color:var(--ac)}
+.em{font-size:24px;margin-left:6px}
+.dn{font-size:19px;font-weight:700;margin-top:2px}
+.meta2{color:var(--sub);font-size:13px;margin-top:2px}
+.bar{height:8px;border-radius:4px;background:rgba(var(--acrgb),.18);overflow:hidden;margin:8px 0 12px}
+.bar i{display:block;height:100%;background:var(--ac);border-radius:4px;width:0;transition:width .3s}
+.alert{background:var(--warn);color:var(--warntx);border-radius:16px;padding:10px 14px;margin-bottom:10px;font-size:15px;font-weight:600}
+.sec{display:inline-block;margin:18px 0 6px;padding:5px 14px;border-radius:16px;background:rgba(var(--acrgb),.16);color:var(--ac);font-size:14px;font-weight:700}
+.walk{margin:2px 0 2px 24px;padding-left:14px;border-left:2px dashed rgba(var(--acrgb),.45);color:var(--sub);font-size:13px;line-height:26px}
+.card{display:flex;gap:12px;background:var(--card);border:2px solid transparent;border-radius:22px;padding:12px;margin:8px 0;box-shadow:var(--shadow)}
+.card.next{border-color:var(--ac);box-shadow:0 4px 16px rgba(var(--acrgb),.35)}
+.chk{flex:0 0 44px;width:44px;height:44px;border-radius:22px;border:2.5px solid var(--ac);background:transparent;color:transparent;font-size:22px;font-weight:700}
+.chk:active{background:var(--ac);color:#fff}
 .body{flex:1;min-width:0}
-.time{font-weight:700;color:var(--red);font-variant-numeric:tabular-nums;margin-right:6px}
-.badge{font-size:12px;background:var(--red);color:#fff;border-radius:8px;padding:1px 7px;margin-right:4px;white-space:nowrap}
-.title{font-weight:600;font-size:17px;margin-top:2px;word-break:break-word}
+.time{font-weight:800;color:var(--ac);font-variant-numeric:tabular-nums;margin-right:6px}
+.badge{font-size:12px;font-weight:700;background:var(--ac);color:#fff;border-radius:10px;padding:2px 9px;margin-right:4px;white-space:nowrap}
+.title{font-weight:700;font-size:17px;margin-top:2px;word-break:break-word}
 .sub,.hrs{color:var(--sub);font-size:14px}
 .lines{margin:4px 0;font-size:14px}.lines div{padding:1px 0}
 .meta{color:var(--sub);font-size:13px;margin-top:2px}
 .acts{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
-.acts a,.acts button{border:0;border-radius:12px;background:rgba(10,108,255,.12);color:var(--blue);padding:9px 14px;font-size:15px;font-weight:600;text-decoration:none;min-height:40px}
-.donerow{display:flex;gap:10px;align-items:center;margin:4px 0;padding:8px 12px;border-radius:12px;background:transparent;border:1px dashed var(--line);color:var(--sub);font-size:14px;text-decoration:line-through;width:100%;text-align:left;min-height:40px}
-.donerow span{text-decoration:none}
+.acts a,.acts button{border:0;border-radius:14px;background:rgba(var(--acrgb),.14);color:var(--ac);padding:9px 14px;font-size:15px;font-weight:700;text-decoration:none;min-height:40px}
+.donerow{display:flex;gap:10px;align-items:center;margin:4px 0;padding:8px 14px;border-radius:16px;background:rgba(255,255,255,.4);border:1.5px dashed var(--line);color:var(--sub);font-size:14px;width:100%;text-align:left;min-height:40px}
+.donerow span:first-child{color:var(--green);font-weight:800}
 .notes{margin-top:22px}
-details{background:var(--card);border-radius:14px;padding:10px 14px;margin:8px 0}
-summary{font-weight:600}
+details{background:var(--card);border-radius:18px;padding:10px 14px;margin:8px 0;box-shadow:var(--shadow)}
+summary{font-weight:700;color:var(--ac)}
 details div{white-space:pre-line;font-size:14px;color:var(--sub);margin-top:6px}
 .tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
-.tools button{border:0;border-radius:12px;background:var(--card);color:var(--tx);padding:11px 14px;font-size:14px;min-height:44px}
-.empty{text-align:center;color:var(--sub);padding:30px 0}
+.tools button{border:0;border-radius:16px;background:var(--card);color:var(--tx);padding:11px 14px;font-size:14px;min-height:44px;box-shadow:var(--shadow)}
+.empty{text-align:center;color:var(--ac);padding:26px 0;font-weight:700}
+.bye{text-align:center;margin-top:26px;font:700 24px "Snell Roundhand","Noteworthy",cursive;color:var(--ac);opacity:.85}
 </style>
 </head>
 <body>
-<header>
-  <div class="h1"><b id="ttl">東京行程</b><button class="iconbtn" id="bell" title="提醒">🔔</button></div>
-  <div class="tabs" id="tabs"></div>
-</header>
+<div class="banner"><button class="iconbtn" id="bell" title="提醒">🔔</button></div>
+<nav class="tabs" id="tabs"></nav>
 <main id="main"></main>
 
 <script>
@@ -73,7 +75,7 @@ const giftQ=['東京ギフトパレット','バニラビーンズ ザ ロース�
 const DS=s=>'東京ディズニーシー '+s;
 
 const DAYS=[
-{d:'2026-10-21',wd:'三',name:'抵達・淺草・丸之內',start:'03:50',items:[
+{d:'2026-10-21',c:'#f0689a',rgb:'240,104,154',em:'✈️',wd:'三',name:'抵達・淺草・丸之內',start:'03:50',items:[
  P({at:'03:50',tz:8,rem:1,title:'機場接送',badge:'‼️'}),
  P({at:'05:00',tz:8,rem:1,title:'CHECK IN 報到',sub:'桃園機場 第1航廈',q:'桃園國際機場第一航廈',badge:'‼️'}),
  P({at:'06:45',tz:8,rem:1,title:'✈️ 酷航 Scoot TR866',sub:'06:45 桃園 T1 ➜ 11:15 成田 T1',q:'成田国際空港 第1ターミナル',note:'行李規定見下方 註1'}),
@@ -109,7 +111,7 @@ const DAYS=[
  {h:'註2｜京成電鐵 成田機場 ➜ 押上 時刻表',l:'【快速】11:53 發 ➜ 13:23 抵達\n【Access特急】12:29 發 ➜ 13:35 抵達'},
  {h:'註3｜都營巴士 十間橋通 ➜ 淺草一丁目 時刻表',l:'13:59 發 ➜ 14:16 抵達\n14:28 發 ➜ 14:45 抵達'}]},
 
-{d:'2026-10-22',wd:'四',name:'東京迪士尼海洋',start:'05:00',items:[
+{d:'2026-10-22',c:'#25b0d6',rgb:'37,176,214',em:'🐭',wd:'四',name:'東京迪士尼海洋',start:'05:00',items:[
  w(12),
  T({at:'05:00',rem:1,title:'都營地下鐵 淺草線',lines:['05:00 A20 押上 往西馬込・羽田機場・京急線方向','➜ 05:10 A14 人形町'],cost:'220日圓（IC卡）',dur:'10分',dir:['押上駅','人形町駅']}),
  w(3),
@@ -150,7 +152,7 @@ const DAYS=[
 ],notes:[
  {h:'註1｜淺草線 寶町 ➜ 押上 時刻表',l:'23:03 發 ➜ 23:17 抵達\n23:14 發 ➜ 23:28 抵達\n23:21 發 ➜ 23:35 抵達\n23:27 發 ➜ 23:41 抵達\n23:33 發 ➜ 23:47 抵達\n23:44 發 ➜ 23:58 抵達\n23:56 發 ➜ 00:10 抵達\n00:13 發 ➜ 00:27 抵達（末班）'}]},
 
-{d:'2026-10-23',wd:'五',name:'新宿・原宿・澀谷',start:'09:00',items:[
+{d:'2026-10-23',c:'#3a72d8',rgb:'58,114,216',em:'🏰',wd:'五',name:'新宿・原宿・澀谷',start:'09:00',items:[
  sec('🍳 早餐｜摩斯漢堡 押上店'),
  w(9),
  P({title:'摩斯漢堡 押上店',hrs:'08:00 - 21:00',q:'モスバーガー押上店'}),
@@ -181,7 +183,7 @@ const DAYS=[
  P({title:'返回飯店',sub:HOTEL,q:'Season Hotel 押上'})
 ],notes:[]},
 
-{d:'2026-10-24',wd:'六',name:'豐洲・橫濱',start:'08:00',items:[
+{d:'2026-10-24',c:'#f0a81c',rgb:'240,168,28',em:'⛵',wd:'六',name:'豐洲・橫濱',start:'08:00',items:[
  sec('🍳 早餐｜SUKE6 DINER'),
  w(12),
  T({title:'都營地下鐵 淺草線',lines:['A20 押上 往西馬込・羽田機場・京急線方向','➜ A18 淺草 5號出口'],cost:'180日圓（IC卡）',dur:'3分',dir:['押上駅','浅草駅']}),
@@ -235,7 +237,7 @@ const DAYS=[
  P({title:'返回飯店',sub:HOTEL,q:'Season Hotel 押上'})
 ],notes:[]},
 
-{d:'2026-10-25',wd:'日',name:'晴空塔・成田・返台',start:'10:00',items:[
+{d:'2026-10-25',c:'#e8554e',rgb:'232,85,78',em:'🗼',wd:'日',name:'晴空塔・成田・返台',start:'10:00',items:[
  sec('🍳 早餐｜PERTH Sandwiches & All Day Breakfast'),
  w(7),
  P({at:'08:00',rem:1,title:'PERTH Sandwiches & All Day Breakfast',sub:'‼️ 08:00 外帶',hrs:'08:00 - 15:00',q:'PERTH Sandwiches & All Day Breakfast 押上'}),
@@ -285,7 +287,7 @@ let cur=0,hideDone=store.get('hide')==='1';
 
 function renderTabs(){
   $('#tabs').innerHTML=DAYS.map((d,i)=>{const[,m,dd]=d.d.split('-');
-    return `<button class="tab ${i===cur?'on':''}" data-i="${i}">${+m}/${+dd}（${d.wd}）<small>${esc(d.name.split('・')[0])}</small></button>`}).join('');
+    return `<button class="tab ${i===cur?'on':''}" data-i="${i}" style="--c:${d.c};--r:${d.rgb}">${+m}/${+dd}（${d.wd}）<small>${d.em} ${esc(d.name.split('・')[0])}</small></button>`}).join('');
   const on=$('.tab.on');if(on)on.scrollIntoView({inline:'center',block:'nearest'});
 }
 function actions(it){let a='';
@@ -293,17 +295,18 @@ function actions(it){let a='';
   if(it.q)a+=`<a href="${mapUrl(it.q)}" target="_blank" rel="noopener">📍 Google 地圖</a>`;
   return a?`<div class="acts">${a}</div>`:''}
 function render(){
-  const day=DAYS[cur];renderTabs();
+  const day=DAYS[cur];renderTabs();const R=document.documentElement.style;R.setProperty('--ac',day.c);R.setProperty('--acrgb',day.rgb);const tc=document.querySelector('meta[name=theme-color]');if(tc)tc.content=day.c;
   const cards=day.items.filter(i=>i.k==='place'||i.k==='move');
   const done=cards.filter(i=>isDone(i.id)).length;
   const nextId=(cards.find(i=>!isDone(i.id))||{}).id;
-  let h=`<div class="dayinfo"><span>${esc(day.name)}</span><span>出發 ${day.start}｜完成 ${done}/${cards.length}</span></div><div class="bar"><i style="width:${cards.length?done/cards.length*100:0}%"></i></div><div id="alerts"></div>`;
+  const[,mm,dd2]=day.d.split('-');
+  let h=`<div class="dayhead"><div><span class="dd">${+mm}/${+dd2}（${day.wd}）</span><span class="em">${day.em}</span></div><div class="dn">${esc(day.name)}</div><div class="meta2">出發 ${day.start}｜完成 ${done}/${cards.length}</div></div><div class="bar"><i style="width:${cards.length?done/cards.length*100:0}%"></i></div><div id="alerts"></div>`;
   day.items.forEach(it=>{
     if(it.k==='sec'){h+=`<div class="sec">${esc(it.t)}</div>`;return}
     if(it.k==='walk'){h+=`<div class="walk">🚶 步行 ${it.m} 分鐘</div>`;return}
     if(isDone(it.id)){if(!hideDone)h+=`<button class="donerow" data-undo="${it.id}"><span>✓</span><span style="text-decoration:line-through">${it.at?it.at+'　':''}${esc(it.title)}</span></button>`;return}
     h+=`<div class="card ${it.id===nextId?'next':''}"><button class="chk" data-done="${it.id}" aria-label="完成">✓</button><div class="body">
-      <div><span class="time">${it.at||''}</span>${it.res?'<span class="badge">已預約</span>':''}${it.badge&&!it.res?'<span class="badge">'+it.badge+'</span>':''}</div>
+      <div><span class="time">${it.at||''}</span>${it.res?'<span class="badge">★ 已預約</span>':''}${it.badge&&!it.res?'<span class="badge">★ 重要</span>':''}</div>
       <div class="title">${esc(it.title)}</div>
       ${it.sub?`<div class="sub">${esc(it.sub)}</div>`:''}
       ${it.lines?`<div class="lines">${it.lines.map(l=>`<div>${esc(l)}</div>`).join('')}</div>`:''}
@@ -315,6 +318,7 @@ function render(){
   if(done===cards.length&&cards.length)h+='<div class="empty">🎉 今天的行程都完成了！</div>';
   if(day.notes.length)h+='<div class="notes">'+day.notes.map(n=>`<details><summary>${esc(n.h)}</summary><div>${esc(n.l)}</div></details>`).join('')+'</div>';
   h+=`<div class="tools"><button id="tHide">${hideDone?'顯示已完成':'隱藏已完成'}</button><button id="tIcs">📅 匯出行事曆（提前1小時提醒）</button><button id="tReset">重置本日勾選</button></div>`;
+  h+='<div class="bye">'+(cur===DAYS.length-1?'Goodbye, Tokyo! ♡':"Let's go! ♡")+'</div>';
   $('#main').innerHTML=h;checkReminders();
 }
 document.addEventListener('click',e=>{
