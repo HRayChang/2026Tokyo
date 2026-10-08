@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="東京行程">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#d6362f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>東京行程</title>
+<style>
+:root{--bg:#f4f1ea;--card:#fff;--tx:#1d1d1f;--sub:#6e6e73;--line:#e5e1d8;--red:#d6362f;--green:#2e9e5b;--blue:#0a6cff;--warn:#fff3d6;--warntx:#7a5200}
+@media(prefers-color-scheme:dark){:root{--bg:#111113;--card:#1c1c1f;--tx:#f2f2f4;--sub:#9a9aa1;--line:#2c2c30;--blue:#4c9aff;--warn:#3a2f10;--warntx:#ffd98a}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 -apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif}
+header{position:sticky;top:0;z-index:10;background:var(--bg);padding:env(safe-area-inset-top,0) 0 0;border-bottom:1px solid var(--line)}
+.h1{display:flex;justify-content:space-between;align-items:center;padding:10px 16px 4px}
+.h1 b{font-size:20px}
+.iconbtn{border:0;background:var(--card);color:var(--tx);width:40px;height:40px;border-radius:20px;font-size:18px}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:6px 16px 10px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;border:0;border-radius:14px;background:var(--card);color:var(--tx);padding:6px 14px;min-width:64px;text-align:center;line-height:1.2}
+.tab small{display:block;color:var(--sub);font-size:12px}
+.tab.on{background:var(--red);color:#fff}.tab.on small{color:#ffe0dd}
+main{padding:12px 16px calc(40px + env(safe-area-inset-bottom,0))}
+.dayinfo{display:flex;justify-content:space-between;color:var(--sub);font-size:14px;margin-bottom:6px}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-bottom:12px}
+.bar i{display:block;height:100%;background:var(--green);width:0;transition:width .3s}
+.alert{background:var(--warn);color:var(--warntx);border-radius:14px;padding:10px 14px;margin-bottom:10px;font-size:15px}
+.sec{margin:18px 2px 8px;font-size:15px;color:var(--sub);font-weight:600}
+.walk{margin:2px 0 2px 24px;padding-left:14px;border-left:2px dashed var(--line);color:var(--sub);font-size:13px;line-height:26px}
+.card{display:flex;gap:12px;background:var(--card);border-radius:16px;padding:12px;margin:6px 0;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.card.next{outline:2px solid var(--red)}
+.chk{flex:0 0 44px;width:44px;height:44px;border-radius:22px;border:2px solid var(--line);background:transparent;color:transparent;font-size:22px;font-weight:700}
+.chk:active{background:var(--green);color:#fff;border-color:var(--green)}
+.body{flex:1;min-width:0}
+.time{font-weight:700;color:var(--red);font-variant-numeric:tabular-nums;margin-right:6px}
+.badge{font-size:12px;background:var(--red);color:#fff;border-radius:8px;padding:1px 7px;margin-right:4px;white-space:nowrap}
+.title{font-weight:600;font-size:17px;margin-top:2px;word-break:break-word}
+.sub,.hrs{color:var(--sub);font-size:14px}
+.lines{margin:4px 0;font-size:14px}.lines div{padding:1px 0}
+.meta{color:var(--sub);font-size:13px;margin-top:2px}
+.acts{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.acts a,.acts button{border:0;border-radius:12px;background:rgba(10,108,255,.12);color:var(--blue);padding:9px 14px;font-size:15px;font-weight:600;text-decoration:none;min-height:40px}
+.donerow{display:flex;gap:10px;align-items:center;margin:4px 0;padding:8px 12px;border-radius:12px;background:transparent;border:1px dashed var(--line);color:var(--sub);font-size:14px;text-decoration:line-through;width:100%;text-align:left;min-height:40px}
+.donerow span{text-decoration:none}
+.notes{margin-top:22px}
+details{background:var(--card);border-radius:14px;padding:10px 14px;margin:8px 0}
+summary{font-weight:600}
+details div{white-space:pre-line;font-size:14px;color:var(--sub);margin-top:6px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.tools button{border:0;border-radius:12px;background:var(--card);color:var(--tx);padding:11px 14px;font-size:14px;min-height:44px}
+.empty{text-align:center;color:var(--sub);padding:30px 0}
+</style>
+</head>
+<body>
+<header>
+  <div class="h1"><b id="ttl">東京行程</b><button class="iconbtn" id="bell" title="提醒">🔔</button></div>
+  <div class="tabs" id="tabs"></div>
+</header>
+<main id="main"></main>
+
+<script>
+/* ============ 資料區（改行程只要改這裡，推上 GitHub 即自動更新） ============ */
+const w=m=>({k:'walk',m}), sec=t=>({k:'sec',t});
+const P=o=>({k:'place',...o}), T=o=>({k:'move',...o});
+const HOTEL='Season Hotel 押上';
+const gift=['東京Gift Palette','Vanilla Beans The Roastery Tokyo（香草豆巧克力）','Brûlée Mélisée 焦糖布蕾 東京Gift Palette店','C3 TIRAMISÙ 東京Gift Palette店','PISTA & TOKYO 東京Gift Palette店'];
+const giftQ=['東京ギフトパレット','バニラビーンズ ザ ロースタリー トーキョー','ブリュレメリゼ 東京ギフトパレット店','C3 TIRAMISÙ 東京ギフトパレット店','PISTA & TOKYO 東京ギフトパレット店'];
+const DS=s=>'東京ディズニーシー '+s;
+
+const DAYS=[
+{d:'2026-10-21',wd:'三',name:'抵達・淺草・丸之內',start:'03:50',items:[
+ P({at:'03:50',tz:8,rem:1,title:'機場接送',badge:'‼️'}),
+ P({at:'05:00',tz:8,rem:1,title:'CHECK IN 報到',sub:'桃園機場 第1航廈',q:'桃園國際機場第一航廈',badge:'‼️'}),
+ P({at:'06:45',tz:8,rem:1,title:'✈️ 酷航 Scoot TR866',sub:'06:45 桃園 T1 ➜ 11:15 成田 T1',q:'成田国際空港 第1ターミナル',note:'行李規定見下方 註1'}),
+ T({at:'11:48',rem:1,title:'京成電鐵 成田Sky Access線 Access特急',lines:['11:48 KS42 成田機場 往京成上野・押上・西馬込・京急線方向','➜ 12:54 KS45 押上 A1出口'],cost:'1,194日圓（IC卡）',dur:'66分',dir:['成田空港駅','押上駅'],note:'時刻表見下方 註2'}),
+ w(12),
+ P({title:'寄放行李',sub:HOTEL,q:'Season Hotel 押上',badge:'‼️'}),
+ sec('🍴 午餐｜牛舌之檸檬 淺草店'),
+ w(3),
+ T({at:'13:32',rem:1,title:'都營巴士',lines:['13:32 十間橋通 往上野松坂屋前','➜ 13:49 淺草一丁目'],cost:'210日圓（IC卡）',dur:'17分',dir:['十間橋通り バス停','浅草一丁目 バス停'],note:'時刻表見下方 註3'}),
+ w(5),
+ P({at:'14:00',rem:1,res:1,title:'牛舌之檸檬 淺草店',hrs:'11:30 - 15:00',q:'牛たんの檸檬 浅草店'}),
+ P({title:'OS藥妝 淺草店',hrs:'10:00 - 19:45',q:'OSドラッグ 浅草店'}),
+ P({title:'鳴門鯛燒本舖 淺草新仲見世店',hrs:'09:00 - 23:00',q:'鳴門鯛焼本舗 浅草新仲見世店'}),
+ w(8),
+ P({title:'仲見世商店街',hrs:'10:00 - 17:00',q:'仲見世商店街'}),
+ P({title:'三鳩堂',hrs:'08:00 - 18:00',q:'三鳩堂 浅草'}),
+ P({title:'淺草 mille mele（ミレメーレ）',hrs:'10:00 - 18:00',q:'浅草 mille mele ミレメーレ'}),
+ sec('🍴 晚餐｜迴轉壽司 根室花丸 KITTE丸之內店'),
+ w(4),
+ T({title:'東京Metro 銀座線',lines:['G19 淺草 往澀谷方向','➜ G10 京橋 5號出口'],cost:'210日圓（IC卡）',dur:'18分',dir:['浅草駅','京橋駅']}),
+ w(6),
+ ...gift.map((t,i)=>P({title:t,hrs:'09:30 - 20:30',q:giftQ[i]})),
+ w(10),
+ P({title:'迴轉壽司 根室花丸 KITTE丸之內店',hrs:'11:00 - 22:00',q:'回転寿司 根室花まる KITTE丸の内店'}),
+ w(8),
+ T({title:'東京Metro 丸之內線 → 半藏門線',lines:['丸之內線 M17 東京 往池袋方向 ➜ M18 大手町','半藏門線 Z08 大手町 往押上方向 ➜ Z14 押上 A1出口'],cost:'210日圓（IC卡）',dur:'16分',dir:['東京駅','押上駅']}),
+ w(1),
+ P({title:'花丸超市 Plus 押上店',hrs:'00:00 - 24:00（24小時）',q:'肉のハナマサ プラス押上店'}),
+ w(12),
+ P({title:'返回飯店',sub:HOTEL,q:'Season Hotel 押上'})
+],notes:[
+ {h:'註1｜酷航 Scoot 行李規定',l:'隨身行李 1 件：54 × 38 × 23 cm\n小型行李 1 件：40 × 30 × 10 cm\n兩件合計 10 kg'},
+ {h:'註2｜京成電鐵 成田機場 ➜ 押上 時刻表',l:'【快速】11:53 發 ➜ 13:23 抵達\n【Access特急】12:29 發 ➜ 13:35 抵達'},
+ {h:'註3｜都營巴士 十間橋通 ➜ 淺草一丁目 時刻表',l:'13:59 發 ➜ 14:16 抵達\n14:28 發 ➜ 14:45 抵達'}]},
+
+{d:'2026-10-22',wd:'四',name:'東京迪士尼海洋',start:'05:00',items:[
+ w(12),
+ T({at:'05:00',rem:1,title:'都營地下鐵 淺草線',lines:['05:00 A20 押上 往西馬込・羽田機場・京急線方向','➜ 05:10 A14 人形町'],cost:'220日圓（IC卡）',dur:'10分',dir:['押上駅','人形町駅']}),
+ w(3),
+ T({at:'05:15',title:'東京Metro 日比谷線',lines:['05:15 H14 人形町 往中目黑方向','➜ 05:19 H12 八丁堀 A1出口'],cost:'180日圓（IC卡）',dur:'4分',dir:['人形町駅','八丁堀駅']}),
+ w(3),
+ T({at:'05:36',title:'JR東日本 京葉線',lines:['05:36 JE02 八丁堀 往舞濱・新浦安・府中本町方向（下行）','➜ 05:50 JE07 舞濱 南口'],cost:'260日圓（IC卡）',dur:'14分',dir:['八丁堀駅','舞浜駅']}),
+ w(3),
+ T({at:'06:08',title:'迪士尼度假區線',lines:['06:08 海灣站（Bayside Station）','➜ 06:12 東京迪士尼海洋站'],cost:'300日圓（IC卡）',dur:'4分',dir:['舞浜駅','東京ディズニーシー・ステーション']}),
+ w(3),
+ P({title:'東京迪士尼海洋',hrs:'09:00 - 21:00',q:'東京ディズニーシー'}),
+ P({at:'09:00',rem:1,title:'入園申請（Entry Request）',badge:'‼️',q:'東京ディズニーシー'}),
+ P({title:'夢想起飛（Dreams Take Flight）',sub:'Exp 15:55 - 16:20、17:20 - 17:45',q:DS('ドリームス・テイク・フライト')}),
+ P({title:'舞動地球！（Dance the Globe!）',sub:'Exp 16:45 - 17:10、18:30 - 18:55',q:DS('ダンス・ザ・グローブ')}),
+ P({title:'安娜與艾莎的冰雪旅程',q:DS('アナとエルサのフローズンジャーニー')}),
+ P({title:'小飛俠的夢幻島冒險',q:DS('ピーターパンのネバーランドアドベンチャー')}),
+ P({title:'樂佩的燈籠節',q:DS('ラプンツェルのランタンフェスティバル')}),
+ P({at:'11:30',rem:1,title:'閃耀慶典（Sparkling Jubilee Celebration）',hrs:'11:30 - 11:45',badge:'‼️',q:DS('スパークリング・ジュビリー・セレブレーション')}),
+ P({at:'12:00',rem:1,title:'翱翔：奇幻飛行（Soaring）',badge:'‼️',q:DS('ソアリン：ファンタスティック・フライト')}),
+ P({at:'15:00',rem:1,title:'閃耀慶典（Sparkling Jubilee Celebration）',hrs:'15:00 - 15:15',badge:'‼️',q:DS('スパークリング・ジュビリー・セレブレーション')}),
+ P({at:'15:55',rem:1,title:'夢想起飛（Dreams Take Flight）',hrs:'15:55 - 16:20',badge:'‼️',q:DS('ドリームス・テイク・フライト')}),
+ P({title:'玩具總動員瘋狂遊戲屋',q:DS('トイ・ストーリー・マニア')}),
+ P({title:'地心探險之旅',q:DS('センター・オブ・ジ・アース')}),
+ P({at:'18:30',rem:1,title:'舞動地球！（Dance the Globe!）',hrs:'18:30 - 18:55',badge:'‼️',q:DS('ダンス・ザ・グローブ')}),
+ P({at:'19:30',rem:1,title:'相信！～夢之海～（Believe! Sea of Dreams）',hrs:'19:30 - 20:00',badge:'‼️',q:DS('ビリーヴ！シー・オブ・ドリームス')}),
+ P({at:'20:30',rem:1,title:'Night High Halloween（夜間萬聖節）',hrs:'20:30 - 20:35',badge:'‼️',q:DS('ナイトハイ・ハロウィーン')}),
+ P({title:'人魚礁湖',q:DS('マーメイドラグーン')}),
+ P({at:'20:55',title:'【環境演出】閃耀慶典之夜',hrs:'20:55 - 21:00',badge:'‼️',q:DS('スパークリング・ジュビリー・ナイト')}),
+ sec('🍴 晚餐｜稻庭烏龍麵與丼飯 金子半之助 Ikspiari店'),
+ P({title:'凜屋 Ikspiari店',hrs:'11:00 - 22:30（最後點餐 21:30）',q:'凜や イクスピアリ店'}),
+ P({title:'一風堂 Ikspiari店',hrs:'11:00 - 22:00（最後點餐 21:40）',q:'一風堂 イクスピアリ店'}),
+ P({title:'稻庭烏龍麵與丼飯 金子半之助 Ikspiari店',hrs:'11:00 - 22:30（最後點餐 21:30）',q:'稲庭うどんと丼めし 金子半之助 イクスピアリ店'}),
+ w(4),
+ T({title:'JR東日本 京葉線',lines:['JE07 舞濱 往東京方向（上行）','➜ JE02 八丁堀 A3出口'],cost:'260日圓（IC卡）',dur:'15分',dir:['舞浜駅','八丁堀駅']}),
+ w(13),
+ T({at:'00:13',date:'2026-10-23',rem:1,title:'‼️ 末班車 00:13｜都營地下鐵 淺草線',lines:['A12 寶町 往押上・京成線・北總線方向','➜ A20 押上 A1出口'],cost:'220日圓（IC卡）',dur:'14分',dir:['宝町駅','押上駅'],note:'時刻表見下方 註1'}),
+ w(12),
+ P({title:'返回飯店',sub:HOTEL,q:'Season Hotel 押上'})
+],notes:[
+ {h:'註1｜淺草線 寶町 ➜ 押上 時刻表',l:'23:03 發 ➜ 23:17 抵達\n23:14 發 ➜ 23:28 抵達\n23:21 發 ➜ 23:35 抵達\n23:27 發 ➜ 23:41 抵達\n23:33 發 ➜ 23:47 抵達\n23:44 發 ➜ 23:58 抵達\n23:56 發 ➜ 00:10 抵達\n00:13 發 ➜ 00:27 抵達（末班）'}]},
+
+{d:'2026-10-23',wd:'五',name:'新宿・原宿・澀谷',start:'09:00',items:[
+ sec('🍳 早餐｜摩斯漢堡 押上店'),
+ w(9),
+ P({title:'摩斯漢堡 押上店',hrs:'08:00 - 21:00',q:'モスバーガー押上店'}),
+ w(4),
+ T({title:'都營淺草線 → 都營新宿線',lines:['淺草線 A20 押上 往西馬込・羽田機場・京急線方向 ➜ A15 東日本橋','新宿線 S09 馬喰橫山 往新宿・京王線方向 ➜ S02 新宿三丁目 E6、E7出口'],cost:'280日圓（IC卡）',dur:'25分',dir:['押上駅','新宿三丁目駅']}),
+ w(3),
+ P({title:'Onitsuka Tiger 新宿南',hrs:'11:00 - 20:00',q:'オニツカタイガー 新宿南'}),
+ sec('🍴 午餐｜人形町今半 新宿第一生命大樓店'),
+ w(22),
+ P({at:'12:30',rem:1,res:1,title:'人形町今半 新宿第一生命大樓店',hrs:'11:00 - 15:00',q:'人形町今半 新宿第一生命ビル店'}),
+ w(16),
+ P({title:'Alpen Tokyo（Sports wear Disc.）',hrs:'11:00 - 22:00',q:'Sports wear Disc. Alpen Tokyo'}),
+ w(8),
+ T({title:'JR東日本 山手線',lines:['JY17 新宿 往澀谷・品川方向（內環）','➜ JY19 原宿 東口'],cost:'160日圓（IC卡）',dur:'4分',dir:['新宿駅','原宿駅']}),
+ w(10),
+ P({title:'HUMAN MADE TOKYO',hrs:'11:00 - 19:00',q:'HUMAN MADE TOKYO'}),
+ P({title:'On Store 東京貓街',hrs:'11:00 - 19:00',q:'On Store 東京キャットストリート'}),
+ P({title:'NUMBER SUGAR',hrs:'11:00 - 19:00',q:'NUMBER SUGAR 表参道'}),
+ P({title:'GARIGUETTE 草莓咖啡 表參道（千層派專賣店）',hrs:'11:00 - 19:00',q:'GARIGUETTE ガリゲット カフェ 表参道 ミルフィーユ専門店'}),
+ sec('🍴 晚餐｜和牛吃到飽殿堂 肉屋橫丁 澀谷宇田川町店'),
+ w(20),
+ P({title:'迪士尼商店 澀谷公園通店',hrs:'11:00 - 20:00',q:'ディズニーストア 渋谷公園通り店'}),
+ P({title:'SHIBUYA109',hrs:'10:00 - 21:00',q:'SHIBUYA109'}),
+ P({at:'19:30',rem:1,res:1,title:'和牛吃到飽殿堂 肉屋橫丁 澀谷宇田川町店',hrs:'14:00 - 23:00',q:'和牛放題の殿堂 肉屋横丁 渋谷宇田川町店'}),
+ w(4),
+ T({title:'東京Metro 半藏門線',lines:['Z01 澀谷 往押上方向','➜ Z14 押上 A1出口'],dir:['渋谷駅','押上駅']}),
+ w(12),
+ P({title:'返回飯店',sub:HOTEL,q:'Season Hotel 押上'})
+],notes:[]},
+
+{d:'2026-10-24',wd:'六',name:'豐洲・橫濱',start:'08:00',items:[
+ sec('🍳 早餐｜SUKE6 DINER'),
+ w(12),
+ T({title:'都營地下鐵 淺草線',lines:['A20 押上 往西馬込・羽田機場・京急線方向','➜ A18 淺草 5號出口'],cost:'180日圓（IC卡）',dur:'3分',dir:['押上駅','浅草駅']}),
+ w(1),
+ P({at:'08:30',rem:1,res:1,title:'SUKE6 DINER',hrs:'08:00 - 18:00',q:'SUKE6 DINER 浅草'}),
+ w(1),
+ P({at:'09:40',rem:1,res:1,title:'東京都觀光汽船 淺草營業所',sub:'乘船報到',q:'東京都観光汽船 浅草営業所'}),
+ T({at:'10:00',rem:1,title:'東京都觀光汽船 螢月號 HOTALUNA',lines:['10:00 淺草 往台場海濱公園','➜ 11:05 台場海濱公園'],cost:'2,000日圓',dur:'65分',dir:['浅草 東京都観光汽船','お台場海浜公園']}),
+ w(5),
+ T({title:'百合海鷗號（ゆりかもめ線）',lines:['U07 台場 往豐洲方向','➜ U14 市場前 2A出口'],cost:'325日圓（IC卡）',dur:'13分',dir:['台場駅','市場前駅']}),
+ w(3),
+ sec('🍴 午餐｜豐洲市場'),
+ P({title:'豐洲市場',hrs:'05:00 - 15:00',q:'豊洲市場'}),
+ P({title:'大和壽司 東京 豐洲市場',hrs:'06:00 - 13:00',q:'大和寿司 東京 豊洲市場'}),
+ P({title:'鮨晶（Sushi Shou）豐洲市場內店',hrs:'07:00 - 14:00',q:'鮨晶 豊洲市場内店'}),
+ P({title:'磯壽司',hrs:'06:30 - 15:00',q:'磯寿司 豊洲市場'}),
+ P({title:'大江戶 豐洲市場內店',hrs:'07:00 - 14:30',q:'大江戸 豊洲市場内店'}),
+ P({title:'仲家',hrs:'05:30 - 13:30',q:'仲家 豊洲市場'}),
+ P({title:'天婦羅 天房',hrs:'07:00 - 13:00',q:'天ぷら 天房 豊洲市場'}),
+ P({title:'炸豬排 小田保 場內店',hrs:'06:00 - 14:00',q:'とんかつ小田保 場内店'}),
+ P({title:'鳥藤 豐洲市場店',hrs:'06:30 - 12:40',q:'鳥藤 豊洲市場店'}),
+ w(4),
+ T({title:'百合海鷗號（ゆりかもめ線）',lines:['U14 市場前 往豐洲方向','➜ U16 豐洲 1A出口'],cost:'190日圓（IC卡）',dur:'3分',dir:['市場前駅','豊洲駅']}),
+ w(4),
+ P({title:'RINGO 豐洲LaLaport 3店',hrs:'10:00 - 21:00',q:'RINGO ららぽーと豊洲'}),
+ w(4),
+ T({title:'東京Metro 有樂町線 → JR 前往橫濱',lines:['有樂町線 Y22 豐洲 往和光市方向 ➜ Y18 有樂町 D6出口','JR山手線 JY30 有樂町 往品川・澀谷方向（外環）➜ JY29 新橋','JR東海道線・橫須賀線 JT02 新橋 往品川・橫濱・小田原方向（下行）➜ JT05 橫濱','或 JO18 新橋 往橫濱・鎌倉方向（下行）➜ JO13 橫濱'],cost:'180 + 530日圓（IC卡）',dur:'約32分',dir:['豊洲駅','横浜駅']}),
+ w(4),
+ P({at:'19:45',rem:1,title:'Antenor 橫濱崇光店',sub:'‼️ 先付款・19:45 取貨',hrs:'10:00 - 20:00',q:'アンテノール 横浜そごう店'}),
+ P({title:'HARBS LUMINE橫濱店',hrs:'10:00 - 20:30',q:'HARBS ハーブス ルミネ横浜店'}),
+ w(4),
+ T({title:'JR東日本 京濱東北線・根岸線',lines:['JK12 橫濱 往磯子・大船方向（南行）','➜ JK09 石川町 北口'],cost:'200日圓（IC卡）',dur:'7分',dir:['横浜駅','石川町駅']}),
+ w(7),
+ P({title:'橫濱中華街',hrs:'24小時',q:'横浜中華街'}),
+ P({title:'皇朝點心舖 本店',hrs:'10:00 - 21:00',q:'皇朝点心舗 本店'}),
+ P({title:'豬肉包的江戶清 本店',hrs:'10:00 - 21:00',q:'ブタまんの江戸清 本店'}),
+ w(14),
+ P({at:'16:55',rem:1,title:'🌅 橫濱港大棧橋（夕陽）',hrs:'24小時',q:'横浜港大さん橋'}),
+ sec('🍴 晚餐｜炎 橫濱店'),
+ w(10),
+ P({title:'橫濱紅磚倉庫',hrs:'11:00 - 20:00',q:'横浜赤レンガ倉庫'}),
+ w(7),
+ P({at:'19:00',rem:1,title:'🎆 橫濱 Night Flowers（夜間花火）',sub:'女神橋　19:00 - 19:05',badge:'‼️',hrs:'24小時',q:'女神橋 横浜'}),
+ w(10),
+ T({title:'港未來線',lines:['MM03 港未來 往橫濱・澀谷・池袋方向','➜ MM01 橫濱 西口'],cost:'200日圓（IC卡）',dur:'3分',dir:['みなとみらい駅','横浜駅']}),
+ w(6),
+ P({at:'20:00',rem:1,res:1,title:'炎 橫濱店',hrs:'11:00 - 24:00',q:'炎 横浜店'}),
+ w(5),
+ T({at:'22:42',rem:1,title:'京急電鐵 本線 特急 → 都營淺草線',lines:['22:42 KK37 橫濱 往泉岳寺方向','➜ 23:37 A20 押上 A1出口（直通）'],cost:'619日圓（IC卡）',dur:'51分',dir:['横浜駅','押上駅']}),
+ w(12),
+ P({title:'返回飯店',sub:HOTEL,q:'Season Hotel 押上'})
+],notes:[]},
+
+{d:'2026-10-25',wd:'日',name:'晴空塔・成田・返台',start:'10:00',items:[
+ sec('🍳 早餐｜PERTH Sandwiches & All Day Breakfast'),
+ w(7),
+ P({at:'08:00',rem:1,title:'PERTH Sandwiches & All Day Breakfast',sub:'‼️ 08:00 外帶',hrs:'08:00 - 15:00',q:'PERTH Sandwiches & All Day Breakfast 押上'}),
+ w(7),
+ P({at:'10:00',rem:1,title:'CHECK OUT 退房',sub:HOTEL,badge:'‼️',q:'Season Hotel 押上'}),
+ sec('🍴 午餐｜鰻魚三吃 名古屋備長 東京晴空塔城Solamachi店'),
+ w(13),
+ P({title:'東京晴空塔城',hrs:'10:00 - 21:00',q:'東京スカイツリータウン'}),
+ P({title:'鰻魚三吃 名古屋備長 東京晴空塔城Solamachi店',hrs:'11:00 - 21:00',q:'ひつまぶし 名古屋 備長 東京スカイツリータウン ソラマチ店'}),
+ w(5),
+ T({at:'12:57',rem:1,title:'京成電鐵 押上線 → 京成本線',lines:['12:57 KS45 押上 往成田機場・成田Sky Access線・北總線方向','➜ 京成本線 14:12 KS40 京成成田 東口'],cost:'800日圓',dur:'80分',dir:['押上駅','京成成田駅']}),
+ w(5),
+ P({title:'‼️ 投幣式置物櫃',sub:'成田站（小 400 / 中 500 / 大 700 日圓）',q:'成田駅 コインロッカー'}),
+ P({title:'黑平饅頭本舖 JR成田站前店',hrs:'09:00 - 17:30',q:'黒平饅頭本舗 JR成田駅前店'}),
+ P({title:'金時的甘太郎燒',hrs:'09:00 - 17:30',q:'金時の甘太郎焼 成田'}),
+ P({title:'成田山表參道',hrs:'24小時',q:'成田山表参道'}),
+ P({title:'後藤糰子屋',hrs:'10:00 - 17:00',q:'後藤だんご屋 成田'}),
+ P({title:'林田仙貝',hrs:'09:00 - 17:00',q:'林田のおせんべい 成田'}),
+ P({title:'成田山新勝寺',hrs:'08:00 - 16:00',q:'成田山新勝寺'}),
+ sec('🍴 晚餐｜披薩店 Positano'),
+ w(12),
+ P({title:'披薩店 Positano',hrs:'17:00 - 24:00',q:'ピッツェリア ポジターノ 成田'}),
+ P({at:'18:00',rem:1,res:1,title:'Flying pig N',hrs:'17:30 - 21:00（最後點餐 20:30）',q:'Flying pig N 成田'}),
+ T({at:'20:10',rem:1,title:'京成電鐵 京成本線',lines:['20:10 KS40 京成成田 往成田機場方向','➜ 20:16 KS41 機場第2航廈（成田第2・第3航廈）'],cost:'280日圓（IC卡）',dur:'6分',dir:['京成成田駅','空港第2ビル駅'],note:'時刻表見下方 註2'}),
+ P({title:'I.A.S.S 貴賓室（Executive Lounge）',hrs:'07:00 - 21:00',q:'I.A.S.S Executive Lounge 成田空港'}),
+ P({at:'20:25',rem:1,title:'CHECK IN 報到',badge:'‼️',q:'成田国際空港 第3ターミナル'}),
+ P({at:'22:25',rem:1,title:'✈️ 捷星 Jetstar GK11',sub:'22:25 成田 T3 ➜ 01:30（+1）桃園 T1',q:'成田国際空港 第3ターミナル',note:'行李規定見下方 註3'}),
+ P({at:'01:30',date:'2026-10-26',tz:8,rem:1,title:'‼️ 10/26（一）01:30 機場接送',sub:'抵達桃園後',q:'桃園國際機場第一航廈'})
+],notes:[
+ {h:'註1｜成田站 投幣式置物櫃',l:'小：400日圓\n中：500日圓\n大：700日圓'},
+ {h:'註2｜京成本線 京成成田 ➜ 機場第2航廈 時刻表',l:'20:35 發 ➜ 20:41 抵達\n21:00 發 ➜ 21:06 抵達'},
+ {h:'註3｜捷星 Jetstar 行李規定',l:'隨身行李 1 件：56 × 36 × 23 cm\n小型行李 1 件\n兩件合計 7 kg'}]}
+];
+/* ============ 程式區 ============ */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const enc=encodeURIComponent;
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const tsOf=(day,it)=>{const[y,m,d]=(it.date||day.d).split('-').map(Number);const[h,mi]=it.at.split(':').map(Number);return Date.UTC(y,m-1,d,h-(it.tz??9),mi)};
+DAYS.forEach(d=>d.items.forEach((it,i)=>{it.id=d.d+'#'+i;if(it.at)it.ts=tsOf(d,it)}));
+const mapUrl=q=>'https://www.google.com/maps/search/?api=1&query='+enc(q);
+const dirUrl=(a,b)=>'https://www.google.com/maps/dir/?api=1&origin='+enc(a)+'&destination='+enc(b)+'&travelmode=transit';
+const isDone=id=>store.get('done:'+id)==='1';
+let cur=0,hideDone=store.get('hide')==='1';
+(function pick(){const t=new Date(),s=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+  const i=DAYS.findIndex(d=>d.d===s);cur=i>=0?i:(s>DAYS[DAYS.length-1].d?DAYS.length-1:0)})();
+
+function renderTabs(){
+  $('#tabs').innerHTML=DAYS.map((d,i)=>{const[,m,dd]=d.d.split('-');
+    return `<button class="tab ${i===cur?'on':''}" data-i="${i}">${+m}/${+dd}（${d.wd}）<small>${esc(d.name.split('・')[0])}</small></button>`}).join('');
+  const on=$('.tab.on');if(on)on.scrollIntoView({inline:'center',block:'nearest'});
+}
+function actions(it){let a='';
+  if(it.dir)a+=`<a href="${dirUrl(it.dir[0],it.dir[1])}" target="_blank" rel="noopener">🚉 路線</a>`;
+  if(it.q)a+=`<a href="${mapUrl(it.q)}" target="_blank" rel="noopener">📍 Google 地圖</a>`;
+  return a?`<div class="acts">${a}</div>`:''}
+function render(){
+  const day=DAYS[cur];renderTabs();
+  const cards=day.items.filter(i=>i.k==='place'||i.k==='move');
+  const done=cards.filter(i=>isDone(i.id)).length;
+  const nextId=(cards.find(i=>!isDone(i.id))||{}).id;
+  let h=`<div class="dayinfo"><span>${esc(day.name)}</span><span>出發 ${day.start}｜完成 ${done}/${cards.length}</span></div><div class="bar"><i style="width:${cards.length?done/cards.length*100:0}%"></i></div><div id="alerts"></div>`;
+  day.items.forEach(it=>{
+    if(it.k==='sec'){h+=`<div class="sec">${esc(it.t)}</div>`;return}
+    if(it.k==='walk'){h+=`<div class="walk">🚶 步行 ${it.m} 分鐘</div>`;return}
+    if(isDone(it.id)){if(!hideDone)h+=`<button class="donerow" data-undo="${it.id}"><span>✓</span><span style="text-decoration:line-through">${it.at?it.at+'　':''}${esc(it.title)}</span></button>`;return}
+    h+=`<div class="card ${it.id===nextId?'next':''}"><button class="chk" data-done="${it.id}" aria-label="完成">✓</button><div class="body">
+      <div><span class="time">${it.at||''}</span>${it.res?'<span class="badge">已預約</span>':''}${it.badge&&!it.res?'<span class="badge">'+it.badge+'</span>':''}</div>
+      <div class="title">${esc(it.title)}</div>
+      ${it.sub?`<div class="sub">${esc(it.sub)}</div>`:''}
+      ${it.lines?`<div class="lines">${it.lines.map(l=>`<div>${esc(l)}</div>`).join('')}</div>`:''}
+      ${it.hrs?`<div class="hrs">🕘 ${esc(it.hrs)}</div>`:''}
+      ${it.cost||it.dur?`<div class="meta">${[it.cost,it.dur].filter(Boolean).map(esc).join('｜')}</div>`:''}
+      ${it.note?`<div class="meta">📝 ${esc(it.note)}</div>`:''}
+      ${actions(it)}</div></div>`;
+  });
+  if(done===cards.length&&cards.length)h+='<div class="empty">🎉 今天的行程都完成了！</div>';
+  if(day.notes.length)h+='<div class="notes">'+day.notes.map(n=>`<details><summary>${esc(n.h)}</summary><div>${esc(n.l)}</div></details>`).join('')+'</div>';
+  h+=`<div class="tools"><button id="tHide">${hideDone?'顯示已完成':'隱藏已完成'}</button><button id="tIcs">📅 匯出行事曆（提前1小時提醒）</button><button id="tReset">重置本日勾選</button></div>`;
+  $('#main').innerHTML=h;checkReminders();
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('button');if(!t)return;
+  if(t.dataset.i!==undefined){cur=+t.dataset.i;render();scrollTo(0,0)}
+  else if(t.dataset.done){store.set('done:'+t.dataset.done,'1');render()}
+  else if(t.dataset.undo){store.del('done:'+t.dataset.undo);render()}
+  else if(t.id==='tHide'){hideDone=!hideDone;store.set('hide',hideDone?'1':'0');render()}
+  else if(t.id==='tReset'){if(confirm('清除本日所有完成勾選？')){DAYS[cur].items.forEach(i=>store.del('done:'+i.id));render()}}
+  else if(t.id==='tIcs')exportIcs();
+  else if(t.id==='bell')askNotif();
+});
+
+/* ---- 提醒：事件前 1 小時 ---- */
+const HOUR=3600e3;
+function allTimed(){return DAYS.flatMap(d=>d.items.filter(i=>i.rem&&i.ts))}
+async function notify(it){
+  const body=(it.at||'')+' '+it.title;
+  try{const reg=await navigator.serviceWorker.getRegistration();
+    if(Notification.permission==='granted'){reg?reg.showNotification('⏰ 1小時後：'+it.title,{body,icon:'icon-192.png',tag:it.id}):new Notification('⏰ 1小時後：'+it.title,{body})}}catch(e){}
+}
+function checkReminders(){
+  const now=Date.now(),box=$('#alerts');let h='';
+  allTimed().forEach(it=>{
+    if(isDone(it.id))return;
+    if(now>=it.ts-HOUR&&now<it.ts+30*60e3){
+      const mins=Math.round((it.ts-now)/60e3);
+      h+=`<div class="alert">⏰ ${mins>0?mins+' 分鐘後':'現在'}｜${it.at} ${esc(it.title)}</div>`;
+      if(!store.get('n:'+it.id)){store.set('n:'+it.id,'1');notify(it)}
+    }
+  });
+  if(box)box.innerHTML=h;
+}
+setInterval(checkReminders,30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){checkReminders();navigator.serviceWorker&&navigator.serviceWorker.getRegistration().then(r=>r&&r.update())}});
+async function askNotif(){
+  if(!('Notification' in window)){alert('此瀏覽器不支援通知。請先「加入主畫面」，用主畫面圖示開啟（需 iOS 16.4 以上）。\n\n最穩的做法：按下方「📅 匯出行事曆」，由 iPhone 行事曆在事件前 1 小時提醒。');return}
+  const p=await Notification.requestPermission();
+  alert(p==='granted'?'已開啟。App 開啟/背景執行時會在事件前 1 小時提醒。\n若要 App 關閉時也提醒，請同時匯入行事曆。':'未允許通知，請到 iPhone 設定 > 通知 開啟，或改用行事曆提醒。');
+}
+
+/* ---- 匯出 .ics（每個有時間的項目都附「前1小時」提醒） ---- */
+function exportIcs(){
+  const f=t=>new Date(t).toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
+  let s='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//tokyo-trip//ZH\r\nCALSCALE:GREGORIAN\r\n';
+  allTimed().forEach(it=>{
+    s+=`BEGIN:VEVENT\r\nUID:${it.id.replace('#','-')}@tokyo-trip\r\nDTSTAMP:${f(Date.now())}\r\nDTSTART:${f(it.ts)}\r\nDTEND:${f(it.ts+30*60e3)}\r\nSUMMARY:${(it.title+(it.sub?'｜'+it.sub:'')).replace(/[,;\n]/g,' ')}\r\n`;
+    if(it.q)s+=`LOCATION:${it.q.replace(/[,;\n]/g,' ')}\r\nURL:${mapUrl(it.q)}\r\n`;
+    s+='BEGIN:VALARM\r\nTRIGGER:-PT1H\r\nACTION:DISPLAY\r\nDESCRIPTION:1小時後\r\nEND:VALARM\r\nEND:VEVENT\r\n';
+  });
+  s+='END:VCALENDAR';
+  const url=URL.createObjectURL(new Blob([s],{type:'text/calendar'}));
+  const a=document.createElement('a');a.href=url;a.download='tokyo-trip.ics';document.body.appendChild(a);a.click();
+  setTimeout(()=>a.remove(),500);
+  setTimeout(()=>alert('若沒有跳出「加入行事曆」，請改用 Safari 開啟本網址再按一次。'),800);
+}
+
+/* ---- 自動更新：Service Worker 網路優先，有新版自動重載 ---- */
+if('serviceWorker' in navigator){
+  const had=!!navigator.serviceWorker.controller;let reloaded=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had&&!reloaded){reloaded=true;location.reload()}});
+  navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{});
+}
+render();
+</script>
+</body>
+</html>
