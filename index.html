@@ -43,7 +43,14 @@ main{padding:4px 16px calc(40px + env(safe-area-inset-bottom,0))}
 .body{flex:1;min-width:0}
 .meal{display:inline-block;font-size:12px;font-weight:700;color:var(--ac);background:rgba(var(--acrgb),.14);border-radius:10px;padding:2px 9px;margin-right:4px;white-space:nowrap}
 .r1:empty,.r1:not(:has(span)){display:none}
-.card{scroll-margin-top:120px}
+.card,.grph{scroll-margin-top:120px}
+.badge.tent{background:transparent;color:var(--ac);border:1.5px solid var(--ac)}
+.grph{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;width:100%;text-align:left;border:2px dashed rgba(var(--acrgb),.55);background:rgba(var(--acrgb),.08);color:var(--tx);border-radius:20px;padding:11px 14px;margin:8px 0;font-size:15px;font-weight:700}
+.grph small{flex:1 1 100%;color:var(--sub);font-weight:500;font-size:13px}
+.grph i{margin-left:auto;font-style:normal;color:var(--ac)}
+.grph.dn{opacity:.6}
+.grph.next,.grph.now{border-style:solid;border-color:var(--ac)}
+.grp-body{margin:0 0 6px 6px;padding-left:8px;border-left:3px solid rgba(var(--acrgb),.35)}
 .seg{position:relative;display:flex;justify-content:center;padding:0 14px 8px}
 .sg{display:flex;background:var(--card);border-radius:18px;padding:3px;box-shadow:var(--shadow)}
 .sg button{border:0;background:transparent;color:var(--sub);font-weight:700;font-size:14px;padding:6px 18px;border-radius:15px;min-height:34px}
@@ -168,7 +175,7 @@ const DS=s=>'東京ディズニーシー '+s;
 
 const DAYS=[
 {d:'2026-10-21',c:'#f0689a',rgb:'240,104,154',em:'✈️',wd:'三',name:'抵達・淺草・丸之內',start:'03:50',items:[
- P({at:'03:50',tz:8,rem:1,bk:'p1',title:'機場接送',badge:'‼️'}),
+ P({at:'03:50',tz:8,rem:1,bk:'p1',title:'機場接送',badge:'‼️',q:'25.026842357443577,121.47839501582564'}),
  P({at:'05:00',tz:8,rem:1,bk:'f1',title:'CHECK IN 報到',sub:'桃園機場 第1航廈',q:'桃園國際機場第一航廈',badge:'‼️'}),
  P({at:'06:45',tz:8,rem:1,bk:'f1',title:'✈️ 酷航 Scoot TR866',sub:'06:45 桃園 T1 ➜ 11:15 成田 T1',q:'成田国際空港 第1ターミナル',note:'行李規定見下方 註1'}),
  T({at:'11:48',rem:1,title:'京成電鐵 成田Sky Access線 Access特急',lines:['11:48 KS42 成田機場 往京成上野・押上・西馬込・京急線方向','➜ 12:54 KS45 押上 A1出口'],cost:'1,194日圓（IC卡）',dur:'66分',dir:['成田空港駅','押上駅'],note:'時刻表見下方 註2'}),
@@ -187,6 +194,7 @@ const DAYS=[
  w(4),
  T({title:'東京Metro 銀座線',lines:['G19 淺草 往澀谷方向','➜ G10 京橋 5號出口'],cost:'210日圓（IC卡）',dur:'18分',dir:['浅草駅','京橋駅']}),
  w(6),
+ P({badge:'‼️',title:'迴轉壽司 根室花丸 KITTE丸之內店',sub:'‼️ 先去抽號碼牌（整理券）',hrs:'11:00 - 22:00',q:'回転寿司 根室花まる KITTE丸の内店'}),
  ...gift.map((t,i)=>P({title:t,hrs:'09:30 - 20:30',q:giftQ[i]})),
  w(10),
  P({meal:'晚餐',title:'迴轉壽司 根室花丸 KITTE丸之內店',hrs:'11:00 - 22:00',q:'回転寿司 根室花まる KITTE丸の内店'}),
@@ -212,26 +220,27 @@ const DAYS=[
  T({at:'06:08',title:'迪士尼度假區線',lines:['06:08 海灣站（Bayside Station）','➜ 06:12 東京迪士尼海洋站'],cost:'300日圓（IC卡）',dur:'4分',dir:['舞浜駅','東京ディズニーシー・ステーション']}),
  w(3),
  P({title:'東京迪士尼海洋',hrs:'09:00 - 21:00',q:'東京ディズニーシー'}),
- P({at:'09:00',rem:1,bk:'dsea',title:'入園申請（Entry Request）',badge:'‼️',q:'東京ディズニーシー'}),
- P({bk:'dsea',title:'夢想起飛（Dreams Take Flight）',sub:'Exp 15:55 - 16:20、17:20 - 17:45',q:DS('ドリームス・テイク・フライト')}),
- P({bk:'dsea',title:'舞動地球！（Dance the Globe!）',sub:'Exp 16:45 - 17:10、18:30 - 18:55',q:DS('ダンス・ザ・グローブ')}),
- P({title:'安娜與艾莎的冰雪旅程',q:DS('アナとエルサのフローズンジャーニー')}),
- P({title:'小飛俠的夢幻島冒險',q:DS('ピーターパンのネバーランドアドベンチャー')}),
- P({title:'樂佩的燈籠節',q:DS('ラプンツェルのランタンフェスティバル')}),
- P({at:'11:30',rem:1,title:'閃耀慶典（Sparkling Jubilee Celebration）',hrs:'11:30 - 11:45',badge:'‼️',q:DS('スパークリング・ジュビリー・セレブレーション')}),
- P({at:'12:00',rem:1,title:'翱翔：奇幻飛行（Soaring）',badge:'‼️',q:DS('ソアリン：ファンタスティック・フライト')}),
- P({at:'15:00',rem:1,title:'閃耀慶典（Sparkling Jubilee Celebration）',hrs:'15:00 - 15:15',badge:'‼️',q:DS('スパークリング・ジュビリー・セレブレーション')}),
- P({at:'15:55',rem:1,title:'夢想起飛（Dreams Take Flight）',hrs:'15:55 - 16:20',badge:'‼️',q:DS('ドリームス・テイク・フライト')}),
- P({title:'玩具總動員瘋狂遊戲屋',q:DS('トイ・ストーリー・マニア')}),
- P({title:'地心探險之旅',q:DS('センター・オブ・ジ・アース')}),
- P({at:'18:30',rem:1,title:'舞動地球！（Dance the Globe!）',hrs:'18:30 - 18:55',badge:'‼️',q:DS('ダンス・ザ・グローブ')}),
- P({at:'19:30',rem:1,title:'相信！～夢之海～（Believe! Sea of Dreams）',hrs:'19:30 - 20:00',badge:'‼️',q:DS('ビリーヴ！シー・オブ・ドリームス')}),
- P({at:'20:30',rem:1,title:'Night High Halloween（夜間萬聖節）',hrs:'20:30 - 20:35',badge:'‼️',q:DS('ナイトハイ・ハロウィーン')}),
- P({title:'人魚礁湖',q:DS('マーメイドラグーン')}),
- P({at:'20:55',title:'【環境演出】閃耀慶典之夜',hrs:'20:55 - 21:00',badge:'‼️',q:DS('スパークリング・ジュビリー・ナイト')}),
- P({title:'凜屋 Ikspiari店',hrs:'11:00 - 22:30（最後點餐 21:30）',q:'凜や イクスピアリ店'}),
- P({title:'一風堂 Ikspiari店',hrs:'11:00 - 22:00（最後點餐 21:40）',q:'一風堂 イクスピアリ店'}),
- P({meal:'晚餐',title:'稻庭烏龍麵與丼飯 金子半之助 Ikspiari店',hrs:'11:00 - 22:30（最後點餐 21:30）',q:'稲庭うどんと丼めし 金子半之助 イクスピアリ店'}),
+ P({at:'09:00',rem:1,bk:'dsea',title:'入園申請（Entry Request）',sub:'夢想起飛、舞動地球 需抽 Entry Request',badge:'‼️',q:'東京ディズニーシー'}),
+ P({title:'安娜與艾莎的冰雪旅程'}),
+ P({title:'小飛俠的夢幻島冒險'}),
+ P({title:'樂佩的燈籠節'}),
+ P({at:'11:30',rem:1,title:'閃耀慶典（Sparkling Jubilee Celebration）',hrs:'11:30 - 11:45',badge:'‼️'}),
+ P({at:'12:00',rem:1,title:'翱翔：奇幻飛行（Soaring）',badge:'‼️'}),
+ P({at:'15:00',rem:1,title:'閃耀慶典（Sparkling Jubilee Celebration）',hrs:'15:00 - 15:15',badge:'‼️'}),
+ P({at:'15:55',rem:1,bk:'dsea',title:'夢想起飛（Dreams Take Flight）',sub:'需抽 Entry Request｜可選時段 15:55 - 16:20、17:20 - 17:45',hrs:'15:55 - 16:20',badge:'‼️'}),
+ P({title:'玩具總動員瘋狂遊戲屋'}),
+ P({title:'地心探險之旅'}),
+ P({at:'18:30',rem:1,bk:'dsea',title:'舞動地球！（Dance the Globe!）',sub:'需抽 Entry Request｜可選時段 16:45 - 17:10、18:30 - 18:55',hrs:'18:30 - 18:55',badge:'‼️'}),
+ P({at:'19:30',rem:1,title:'相信！～夢之海～（Believe! Sea of Dreams）',hrs:'19:30 - 20:00',badge:'‼️'}),
+ P({at:'20:30',rem:1,title:'Night High Halloween（夜間萬聖節）',hrs:'20:30 - 20:35',badge:'‼️'}),
+ P({title:'人魚礁湖'}),
+ P({at:'20:55',title:'【環境演出】閃耀慶典之夜',hrs:'20:55 - 21:00',badge:'‼️'}),
+ w(3),
+ T({title:'迪士尼度假區線',lines:['東京迪士尼海洋站 ➜ 海灣站（Bayside Station）'],cost:'300日圓（IC卡）',dur:'8分',dir:['東京ディズニーシー・ステーション','ベイサイド・ステーション']}),
+ w(3),
+ P({grp:'g22',title:'凜屋 Ikspiari店',hrs:'11:00 - 22:30（最後點餐 21:30）',q:'凜や イクスピアリ店'}),
+ P({grp:'g22',title:'一風堂 Ikspiari店',hrs:'11:00 - 22:00（最後點餐 21:40）',q:'一風堂 イクスピアリ店'}),
+ P({grp:'g22',tent:1,meal:'晚餐',title:'稻庭烏龍麵與丼飯 金子半之助 Ikspiari店',hrs:'11:00 - 22:30（最後點餐 21:30）',q:'稲庭うどんと丼めし 金子半之助 イクスピアリ店'}),
  w(4),
  T({title:'JR東日本 京葉線',lines:['JE07 舞濱 往東京方向（上行）','➜ JE02 八丁堀 A3出口'],cost:'260日圓（IC卡）',dur:'15分',dir:['舞浜駅','八丁堀駅']}),
  w(13),
@@ -280,15 +289,15 @@ const DAYS=[
  w(5),
  T({title:'百合海鷗號',lines:['U07 台場 往豐洲方向','➜ U14 市場前 2A出口'],cost:'325日圓（IC卡）',dur:'13分',dir:['台場駅','市場前駅']}),
  w(3),
- P({meal:'午餐',title:'豐洲市場',hrs:'05:00 - 15:00',q:'豊洲市場'}),
- P({title:'大和壽司 東京 豐洲市場',hrs:'06:00 - 13:00',q:'大和寿司 東京 豊洲市場'}),
- P({title:'鮨晶（Sushi Shou）豐洲市場內店',hrs:'07:00 - 14:00',q:'鮨晶 豊洲市場内店'}),
- P({title:'磯壽司',hrs:'06:30 - 15:00',q:'磯寿司 豊洲市場'}),
- P({title:'大江戶 豐洲市場內店',hrs:'07:00 - 14:30',q:'大江戸 豊洲市場内店'}),
- P({title:'仲家',hrs:'05:30 - 13:30',q:'仲家 豊洲市場'}),
- P({title:'天婦羅 天房',hrs:'07:00 - 13:00',q:'天ぷら 天房 豊洲市場'}),
- P({title:'炸豬排 小田保 場內店',hrs:'06:00 - 14:00',q:'とんかつ小田保 場内店'}),
- P({title:'鳥藤 豐洲市場店',hrs:'06:30 - 12:40',q:'鳥藤 豊洲市場店'}),
+ P({grp:'g24',title:'豐洲市場',hrs:'05:00 - 15:00',q:'豊洲市場'}),
+ P({grp:'g24',tent:1,meal:'午餐',title:'大和壽司 東京 豐洲市場',hrs:'06:00 - 13:00',q:'大和寿司 東京 豊洲市場'}),
+ P({grp:'g24',title:'鮨晶（Sushi Shou）豐洲市場內店',hrs:'07:00 - 14:00',q:'鮨晶 豊洲市場内店'}),
+ P({grp:'g24',title:'磯壽司',hrs:'06:30 - 15:00',q:'磯寿司 豊洲市場'}),
+ P({grp:'g24',title:'大江戶 豐洲市場內店',hrs:'07:00 - 14:30',q:'大江戸 豊洲市場内店'}),
+ P({grp:'g24',title:'仲家',hrs:'05:30 - 13:30',q:'仲家 豊洲市場'}),
+ P({grp:'g24',title:'天婦羅 天房',hrs:'07:00 - 13:00',q:'天ぷら 天房 豊洲市場'}),
+ P({grp:'g24',title:'炸豬排 小田保 場內店',hrs:'06:00 - 14:00',q:'とんかつ小田保 場内店'}),
+ P({grp:'g24',title:'鳥藤 豐洲市場店',hrs:'06:30 - 12:40',q:'鳥藤 豊洲市場店'}),
  w(4),
  T({title:'百合海鷗號',lines:['U14 市場前 往豐洲方向','➜ U16 豐洲 1A出口'],cost:'190日圓（IC卡）',dur:'3分',dir:['市場前駅','豊洲駅']}),
  w(4),
@@ -296,7 +305,7 @@ const DAYS=[
  w(4),
  T({title:'東京Metro 有樂町線 → JR 前往橫濱',lines:['有樂町線 Y22 豐洲 往和光市方向 ➜ Y18 有樂町 D6出口','JR山手線 JY30 有樂町 往品川・澀谷方向（外環）➜ JY29 新橋','JR東海道線・橫須賀線 JT02 新橋 往品川・橫濱・小田原方向（下行）➜ JT05 橫濱','或 JO18 新橋 往橫濱・鎌倉方向（下行）➜ JO13 橫濱'],cost:'180 + 530日圓（IC卡）',dur:'約32分',dir:['豊洲駅','横浜駅']}),
  w(4),
- P({at:'19:45',rem:1,noanchor:1,bk:'ante',title:'Antenor 橫濱崇光店',sub:'‼️ 先付款・19:45 取貨',hrs:'10:00 - 20:00',q:'アンテノール 横浜そごう店'}),
+ P({bk:'ante',badge:'‼️',title:'Antenor 橫濱崇光店',sub:'‼️ 先付款（19:30 回來取蛋糕）',hrs:'10:00 - 20:00',q:'アンテノール 横浜そごう店'}),
  P({title:'HARBS LUMINE橫濱店',hrs:'10:00 - 20:30',q:'HARBS ハーブス ルミネ横浜店'}),
  w(4),
  T({title:'JR東日本 京濱東北線・根岸線',lines:['JK12 橫濱 往磯子・大船方向（南行）','➜ JK09 石川町 北口'],cost:'200日圓（IC卡）',dur:'7分',dir:['横浜駅','石川町駅']}),
@@ -313,6 +322,7 @@ const DAYS=[
  w(10),
  T({title:'港未來線',lines:['MM03 港未來 往橫濱・澀谷・池袋方向','➜ MM01 橫濱 西口'],cost:'200日圓（IC卡）',dur:'3分',dir:['みなとみらい駅','横浜駅']}),
  w(6),
+ P({at:'19:30',rem:1,bk:'ante',badge:'‼️',title:'Antenor 橫濱崇光店・取蛋糕',sub:'‼️ 19:30 取貨（已先付款）',hrs:'10:00 - 20:00',q:'アンテノール 横浜そごう店'}),
  P({at:'20:00',rem:1,res:1,meal:'晚餐',bk:'homura',title:'炎 橫濱店',hrs:'11:00 - 24:00',q:'炎 横浜店'}),
  w(5),
  T({at:'22:42',rem:1,title:'京急電鐵 本線 特急 → 都營淺草線',lines:['22:42 KK37 橫濱 往泉岳寺方向','➜ 23:37 A20 押上 A1出口（直通）'],cost:'619日圓（IC卡）',dur:'51分',dir:['横浜駅','押上駅']}),
@@ -339,8 +349,8 @@ const DAYS=[
  P({title:'林田仙貝',hrs:'09:00 - 17:00',q:'林田のおせんべい 成田'}),
  P({title:'成田山新勝寺',hrs:'08:00 - 16:00',q:'成田山新勝寺'}),
  w(12),
- P({meal:'晚餐',title:'披薩店 Positano',hrs:'17:00 - 24:00',q:'ピッツェリア ポジターノ 成田'}),
- P({at:'18:00',rem:1,res:1,bk:'fpig',title:'Flying pig N',hrs:'17:30 - 21:00（最後點餐 20:30）',q:'Flying pig N 成田'}),
+ P({at:'18:00',rem:1,res:1,grp:'g25',tent:1,bk:'pos',meal:'晚餐',title:'披薩店 Positano',hrs:'17:00 - 24:00',q:'ピッツェリア ポジターノ 成田'}),
+ P({at:'18:00',rem:1,res:1,grp:'g25',bk:'fpig',title:'Flying pig N',hrs:'17:30 - 21:00（最後點餐 20:30）',q:'Flying pig N 成田'}),
  T({at:'20:10',rem:1,title:'京成電鐵 京成本線',lines:['20:10 KS40 京成成田 往成田機場方向','➜ 20:16 KS41 機場第2航廈（成田第2・第3航廈）'],cost:'280日圓（IC卡）',dur:'6分',dir:['京成成田駅','空港第2ビル駅'],note:'時刻表見下方 註2'}),
  P({title:'I.A.S.S 貴賓室（Executive Lounge）',hrs:'07:00 - 21:00',q:'I.A.S.S Executive Lounge 成田空港'}),
  P({at:'20:25',rem:1,bk:'f2',title:'CHECK IN 報到',badge:'‼️',q:'成田国際空港 第3ターミナル'}),
@@ -354,21 +364,24 @@ const DAYS=[
 
 /* ===== 已預訂清單（id 要和上面行程裡的 bk 對得上；改內容改這裡） ===== */
 const BK=[
- {id:'p1',ic:'🚐',t:'去程 機場接送',when:'10/21（三）03:50',info:['台灣出發時間，接送到桃園機場'],q:'桃園國際機場第一航廈'},
+ {id:'p1',ic:'🚐',t:'去程 機場接送',when:'10/21（三）03:50',info:['台灣出發時間，接送到桃園機場'],q:'25.026842357443577,121.47839501582564'},
  {id:'f1',ic:'✈️',t:'酷航 Scoot TR866（去程）',when:'10/21（三）06:45 起飛',info:['05:00 CHECK IN','桃園 T1 06:45 ➜ 成田 T1 11:15','隨身行李 1 件 54×38×23 cm＋小型行李 1 件 40×30×10 cm，兩件合計 10 kg'],q:'桃園國際機場第一航廈'},
  {id:'hotel',ic:'🏨',t:'Season Hotel 押上',when:'10/21 先寄放行李｜10/25 10:00 退房',info:['10/21 抵達後先到飯店寄放行李','10/25 10:00 CHECK OUT'],q:'Season Hotel 押上'},
  {id:'lemon',ic:'🍽️',t:'牛舌之檸檬 淺草店',when:'10/21（三）14:00',info:['營業時間 11:30 - 15:00'],q:'牛たんの檸檬 浅草店'},
- {id:'dsea',ic:'🎢',t:'東京迪士尼海洋',when:'10/22（四）09:00 入園申請',info:['09:00 入園申請（Entry Request）','Exp 夢想起飛：15:55 - 16:20、17:20 - 17:45','Exp 舞動地球！：16:45 - 17:10、18:30 - 18:55'],q:'東京ディズニーシー'},
+ {id:'dsea',ic:'🎢',t:'東京迪士尼海洋',when:'10/22（四）09:00 入園申請（抽選）',info:['09:00 入園申請（Entry Request，需抽選）','夢想起飛：可選時段 15:55 - 16:20、17:20 - 17:45','舞動地球！：可選時段 16:45 - 17:10、18:30 - 18:55'],q:'東京ディズニーシー'},
  {id:'imahan',ic:'🍽️',t:'人形町今半 新宿第一生命大樓店',when:'10/23（五）12:30',info:['營業時間 11:00 - 15:00'],q:'人形町今半 新宿第一生命ビル店'},
  {id:'nikuya',ic:'🍽️',t:'和牛吃到飽殿堂 肉屋橫丁 澀谷宇田川町店',when:'10/23（五）19:30',info:['營業時間 14:00 - 23:00'],q:'和牛放題の殿堂 肉屋横丁 渋谷宇田川町店'},
  {id:'suke6',ic:'🍽️',t:'SUKE6 DINER',when:'10/24（六）08:30',info:['營業時間 08:00 - 18:00'],q:'SUKE6 DINER 浅草'},
  {id:'boat',ic:'🚢',t:'東京都觀光汽船 螢月號 HOTALUNA',when:'10/24（六）09:40 報到｜10:00 出航',info:['淺草營業所報到','10:00 淺草 ➜ 11:05 台場海濱公園（65 分鐘）','票價 2,000 日圓'],q:'東京都観光汽船 浅草営業所'},
- {id:'ante',ic:'🛍️',t:'Antenor 橫濱崇光店（先付款取貨）',when:'10/24（六）19:45 取貨',info:['已付款，19:45 取貨','營業時間 10:00 - 20:00'],q:'アンテノール 横浜そごう店'},
+ {id:'ante',ic:'🛍️',t:'Antenor 橫濱崇光店（先付款取蛋糕）',when:'10/24（六）先付款｜19:30 取貨',info:['先在店內付款','19:30 回來取蛋糕','營業時間 10:00 - 20:00'],q:'アンテノール 横浜そごう店'},
  {id:'homura',ic:'🍽️',t:'炎 橫濱店',when:'10/24（六）20:00',info:['營業時間 11:00 - 24:00'],q:'炎 横浜店'},
- {id:'fpig',ic:'🍽️',t:'Flying pig N',when:'10/25（日）18:00',info:['營業時間 17:30 - 21:00（最後點餐 20:30）'],q:'Flying pig N 成田'},
+ {id:'pos',ic:'🍽️',t:'披薩店 Positano（暫定）',when:'10/25（日）18:00',info:['營業時間 17:00 - 24:00','與 Flying pig N 擇一，另一間會先取消'],q:'ピッツェリア ポジターノ 成田'},
+ {id:'fpig',ic:'🍽️',t:'Flying pig N',when:'10/25（日）18:00',info:['營業時間 17:30 - 21:00（最後點餐 20:30）','與 Positano 擇一，另一間會先取消'],q:'Flying pig N 成田'},
  {id:'f2',ic:'✈️',t:'捷星 Jetstar GK11（回程）',when:'10/25（日）22:25 起飛',info:['20:25 CHECK IN','成田 T3 22:25 ➜ 桃園 T1 01:30（+1）','隨身行李 1 件 56×36×23 cm＋小型行李 1 件，兩件合計 7 kg'],q:'成田国際空港 第3ターミナル'},
  {id:'p2',ic:'🚐',t:'回程 機場接送',when:'10/26（一）01:30',info:['抵達桃園後的接送（台灣時間）'],q:'桃園國際機場第一航廈'}
 ];
+/* ===== 擇一群組（同一組只需完成其中一個；tent=暫定） ===== */
+const GMETA={g22:{meal:'晚餐'},g24:{meal:'午餐'},g25:{meal:'晚餐'}};
 /* ===== 出發前清單（建議清單，可自行增減；勾選只存在這支手機） ===== */
 const CHECK=[
  {g:'📘 證件與入境',l:['護照（效期足夠，姓名與機票一致）','Visit Japan Web：入境審查、海關申報填好並截圖 QR Code','電子機票／登機證（Scoot TR866、Jetstar GK11）','住宿與各項預約確認信截圖（見「已預訂」）']},
@@ -391,7 +404,8 @@ const tsOf=(day,it)=>{const[y,m,d]=(it.date||day.d).split('-').map(Number);const
 DAYS.forEach(d=>d.items.forEach((it,i)=>{it.id=d.d+'#'+i;if(it.at)it.ts=tsOf(d,it)}));
 /* ---- 座標（約略位置，用來判斷你在哪一站附近） ---- */
 const GEO=[
- [/桃園/,25.0777,121.2328,'桃園機場'],[/成田空港|成田国際空港|空港第2|I\.A\.S\.S/,35.7720,140.3929,'成田機場'],
+ [/^25\.0268/,25.026842357443577,121.47839501582564,'機場接送上車點'],
+ [/桃園/,25.081201978657926,121.23121024933404,'桃園機場'],[/成田空港|成田国際空港|空港第2|I\.A\.S\.S/,35.770647791162965,140.3844279734905,'成田機場'],
  [/Season Hotel|モスバーガー|ハナマサ|PERTH/,35.7107,139.8135,'飯店・押上周邊'],[/スカイツリー|ソラマチ|ひつまぶし/,35.7101,139.8107,'東京晴空塔城'],
  [/浅草|仲見世|三鳩堂|鳴門鯛焼|OSドラッグ|牛たん|mille mele|SUKE6/,35.7116,139.7965,'淺草'],
  [/豊洲市場|小田保/,35.6456,139.7843,'豐洲市場'],[/ららぽーと豊洲/,35.6537,139.7926,'豐洲 LaLaport'],
@@ -408,6 +422,10 @@ DAYS.forEach(d=>{let last=null;d.items.forEach(it=>{
   if(it.k==='place'&&it.q){const o=LL[it.q],g=GEO.find(x=>x[0].test(it.q));if(o){it.ll=o;last=o}else if(g){it.ll=[g[1],g[2]];it.gn=g[3];last=it.ll}}
   else if(it.k==='move'&&last)it.ll=last;
 })});
+const GRP={};DAYS.forEach(d=>d.items.forEach(it=>{if(it.grp)(GRP[it.grp]=GRP[it.grp]||{id:it.grp,items:[]}).items.push(it)}));
+const gDone=g=>GRP[g].items.some(i=>isDone(i.id));
+const doneU=it=>it.grp?gDone(it.grp):isDone(it.id);
+const repOf=it=>it.grp?(GRP[it.grp].items.find(i=>i.tent)||GRP[it.grp].items[0]):it;
 const jstDate=t=>new Date(t+9*3600e3).toISOString().slice(0,10);
 function liveDayIdx(now=Date.now()){
   const ts=d=>d.items.filter(i=>i.ts).map(i=>i.ts);
@@ -426,16 +444,16 @@ function infer(day){
   let prev=-1,next=-1;
   for(const i of cards){if(!its[i].ts||its[i].noanchor)continue;if(its[i].ts<=now)prev=i;else{next=i;break}}
   const start=prev>=0?prev:0,end=next>=0?next:its.length;
-  let win=cards.filter(i=>i>=start&&i<end&&!isDone(its[i].id));
-  if(!win.length){const a=cards.filter(i=>i>=end&&!isDone(its[i].id));
-    const b=a.length?a:cards.filter(i=>!isDone(its[i].id));if(!b.length)return null;win=[b[0]]}
+  let win=cards.filter(i=>i>=start&&i<end&&!doneU(its[i]));
+  if(!win.length){const a=cards.filter(i=>i>=end&&!doneU(its[i]));
+    const b=a.length?a:cards.filter(i=>!doneU(its[i]));if(!b.length)return null;win=[b[0]]}
   let pick=win[0],d=null,mode='time';
   if(loc){
     const ds=win.filter(i=>its[i].ll).map(i=>({i,d:dist(loc.lat,loc.lng,its[i].ll[0],its[i].ll[1])}));
     if(ds.length){const m=Math.min(...ds.map(x=>x.d));
       if(m<3000){const best=ds.find(x=>x.d<=m+150);pick=best.i;d=best.d;mode='geo'}else mode='far'}
   }
-  return {item:its[pick],mode,d};
+  let item=its[pick];if(mode!=='geo')item=repOf(item);return {item,mode,d};
 }
 function whereHtml(){
   if(!liveInfo)return '';
@@ -443,7 +461,7 @@ function whereHtml(){
   const note=liveInfo.mode==='geo'?'依定位＋時間，距離約 '+f(liveInfo.d):liveInfo.mode==='far'?'不在行程地點附近，依時間推測':(loc?'依時間推測':'依時間推測（未取得定位）');
   return `<button class="where" data-now="1">📍 現在：${esc(liveInfo.item.title)}<small>${note}</small></button>`;
 }
-function goNow(smooth){const el=document.querySelector('.card.now')||document.querySelector('.card.next');if(el)el.scrollIntoView({block:'start',behavior:smooth?'smooth':'auto'})}
+function goNow(smooth){const el=document.querySelector('.card.now,.grph.now')||document.querySelector('.card.next,.grph.next');if(el)el.scrollIntoView({block:'start',behavior:smooth?'smooth':'auto'})}
 function locate(){return new Promise(res=>{if(!navigator.geolocation)return res(null);
   navigator.geolocation.getCurrentPosition(p=>res({lat:p.coords.latitude,lng:p.coords.longitude}),()=>res(null),{timeout:8000,maximumAge:120000})})}
 function startLive(){
@@ -469,33 +487,49 @@ function actions(it){let a='';
   if(it.dir)a+=`<a href="${dirUrl(it.dir[0],it.dir[1])}" target="_blank" rel="noopener">🚉 路線</a>`;
   if(it.q)a+=`<a href="${mapUrl(it.q)}" target="_blank" rel="noopener">📍 Google 地圖</a>`;
   return a?`<div class="acts">${a}</div>`:''}
+function itemHtml(it,nextId){
+    if(isDone(it.id)){return hideDone?'':`<button class="donerow" data-undo="${it.id}"><span>✓</span><span style="text-decoration:line-through">${it.at?it.at+'　':''}${esc(it.title)}</span></button>`}
+  return `<div class="card ${it.id===nextId?'next':''} ${liveInfo&&it.id===nextId?'now':''}" data-iid="${it.id}"><button class="chk" data-done="${it.id}" aria-label="完成">✓</button><div class="body">
+    <div class="r1">${liveInfo&&it.id===nextId?'<span class="badge now">📍 現在</span>':''}${it.at?'<span class="time">'+it.at+'</span>':''}${it.meal?'<span class="meal">'+({'早餐':'🍳','午餐':'🍱','晚餐':'🍽️'}[it.meal])+' '+it.meal+'</span>':''}${it.tent?'<span class="badge tent">暫定</span>':''}${it.res?'<span class="badge">★ 已預約</span>':''}${it.badge&&!it.res?'<span class="badge">★ 重要</span>':''}</div>
+    <div class="title">${esc(it.title)}</div>
+    ${it.sub?`<div class="sub">${esc(it.sub)}</div>`:''}
+    ${it.lines?`<div class="lines">${it.lines.map(l=>`<div>${esc(l)}</div>`).join('')}</div>`:''}
+    ${it.hrs?`<div class="hrs">🕘 ${esc(it.hrs)}</div>`:''}
+    ${it.cost||it.dur?`<div class="meta">${[it.cost,it.dur].filter(Boolean).map(esc).join('｜')}</div>`:''}
+    ${it.note?`<div class="meta">📝 ${esc(it.note)}</div>`:''}
+    ${actions(it)}</div></div>`;
+}
+function groupHtml(g,nextId){
+  const G=GRP[g],M=GMETA[g]||{},open=store.get('go:'+g)==='1',dn=G.items.find(i=>isDone(i.id)),tent=repOf(G.items[0]);
+  if(dn&&hideDone)return '';
+  const nx=G.items.some(i=>i.id===nextId),isNow=nx&&liveInfo;
+  const em={'早餐':'🍳','午餐':'🍱','晚餐':'🍽️'}[M.meal]||'🍽️';
+  let h=`<button class="grph ${dn?'dn':''} ${nx?(isNow?'now':'next'):''}" data-grp="${g}"><span>${em} ${M.meal||''}・擇一（${G.items.length} 選 1）</span><i>${open?'▲':'▼'}</i><small>${dn?'✓ 已選：'+esc(dn.title):'暫定：'+esc(tent.title)}</small></button>`;
+  if(open)h+='<div class="grp-body">'+G.items.map(i=>itemHtml(i,nextId)).join('')+'</div>';
+  return h;
+}
 function render(){
   const day=DAYS[cur];renderTabs();const R=document.documentElement.style;R.setProperty('--ac',day.c);R.setProperty('--acrgb',day.rgb);const tc=document.querySelector('meta[name=theme-color]');if(tc)tc.content=day.c;
   const cards=day.items.filter(i=>i.k==='place'||i.k==='move');
-  const done=cards.filter(i=>isDone(i.id)).length;
+  const units=cards.filter(i=>!i.grp||GRP[i.grp].items[0]===i);
+  const done=units.filter(doneU).length;
   const live=(cur===liveDayIdx());liveInfo=live?infer(day):null;
-  const nextId=liveInfo?liveInfo.item.id:(cards.find(i=>!isDone(i.id))||{}).id;
+  const un=cards.find(i=>!doneU(i));
+  const nextId=liveInfo?liveInfo.item.id:(un?repOf(un).id:undefined);
   curNext=nextId;document.body.classList.toggle('mapmode',mode==='map');
   document.querySelectorAll('[data-seg]').forEach(b=>b.classList.toggle('on',b.dataset.seg===mode));
   if(mode==='map'){$('#main').innerHTML='';showMap(day);checkReminders();return}
   $('#mapview').hidden=true;
   const[,mm,dd2]=day.d.split('-');
-  let h=`<div class="dayhead"><div><span class="dd">${+mm}/${+dd2}（${day.wd}）</span><span class="em">${day.em}</span></div><div class="dn">${esc(day.name)}</div><div class="meta2">出發 ${day.start}｜完成 ${done}/${cards.length}</div>${whereHtml()}</div><div class="bar"><i style="width:${cards.length?done/cards.length*100:0}%"></i></div><div id="alerts"></div>`;
+  let h=`<div class="dayhead"><div><span class="dd">${+mm}/${+dd2}（${day.wd}）</span><span class="em">${day.em}</span></div><div class="dn">${esc(day.name)}</div><div class="meta2">出發 ${day.start}｜完成 ${done}/${units.length}</div>${whereHtml()}</div><div class="bar"><i style="width:${units.length?done/units.length*100:0}%"></i></div><div id="alerts"></div>`;
+  const seen={};
   day.items.forEach(it=>{
     if(it.k==='sec'){h+=`<div class="sec">${esc(it.t)}</div>`;return}
     if(it.k==='walk'){h+=`<div class="walk">🚶 步行 ${it.m} 分鐘</div>`;return}
-    if(isDone(it.id)){if(!hideDone)h+=`<button class="donerow" data-undo="${it.id}"><span>✓</span><span style="text-decoration:line-through">${it.at?it.at+'　':''}${esc(it.title)}</span></button>`;return}
-    h+=`<div class="card ${it.id===nextId?'next':''} ${liveInfo&&it.id===nextId?'now':''}" data-iid="${it.id}"><button class="chk" data-done="${it.id}" aria-label="完成">✓</button><div class="body">
-      <div class="r1">${liveInfo&&it.id===nextId?'<span class="badge now">📍 現在</span>':''}${it.at?'<span class="time">'+it.at+'</span>':''}${it.meal?'<span class="meal">'+({'早餐':'🍳','午餐':'🍱','晚餐':'🍽️'}[it.meal])+' '+it.meal+'</span>':''}${it.res?'<span class="badge">★ 已預約</span>':''}${it.badge&&!it.res?'<span class="badge">★ 重要</span>':''}</div>
-      <div class="title">${esc(it.title)}</div>
-      ${it.sub?`<div class="sub">${esc(it.sub)}</div>`:''}
-      ${it.lines?`<div class="lines">${it.lines.map(l=>`<div>${esc(l)}</div>`).join('')}</div>`:''}
-      ${it.hrs?`<div class="hrs">🕘 ${esc(it.hrs)}</div>`:''}
-      ${it.cost||it.dur?`<div class="meta">${[it.cost,it.dur].filter(Boolean).map(esc).join('｜')}</div>`:''}
-      ${it.note?`<div class="meta">📝 ${esc(it.note)}</div>`:''}
-      ${actions(it)}</div></div>`;
+    if(it.grp){if(seen[it.grp])return;seen[it.grp]=1;h+=groupHtml(it.grp,nextId);return}
+    h+=itemHtml(it,nextId);
   });
-  if(done===cards.length&&cards.length)h+='<div class="empty">🎉 今天的行程都完成了！</div>';
+  if(done===units.length&&units.length)h+='<div class="empty">🎉 今天的行程都完成了！</div>';
   if(day.notes.length)h+='<div class="notes">'+day.notes.map(n=>`<details><summary>${esc(n.h)}</summary><div>${esc(n.l)}</div></details>`).join('')+'</div>';
   h+=`<div class="tools"><button id="tHide">${hideDone?'顯示已完成':'隱藏已完成'}</button><button id="tIcs">📅 匯出行事曆（提前1小時提醒）</button><button id="tReset">重置本日勾選</button></div>`;
   h+='<div class="bye">'+(cur===DAYS.length-1?'Goodbye, Tokyo! ♡':"Let's go! ♡")+'</div>';
@@ -504,6 +538,7 @@ function render(){
 document.addEventListener('click',e=>{
   const t=e.target.closest('button');if(!t)return;
   if(t.dataset.i!==undefined){cur=+t.dataset.i;refit=true;render();scrollTo(0,0)}
+  else if(t.dataset.grp){const k='go:'+t.dataset.grp;store.get(k)==='1'?store.del(k):store.set(k,'1');render()}
   else if(t.dataset.done){store.set('done:'+t.dataset.done,'1');render()}
   else if(t.dataset.undo){store.del('done:'+t.dataset.undo);render()}
   else if(t.id==='tHide'){hideDone=!hideDone;store.set('hide',hideDone?'1':'0');render()}
