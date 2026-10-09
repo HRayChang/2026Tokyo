@@ -403,8 +403,8 @@ const LL={
  'Season Hotel 押上':[35.71069077085398,139.81981440497114],
  'モスバーガー押上店':[35.714859511837126,139.79330426406864],
  '肉のハナマサ プラス押上店':[35.71230820609096,139.79462202977908],
- 'PERTH Sandwiches & All Day Breakfast 押上':[35.712379052408004,139.79477629388612],
- '牛たんの檸檬 浅草店':[35.71198062792622,139.7964649328337],
+ 'PERTH Sandwiches & All Day Breakfast 押上':[35.71121658219869,139.8160060288629],
+ '牛たんの檸檬 浅草店':[35.71478552008546,139.7932559814416],
  'OSドラッグ 浅草店':[35.712806583772114,139.79644247639706],
  '鳴門鯛焼本舗 浅草新仲見世店':[35.71215959130629,139.79641064240568],
  '仲見世商店街':[35.711984217543815,139.79654538854942],
@@ -655,9 +655,18 @@ const darkMap=()=>matchMedia('(prefers-color-scheme: dark)').matches;
 const TILE=()=>'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'; /* 國土地理院 淡色地圖：免金鑰、日本全區、地名為日文 */
 function dayModel(day){
   const groups=[],by={},edges=[],rows=[];let prev=null,mv=false;
+  /* 每天地圖的 1 號點都從飯店開始 */
+  const HLL=LL['Season Hotel 押上'],first=day.d===DAYS[0].d;
+  let seenHotel=!first;
+  if(!first){
+    const fk={id:'hotelstart:'+day.d,k:'place',title:'🏨 從飯店出發',sub:HOTEL,q:'Season Hotel 押上',ll:HLL,gn:'飯店・押上'};
+    const g=by[HLL.join(',')]={key:HLL.join(','),ll:HLL,items:[fk],n:1,name:'飯店・押上'};groups.push(g);rows.push({it:fk,g});prev=g;
+  }
   day.items.forEach(it=>{
     if(it.k==='move'){mv=true;return}
     if(it.k!=='place')return;
+    /* 第一天：飯店（寄放行李）之前的機場／航班不上地圖，讓 1 號點是飯店 */
+    if(!seenHotel){if(it.bk==='hotel')seenHotel=true;else{rows.push({it,g:null});return}}
     if(!it.ll){rows.push({it,g:null});return}
     const key=it.ll.join(',');let g=by[key];
     if(!g){g=by[key]={key,ll:it.ll,items:[],n:groups.length+1,name:it.gn};groups.push(g)}
