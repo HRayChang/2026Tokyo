@@ -430,6 +430,8 @@ DAYS.forEach(d=>{let last=null;d.items.forEach(it=>{
 })});
 const GRP={};DAYS.forEach(d=>d.items.forEach(it=>{if(it.grp)(GRP[it.grp]=GRP[it.grp]||{id:it.grp,items:[]}).items.push(it)}));
 const gDone=g=>GRP[g].items.some(i=>isDone(i.id));
+/* 擇一群組：還沒選＝展開，選完＝收起；點標題可手動切換，狀態改變後恢復預設 */
+const gOpen=g=>{const dn=gDone(g),flipped=store.get('gt:'+g)===(dn?'d':'u');return dn?flipped:!flipped};
 const doneU=it=>it.grp?gDone(it.grp):isDone(it.id);
 const repOf=it=>it.grp?(GRP[it.grp].items.find(i=>i.tent)||GRP[it.grp].items[0]):it;
 /* ---- 抽選項目（Entry Request）：結果當天才知道，可在卡片或「已預訂」更新 ---- */
@@ -528,7 +530,7 @@ function itemHtml(it,nextId){
       ${actions(it)}</div></div>`;
 }
 function groupHtml(g,nextId){
-  const G=GRP[g],M=GMETA[g]||{},open=store.get('go:'+g)==='1',dn=G.items.find(i=>isDone(i.id)),tent=repOf(G.items[0]);
+  const G=GRP[g],M=GMETA[g]||{},open=gOpen(g),dn=G.items.find(i=>isDone(i.id)),tent=repOf(G.items[0]);
   if(dn&&hideDone)return '';
   const nx=G.items.some(i=>i.id===nextId),isNow=nx&&liveInfo;
   const em={'早餐':'🍳','午餐':'🍱','晚餐':'🍽️'}[M.meal]||'🍽️';
@@ -567,7 +569,7 @@ function render(){
 document.addEventListener('click',e=>{
   const t=e.target.closest('button');if(!t)return;
   if(t.dataset.i!==undefined){cur=+t.dataset.i;refit=true;render();scrollTo(0,0)}
-  else if(t.dataset.grp){const k='go:'+t.dataset.grp;store.get(k)==='1'?store.del(k):store.set(k,'1');render()}
+  else if(t.dataset.grp){const g=t.dataset.grp,k='gt:'+g,v=gDone(g)?'d':'u';store.get(k)===v?store.del(k):store.set(k,v);render()}
   else if(t.dataset.done){store.set('done:'+t.dataset.done,'1');render()}
   else if(t.dataset.undo){store.del('done:'+t.dataset.undo);if(DRAWMAP[t.dataset.undo]){store.del('dr:'+t.dataset.undo);applyDraw()}render()}
   else if(t.id==='tHide'){hideDone=!hideDone;store.set('hide',hideDone?'1':'0');render()}
