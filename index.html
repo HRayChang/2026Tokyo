@@ -19,7 +19,8 @@ html,body{margin:0;color:var(--tx);font:16px/1.45 -apple-system,BlinkMacSystemFo
 body{background:var(--bg) linear-gradient(180deg,rgba(120,190,240,.28),rgba(120,190,240,0) 420px) no-repeat}
 .banner{position:relative;width:100%;aspect-ratio:900/338;background:url(banner.jpg) center/cover no-repeat;border-radius:0 0 26px 26px;box-shadow:var(--shadow)}
 .iconbtn{position:absolute;right:12px;top:10px;border:0;background:rgba(255,255,255,.85);color:#23344d;width:40px;height:40px;border-radius:20px;font-size:18px;backdrop-filter:blur(6px)}
-.tabs{position:sticky;top:0;z-index:10;display:flex;gap:8px;overflow-x:auto;padding:10px 14px;scrollbar-width:none;background:linear-gradient(var(--bg) 78%,rgba(0,0,0,0))}
+.stick{position:sticky;top:0;z-index:10;background:linear-gradient(var(--bg) 88%,rgba(0,0,0,0))}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:10px 14px 6px;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex:0 0 auto;border:2px solid var(--c);border-radius:18px;background:var(--card);color:var(--tx);padding:6px 12px;min-width:84px;text-align:center;line-height:1.25;font-weight:700;font-size:15px}
 .tab small{display:block;color:var(--sub);font-size:11px;font-weight:500}
@@ -42,8 +43,55 @@ main{padding:4px 16px calc(40px + env(safe-area-inset-bottom,0))}
 .body{flex:1;min-width:0}
 .meal{display:inline-block;font-size:12px;font-weight:700;color:var(--ac);background:rgba(var(--acrgb),.14);border-radius:10px;padding:2px 9px;margin-right:4px;white-space:nowrap}
 .r1:empty,.r1:not(:has(span)){display:none}
-.card{scroll-margin-top:84px}
-.menu{position:absolute;right:12px;top:56px;z-index:40;background:var(--card);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:6px;min-width:190px}
+.card{scroll-margin-top:120px}
+.seg{position:relative;display:flex;justify-content:center;padding:0 14px 8px}
+.sg{display:flex;background:var(--card);border-radius:18px;padding:3px;box-shadow:var(--shadow)}
+.sg button{border:0;background:transparent;color:var(--sub);font-weight:700;font-size:14px;padding:6px 18px;border-radius:15px;min-height:34px}
+.sg button.on{background:var(--ac);color:#fff}
+.mb2{display:none;position:absolute;right:14px;top:-1px;width:38px;height:38px;border:0;border-radius:19px;background:var(--card);color:var(--tx);font-size:17px;box-shadow:var(--shadow);align-items:center;justify-content:center}
+body.mapmode{overflow:hidden;height:100dvh}
+body.mapmode .banner,body.mapmode main,body.mapmode .fab{display:none!important}
+body.mapmode .mb2{display:flex}
+.mapview{position:fixed;left:0;right:0;bottom:0;z-index:8;background:var(--bg)}
+.mapview[hidden]{display:none}
+#map{position:absolute;inset:0}
+.mapmsg{position:absolute;top:60px;left:16px;right:16px;z-index:5;text-align:center;color:var(--sub);font-size:14px}
+#mapalert{position:absolute;top:8px;left:8px;right:64px;z-index:500}
+#mapalert .alert{margin:0 0 6px;font-size:14px;padding:8px 12px}
+.mnow{position:absolute;top:8px;right:8px;z-index:500;border:0;border-radius:20px;background:var(--ac);color:#fff;font-weight:700;font-size:14px;padding:9px 14px;box-shadow:0 4px 12px rgba(var(--acrgb),.5)}
+.mapview .leaflet-popup-content-wrapper{border-radius:18px;background:var(--card);color:var(--tx);box-shadow:var(--shadow)}
+.mapview .leaflet-popup-tip{background:var(--card)}
+.mapview .leaflet-popup-content{margin:12px 14px;font-size:14px;line-height:1.4}
+.mapview .leaflet-container{background:var(--bg);font-family:inherit}
+.mapview .leaflet-control-attribution{font-size:9px;background:rgba(255,255,255,.7)}
+.mapview .acts a{color:var(--ac)}
+.pps{max-height:42vh;overflow-y:auto}
+.ph{font-weight:800;color:var(--ac);margin-bottom:6px}
+.pp{padding:8px 0;border-bottom:1px solid var(--line)}.pp:last-child{border:0}
+.pp.dn .title{text-decoration:line-through;opacity:.6}
+.pp .title{font-size:16px}
+.pp .acts a,.pp .acts button{padding:7px 11px;font-size:13px;min-height:34px;border-radius:12px}
+.pin{position:relative;width:32px;height:32px;border-radius:16px;background:var(--c);color:#fff;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px}
+.pin b{position:absolute;right:-9px;top:-9px;min-width:18px;height:18px;border-radius:9px;background:#fff;color:var(--c);font-size:11px;line-height:18px;text-align:center;padding:0 4px;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.pin.done{background:#9aa5b1}
+.pin.nx{box-shadow:0 0 0 4px rgba(var(--acrgb),.35),0 2px 8px rgba(0,0,0,.35)}
+.pin.now{background:#2e9e5b;transform:scale(1.35);animation:pl 1.8s infinite}
+@keyframes pl{0%{box-shadow:0 0 0 0 rgba(46,158,91,.6)}70%,100%{box-shadow:0 0 0 14px rgba(46,158,91,0)}}
+.sheet{position:absolute;left:0;right:0;bottom:0;height:68px;z-index:600;background:var(--card);border-radius:22px 22px 0 0;box-shadow:0 -6px 20px rgba(0,0,0,.18);display:flex;flex-direction:column;transition:height .22s ease;padding-bottom:env(safe-area-inset-bottom,0)}
+.grab{flex:0 0 22px;display:flex;justify-content:center;align-items:center;touch-action:none;cursor:grab}
+.grab i{width:42px;height:5px;border-radius:3px;background:var(--line)}
+.sh{flex:0 0 40px;display:flex;justify-content:space-between;align-items:center;padding:0 16px;font-size:14px;font-weight:700}
+.sh button{border:0;border-radius:12px;background:rgba(var(--acrgb),.14);color:var(--ac);font-weight:700;font-size:13px;padding:6px 10px;min-height:32px}
+.sl{flex:1;overflow-y:auto;padding:0 12px 16px}
+.srow{display:flex;gap:10px;align-items:center;padding:9px 6px;border-bottom:1px solid var(--line)}
+.srow.dn .st{text-decoration:line-through;opacity:.55}
+.srow.cu{background:rgba(46,158,91,.12);border-radius:12px}
+.sn{flex:0 0 28px;height:28px;border-radius:14px;background:var(--c);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
+.sm{flex:1;min-width:0}.st{font-weight:700;font-size:15px}.st em{font-style:normal;color:var(--ac);margin-right:6px}
+.ss{color:var(--sub);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc{flex:0 0 36px;height:36px;border-radius:18px;border:2px solid var(--ac);background:transparent;color:var(--ac);font-weight:800}
+.sc.on{background:var(--green);border-color:var(--green);color:#fff}
+.menu{position:fixed;right:12px;top:56px;z-index:60;background:var(--card);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:6px;min-width:190px}
 .menu button{display:block;width:100%;text-align:left;border:0;background:transparent;color:var(--tx);font-size:16px;font-weight:600;padding:13px 14px;border-radius:12px;min-height:46px}
 .menu button:active{background:rgba(var(--acrgb),.14)}
 .view{position:fixed;inset:0;z-index:50;background:var(--bg) linear-gradient(180deg,rgba(120,190,240,.28),rgba(120,190,240,0) 300px) no-repeat;overflow-y:auto;-webkit-overflow-scrolling:touch}
@@ -91,14 +139,20 @@ details div{white-space:pre-line;font-size:14px;color:var(--sub);margin-top:6px}
 </style>
 </head>
 <body>
-<div class="banner"><button class="iconbtn" id="menuBtn" title="選單">☰</button>
-  <div class="menu" id="menu" hidden>
-    <button data-m="notif">🔔 開啟通知</button>
-    <button data-m="check">✅ 出發前清單</button>
-    <button data-m="book">📋 已預訂</button>
-  </div></div>
-<nav class="tabs" id="tabs"></nav>
+<div class="banner"><button class="iconbtn" id="menuBtn" data-menu title="選單">☰</button></div>
+<div class="menu" id="menu" hidden>
+  <button data-m="notif">🔔 開啟通知</button>
+  <button data-m="check">✅ 出發前清單</button>
+  <button data-m="book">📋 已預訂</button>
+</div>
+<div class="stick" id="stick"><nav class="tabs" id="tabs"></nav>
+  <div class="seg"><div class="sg"><button data-seg="list">📋 列表</button><button data-seg="map">🗺️ 地圖</button></div><button class="mb2" data-menu title="選單">☰</button></div></div>
 <main id="main"></main>
+<div class="mapview" id="mapview" hidden>
+  <div id="map"></div><div class="mapmsg" id="mapmsg"></div><div id="mapalert"></div>
+  <button class="mnow" id="mnow">📍 現在</button>
+  <div class="sheet" id="sheet"><div class="grab" id="grab"><i></i></div><div class="sh" id="sh"></div><div class="sl" id="sl"></div></div>
+</div>
 <button class="fab" id="fab" style="display:none">📍 現在</button>
 <div class="view" id="view" hidden><div class="vh"><button id="vback">← 返回</button><b id="vt"></b></div><div class="vbody" id="vbody"></div></div>
 
@@ -323,6 +377,10 @@ const CHECK=[
  {g:'🏰 迪士尼與購物',l:['迪士尼 App 登入，確認 10/22 門票與 09:00 入園申請','免稅購物攜帶護照']},
  {g:'📅 出發前一天',l:['再確認 10/21 03:50 機場接送時間','匯入行事曆提醒（選單最下方「匯出行事曆」）','手機與行動電源充飽電']}
 ];
+/* ===== 精確座標（選填）：貼上後會覆蓋約略位置。格式：'搜尋用日文名稱（等於該行程的 q）':[緯度,經度] =====
+   例：'牛たんの檸檬 浅草店':[35.7123,139.7961],  */
+const LL={
+};
 /* ============ 程式區 ============ */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -332,21 +390,21 @@ const tsOf=(day,it)=>{const[y,m,d]=(it.date||day.d).split('-').map(Number);const
 DAYS.forEach(d=>d.items.forEach((it,i)=>{it.id=d.d+'#'+i;if(it.at)it.ts=tsOf(d,it)}));
 /* ---- 座標（約略位置，用來判斷你在哪一站附近） ---- */
 const GEO=[
- [/桃園/,25.0777,121.2328],[/成田空港|成田国際空港|空港第2|I\.A\.S\.S/,35.7720,140.3929],
- [/Season Hotel|モスバーガー|ハナマサ|PERTH/,35.7107,139.8135],[/スカイツリー|ソラマチ|ひつまぶし/,35.7101,139.8107],
- [/浅草|仲見世|三鳩堂|鳴門鯛焼|OSドラッグ|牛たん|mille mele|SUKE6/,35.7116,139.7965],
- [/豊洲市場|小田保/,35.6456,139.7843],[/ららぽーと豊洲/,35.6537,139.7926],
- [/赤レンガ/,35.4529,139.6431],[/大さん橋/,35.4513,139.6490],[/女神橋/,35.4535,139.6420],
- [/中華街|皇朝|江戸清/,35.4437,139.6465],[/そごう|ハーブス|炎 横浜/,35.4658,139.6223],
- [/オニツカ/,35.6889,139.7031],[/今半/,35.6918,139.6925],[/Alpen/,35.6930,139.7010],
- [/HUMAN MADE|On Store|NUMBER SUGAR|ガリゲット/,35.6680,139.7060],
- [/ディズニーストア/,35.6618,139.6987],[/SHIBUYA109/,35.6595,139.6980],[/肉屋横丁/,35.6620,139.6975],
- [/ディズニーシー/,35.6267,139.8851],[/イクスピアリ|凜や|一風堂/,35.6358,139.8830],
- [/KITTE/,35.6797,139.7650],[/パレット|バニラビーンズ|ブリュレ|TIRAMISÙ|PISTA/,35.6815,139.7678],
- [/成田山新勝寺/,35.7870,140.3190],[/成田駅|黒平|金時|成田山表参道|後藤|林田|ポジターノ|Flying pig/,35.7765,140.3177]
+ [/桃園/,25.0777,121.2328,'桃園機場'],[/成田空港|成田国際空港|空港第2|I\.A\.S\.S/,35.7720,140.3929,'成田機場'],
+ [/Season Hotel|モスバーガー|ハナマサ|PERTH/,35.7107,139.8135,'飯店・押上周邊'],[/スカイツリー|ソラマチ|ひつまぶし/,35.7101,139.8107,'東京晴空塔城'],
+ [/浅草|仲見世|三鳩堂|鳴門鯛焼|OSドラッグ|牛たん|mille mele|SUKE6/,35.7116,139.7965,'淺草'],
+ [/豊洲市場|小田保/,35.6456,139.7843,'豐洲市場'],[/ららぽーと豊洲/,35.6537,139.7926,'豐洲 LaLaport'],
+ [/赤レンガ/,35.4529,139.6431,'橫濱紅磚倉庫'],[/大さん橋/,35.4513,139.6490,'橫濱港大棧橋'],[/女神橋/,35.4535,139.6420,'女神橋'],
+ [/中華街|皇朝|江戸清/,35.4437,139.6465,'橫濱中華街'],[/そごう|ハーブス|炎 横浜/,35.4658,139.6223,'橫濱站周邊'],
+ [/オニツカ/,35.6889,139.7031,'Onitsuka Tiger 新宿南'],[/今半/,35.6918,139.6925,'人形町今半'],[/Alpen/,35.6930,139.7010,'Alpen Tokyo'],
+ [/HUMAN MADE|On Store|NUMBER SUGAR|ガリゲット/,35.6680,139.7060,'原宿・表參道'],
+ [/ディズニーストア/,35.6618,139.6987,'迪士尼商店 澀谷'],[/SHIBUYA109/,35.6595,139.6980,'SHIBUYA109'],[/肉屋横丁/,35.6620,139.6975,'肉屋橫丁'],
+ [/ディズニーシー/,35.6267,139.8851,'東京迪士尼海洋'],[/イクスピアリ|凜や|一風堂/,35.6358,139.8830,'Ikspiari'],
+ [/KITTE/,35.6797,139.7650,'KITTE 丸之內'],[/パレット|バニラビーンズ|ブリュレ|TIRAMISÙ|PISTA/,35.6815,139.7678,'東京Gift Palette'],
+ [/成田山新勝寺/,35.7870,140.3190,'成田山新勝寺'],[/成田駅|黒平|金時|成田山表参道|後藤|林田|ポジターノ|Flying pig/,35.7765,140.3177,'成田站周邊']
 ];
 DAYS.forEach(d=>{let last=null;d.items.forEach(it=>{
-  if(it.k==='place'&&it.q){const g=GEO.find(x=>x[0].test(it.q));if(g){it.ll=[g[1],g[2]];last=it.ll}}
+  if(it.k==='place'&&it.q){const o=LL[it.q],g=GEO.find(x=>x[0].test(it.q));if(o){it.ll=o;last=o}else if(g){it.ll=[g[1],g[2]];it.gn=g[3];last=it.ll}}
   else if(it.k==='move'&&last)it.ll=last;
 })});
 const jstDate=t=>new Date(t+9*3600e3).toISOString().slice(0,10);
@@ -388,15 +446,15 @@ function goNow(smooth){const el=document.querySelector('.card.now')||document.qu
 function locate(){return new Promise(res=>{if(!navigator.geolocation)return res(null);
   navigator.geolocation.getCurrentPosition(p=>res({lat:p.coords.latitude,lng:p.coords.longitude}),()=>res(null),{timeout:8000,maximumAge:120000})})}
 function startLive(){
-  const li=liveDayIdx();if(li<0){render();return}
-  cur=li;render();goNow(false);const y0=scrollY;
-  locate().then(p=>{if(!p)return;loc=p;const stay=Math.abs(scrollY-y0)<40;render();if(stay)goNow(false)});
+  const li=liveDayIdx();if(li<0){refit=true;render();return}
+  cur=li;refit=true;render();if(mode==='map')focusItem(curNext,false);else goNow(false);const y0=scrollY;
+  locate().then(p=>{if(!p)return;loc=p;const stay=Math.abs(scrollY-y0)<40;render();if(stay&&mode==='list')goNow(false)});
 }
 
 const mapUrl=q=>'https://www.google.com/maps/search/?api=1&query='+enc(q);
 const dirUrl=(a,b)=>'https://www.google.com/maps/dir/?api=1&origin='+enc(a)+'&destination='+enc(b)+'&travelmode=transit';
 const isDone=id=>store.get('done:'+id)==='1';
-let cur=0,hideDone=store.get('hide')==='1';
+let cur=0,hideDone=store.get('hide')==='1',mode=store.get('view')==='map'?'map':'list',refit=false,curNext=null;
 (function pick(){const li=liveDayIdx();if(li>=0){cur=li;return}cur=jstDate(Date.now())>DAYS[DAYS.length-1].d?DAYS.length-1:0})();
 
 function renderTabs(){
@@ -406,6 +464,7 @@ function renderTabs(){
 }
 function actions(it){let a='';
   if(it.bk)a+=`<button data-bk="${it.bk}">📄 預訂資料</button>`;
+  if(it.ll)a+=`<button data-map="${it.id}">🗺️ 在地圖上看</button>`;
   if(it.dir)a+=`<a href="${dirUrl(it.dir[0],it.dir[1])}" target="_blank" rel="noopener">🚉 路線</a>`;
   if(it.q)a+=`<a href="${mapUrl(it.q)}" target="_blank" rel="noopener">📍 Google 地圖</a>`;
   return a?`<div class="acts">${a}</div>`:''}
@@ -415,6 +474,10 @@ function render(){
   const done=cards.filter(i=>isDone(i.id)).length;
   const live=(cur===liveDayIdx());liveInfo=live?infer(day):null;
   const nextId=liveInfo?liveInfo.item.id:(cards.find(i=>!isDone(i.id))||{}).id;
+  curNext=nextId;document.body.classList.toggle('mapmode',mode==='map');
+  document.querySelectorAll('[data-seg]').forEach(b=>b.classList.toggle('on',b.dataset.seg===mode));
+  if(mode==='map'){$('#main').innerHTML='';showMap(day);checkReminders();return}
+  $('#mapview').hidden=true;
   const[,mm,dd2]=day.d.split('-');
   let h=`<div class="dayhead"><div><span class="dd">${+mm}/${+dd2}（${day.wd}）</span><span class="em">${day.em}</span></div><div class="dn">${esc(day.name)}</div><div class="meta2">出發 ${day.start}｜完成 ${done}/${cards.length}</div>${whereHtml()}</div><div class="bar"><i style="width:${cards.length?done/cards.length*100:0}%"></i></div><div id="alerts"></div>`;
   day.items.forEach(it=>{
@@ -439,7 +502,7 @@ function render(){
 }
 document.addEventListener('click',e=>{
   const t=e.target.closest('button');if(!t)return;
-  if(t.dataset.i!==undefined){cur=+t.dataset.i;render();scrollTo(0,0)}
+  if(t.dataset.i!==undefined){cur=+t.dataset.i;refit=true;render();scrollTo(0,0)}
   else if(t.dataset.done){store.set('done:'+t.dataset.done,'1');render()}
   else if(t.dataset.undo){store.del('done:'+t.dataset.undo);render()}
   else if(t.id==='tHide'){hideDone=!hideDone;store.set('hide',hideDone?'1':'0');render()}
@@ -449,6 +512,130 @@ document.addEventListener('click',e=>{
 });
 
 
+
+/* ---- 地圖模式 ---- */
+const LF_JS='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js',LF_CSS='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+let lfp=null,mapObj=null,mapLayer=null,mapMarkers={},mapM=null,pendingFocus=null,sheetS=0;
+function ensureLeaflet(){
+  if(window.L)return Promise.resolve();if(lfp)return lfp;
+  lfp=new Promise((ok,no)=>{const l=document.createElement('link');l.rel='stylesheet';l.href=LF_CSS;document.head.appendChild(l);
+    const sc=document.createElement('script');sc.src=LF_JS;sc.onload=ok;sc.onerror=()=>{lfp=null;no()};document.head.appendChild(sc)});
+  return lfp;
+}
+const darkMap=()=>matchMedia('(prefers-color-scheme: dark)').matches;
+const TILE=()=>'https://{s}.basemaps.cartocdn.com/'+(darkMap()?'dark_all':'rastertiles/voyager')+'/{z}/{x}/{y}{r}.png';
+function dayModel(day){
+  const groups=[],by={},edges=[],rows=[];let prev=null,mv=false;
+  day.items.forEach(it=>{
+    if(it.k==='move'){mv=true;return}
+    if(it.k!=='place')return;
+    if(!it.ll){rows.push({it,g:null});return}
+    const key=it.ll.join(',');let g=by[key];
+    if(!g){g=by[key]={key,ll:it.ll,items:[],n:groups.length+1,name:it.gn};groups.push(g)}
+    g.items.push(it);rows.push({it,g});
+    if(prev&&prev!==g)edges.push({a:prev,b:g,t:mv});
+    prev=g;mv=false;
+  });
+  return {groups,edges,rows};
+}
+function positionMap(){const r=$('#stick').getBoundingClientRect();$('#mapview').style.top=r.bottom+'px'}
+function setSheet(n,anim=true){
+  sheetS=n;const mv=$('#mapview'),sh=$('#sheet'),H=mv.clientHeight;
+  sh.style.transition=anim?'':'none';sh.style.height=[68,Math.round(H*.45),Math.round(H*.82)][n]+'px';
+}
+function popupHtml(g){
+  const head=g.items.length>1?`<div class="ph">${esc(g.name||'此處')}（${g.items.length}）</div>`:'';
+  return head+'<div class="pps">'+g.items.map(it=>{
+    const d=isDone(it.id);
+    return `<div class="pp ${d?'dn':''}"><div>${it.at?`<span class="time">${it.at}</span>`:''}${it.meal?`<span class="meal">${it.meal}</span>`:''}${it.res?'<span class="badge">★ 已預約</span>':''}</div>
+    <div class="title">${esc(it.title)}</div>${it.sub?`<div class="sub">${esc(it.sub)}</div>`:''}${it.hrs?`<div class="hrs">🕘 ${esc(it.hrs)}</div>`:''}
+    <div class="acts"><a href="https://www.google.com/maps/dir/?api=1&destination=${enc(it.q)}&travelmode=transit" target="_blank" rel="noopener">🧭 導航</a><a href="${mapUrl(it.q)}" target="_blank" rel="noopener">📍 地圖</a>${it.bk?`<button data-bk="${it.bk}">📄 預訂</button>`:''}<button data-${d?'undo':'done'}="${it.id}">${d?'↩︎ 取消完成':'✓ 完成'}</button></div></div>`}).join('')+'</div>';
+}
+async function showMap(day){
+  const mv=$('#mapview');mv.hidden=false;positionMap();$('#mapmsg').textContent='';
+  try{await ensureLeaflet()}catch(e){$('#mapmsg').textContent='地圖載入失敗：需要網路，或先在有網路時開過一次地圖。';buildSheet(day);setSheet(sheetS,false);return}
+  if(!mapObj){
+    mapObj=L.map('map',{zoomControl:false,attributionControl:false,tap:true}).setView([35.68,139.77],11);
+    L.control.zoom({position:'topleft'}).addTo(mapObj);
+    L.control.attribution({position:'bottomleft',prefix:false}).addTo(mapObj);
+    L.tileLayer(TILE(),{subdomains:'abcd',maxZoom:19,attribution:'© OpenStreetMap © CARTO'}).addTo(mapObj);
+    mapLayer=L.layerGroup().addTo(mapObj);
+  }
+  mapObj.invalidateSize();
+  drawMap(day);buildSheet(day);setSheet(sheetS,false);
+  if(refit){refit=false;fitDay()}
+  if(pendingFocus){const p=pendingFocus;pendingFocus=null;setTimeout(()=>focusItem(p.id,p.popup),80)}
+}
+function drawMap(day){
+  const M=dayModel(day);mapM=M;mapLayer.clearLayers();mapMarkers={};
+  M.edges.forEach(e=>{if(dist(e.a.ll[0],e.a.ll[1],e.b.ll[0],e.b.ll[1])>300000)return;
+    L.polyline([e.a.ll,e.b.ll],{color:day.c,weight:e.t?4:3,opacity:.8,dashArray:e.t?null:'6 8'}).addTo(mapLayer)});
+  M.groups.forEach(g=>{
+    const all=g.items.every(i=>isDone(i.id)),now=liveInfo&&g.items.some(i=>i.id===liveInfo.item.id),nx=!liveInfo&&g.items.some(i=>i.id===curNext)&&!all;
+    const icon=L.divIcon({className:'',iconSize:[32,32],iconAnchor:[16,16],popupAnchor:[0,-18],
+      html:`<div class="pin ${all?'done':''} ${now?'now':''} ${nx?'nx':''}" style="--c:${day.c};--acrgb:${day.rgb}">${all?'✓':g.n}${g.items.length>1?`<b>${g.items.length}</b>`:''}</div>`});
+    const mk=L.marker(g.ll,{icon,zIndexOffset:now?1000:all?-100:0}).addTo(mapLayer);
+    mk.bindPopup(popupHtml(g),{maxWidth:290,autoPanPaddingBottomRight:[10,90],autoPanPaddingTopLeft:[10,64]});
+    mapMarkers[g.key]=mk;
+  });
+  if(loc)L.circleMarker([loc.lat,loc.lng],{radius:8,color:'#fff',weight:3,fillColor:'#0a6cff',fillOpacity:1}).addTo(mapLayer);
+}
+function fitDay(){
+  let pts=mapM.groups.filter(g=>g.ll[0]>30).map(g=>g.ll);
+  if(!pts.length){mapObj.setView([35.68,139.77],11);return}
+  /* 離群點（例如成田機場）不納入縮放範圍，避免市區的點擠在一起 */
+  const med=a=>[...a].sort((x,y)=>x-y)[Math.floor(a.length/2)],mc=[med(pts.map(p=>p[0])),med(pts.map(p=>p[1]))];
+  const near=pts.filter(p=>dist(mc[0],mc[1],p[0],p[1])<25000);if(near.length>=2)pts=near;
+  if(pts.length===1){mapObj.setView(pts[0],16);return}
+  mapObj.fitBounds(L.latLngBounds(pts),{paddingTopLeft:[28,28],paddingBottomRight:[28,96],maxZoom:16});
+}
+function focusItem(id,popup){
+  if(!mapObj||!mapM||!id)return;
+  const g=mapM.groups.find(g=>g.items.some(i=>i.id===id));if(!g)return;
+  mapObj.flyTo(g.ll,Math.max(mapObj.getZoom(),16),{duration:.6});
+  const mk=mapMarkers[g.key];if(popup&&mk)setTimeout(()=>mk.openPopup(),700);
+}
+function buildSheet(day){
+  const M=mapM||dayModel(day),cards=day.items.filter(i=>i.k==='place'||i.k==='move'),done=cards.filter(i=>isDone(i.id)).length;
+  $('#sh').innerHTML=`<span>共 ${M.groups.length} 個地點｜完成 ${done}/${cards.length}</span><button id="tPre">📥 預載離線地圖</button>`;
+  $('#sl').innerHTML=M.rows.map(({it,g})=>{const d=isDone(it.id),cu=liveInfo&&liveInfo.item.id===it.id;
+    return `<div class="srow ${d?'dn':''} ${cu?'cu':''}" data-focus="${it.id}"><span class="sn" style="--c:${day.c}">${g?g.n:'–'}</span>
+    <div class="sm"><div class="st">${it.at?`<em>${it.at}</em>`:''}${esc(it.title)}</div><div class="ss">${esc(it.hrs||it.sub||'')}</div></div>
+    <button class="sc ${d?'on':''}" data-${d?'undo':'done'}="${it.id}">✓</button></div>`}).join('');
+}
+/* 底部面板拖曳 */
+(function(){
+  const g=$('#grab');let d=null;
+  g.addEventListener('pointerdown',e=>{d={y:e.clientY,h:$('#sheet').offsetHeight,m:0};g.setPointerCapture(e.pointerId);$('#sheet').style.transition='none'});
+  g.addEventListener('pointermove',e=>{if(!d)return;const H=$('#mapview').clientHeight;d.m=Math.max(d.m,Math.abs(e.clientY-d.y));
+    $('#sheet').style.height=Math.min(H*.85,Math.max(68,d.h+d.y-e.clientY))+'px'});
+  g.addEventListener('pointerup',e=>{if(!d)return;const H=$('#mapview').clientHeight,h=$('#sheet').offsetHeight,t=[68,H*.45,H*.82];
+    if(d.m<6)setSheet((sheetS+1)%3);else setSheet(t.map((v,i)=>[Math.abs(v-h),i]).sort((a,b)=>a[0]-b[0])[0][1]);d=null});
+})();
+/* 離線預載：目前這天每個地點周邊的地圖圖磚（之後離線也看得到） */
+async function preloadDay(btn){
+  const M=dayModel(DAYS[cur]),urls=new Set(),r=(window.devicePixelRatio||1)>1?'@2x':'',base=TILE();
+  M.groups.filter(g=>g.ll[0]>30).forEach(g=>{const[la,lo]=g.ll;
+    for(let z=12;z<=16;z++){const n=2**z,x=Math.floor((lo+180)/360*n),y=Math.floor((1-Math.log(Math.tan(la*Math.PI/180)+1/Math.cos(la*Math.PI/180))/Math.PI)/2*n),k=z>=14?1:0;
+      for(let dx=-k;dx<=k;dx++)for(let dy=-k;dy<=k;dy++){const X=x+dx,Y=y+dy;
+        urls.add(base.replace('{s}','abcd'[Math.abs(X+Y)%4]).replace('{z}',z).replace('{x}',X).replace('{y}',Y).replace('{r}',r))}}});
+  const list=[...urls];let n=0,ok=0;btn.disabled=true;
+  const work=async()=>{while(list.length){const u=list.pop();try{const res=await fetch(u,{mode:'cors'});if(res.ok)ok++}catch(e){}n++;if(n%10===0)btn.textContent=`預載中 ${n}/${n+list.length}`}};
+  await Promise.all([work(),work(),work(),work(),work(),work()]);
+  btn.textContent=ok?`✓ 已預載 ${ok} 張`:'預載失敗（需網路）';btn.disabled=false;
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('button');
+  if(t){
+    if(t.dataset.seg){mode=t.dataset.seg;store.set('view',mode);refit=true;render();if(mode==='list')goNow(false);else if(!loc)locate().then(p=>{if(p){loc=p;render()}})}
+    else if(t.dataset.map){mode='map';store.set('view','map');pendingFocus={id:t.dataset.map,popup:true};render();scrollTo(0,0)}
+    else if(t.id==='mnow')startLive();
+    else if(t.id==='tPre')preloadDay(t);
+    return;
+  }
+  const row=e.target.closest('[data-focus]');if(row){setSheet(0);focusItem(row.dataset.focus,true)}
+});
+addEventListener('resize',()=>{if(mode==='map'&&mapObj){positionMap();mapObj.invalidateSize()}});
 /* ---- 選單與頁面（出發前清單／已預訂） ---- */
 const BKI={};DAYS.forEach((d,di)=>d.items.forEach(it=>{if(it.bk&&!BKI[it.bk])BKI[it.bk]={day:di,id:it.id}}));
 const menuEl=()=>$('#menu');
@@ -480,9 +667,9 @@ function gotoItem(id){
 }
 document.addEventListener('click',e=>{
   const t=e.target.closest('button');
-  if(!e.target.closest('#menu,#menuBtn'))menuEl().hidden=true;
+  if(!e.target.closest('#menu,[data-menu]'))menuEl().hidden=true;
   if(!t)return;
-  if(t.id==='menuBtn')menuEl().hidden=!menuEl().hidden;
+  if('menu' in t.dataset){const m=menuEl();m.hidden=!m.hidden;const r=t.getBoundingClientRect();m.style.top=(r.bottom+6)+'px'}
   else if(t.dataset.m==='notif'){menuEl().hidden=true;askNotif()}
   else if(t.dataset.m)openView(t.dataset.m);
   else if(t.dataset.bk)openView('book',t.dataset.bk);
@@ -501,7 +688,7 @@ async function notify(it){
     if(Notification.permission==='granted'){reg?reg.showNotification('⏰ 1小時後：'+it.title,{body,icon:'icon-192.png',tag:it.id}):new Notification('⏰ 1小時後：'+it.title,{body})}}catch(e){}
 }
 function checkReminders(){
-  const now=Date.now(),box=$('#alerts');let h='';
+  const now=Date.now(),box=$('#alerts')||$('#mapalert');let h='';
   allTimed().forEach(it=>{
     if(isDone(it.id))return;
     if(now>=it.ts-HOUR&&now<it.ts+30*60e3){

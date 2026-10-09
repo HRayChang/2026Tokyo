@@ -1,9 +1,19 @@
-const C='tokyo-trip-cache';
+const C='tokyo-trip-cache',RT='tokyo-runtime',MAXT=3000;
 self.addEventListener('install',e=>self.skipWaiting());
 self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));
+const EXT=/(^|\.)cartocdn\.com$|^cdnjs\.cloudflare\.com$/;
 self.addEventListener('fetch',e=>{
-  const r=e.request;
-  if(r.method!=='GET'||new URL(r.url).origin!==location.origin)return;
+  const r=e.request,u=new URL(r.url);
+  if(r.method!=='GET')return;
+  if(EXT.test(u.hostname)){ /* 地圖圖磚與 Leaflet：快取優先，看過的區域離線也能顯示 */
+    e.respondWith(caches.open(RT).then(async c=>{
+      const m=await c.match(r.url);if(m)return m;
+      try{const res=await fetch(r.url,{mode:'cors'});
+        if(res.ok){c.put(r.url,res.clone());c.keys().then(k=>{if(k.length>MAXT)k.slice(0,k.length-MAXT).forEach(x=>c.delete(x))})}
+        return res}catch(err){return Response.error()}}));
+    return;
+  }
+  if(u.origin!==location.origin)return;
   e.respondWith(fetch(r,{cache:'no-cache'}).then(res=>{
     const copy=res.clone();caches.open(C).then(c=>c.put(r,copy));return res;
   }).catch(()=>caches.match(r)));
