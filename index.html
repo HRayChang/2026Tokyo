@@ -43,6 +43,28 @@ main{padding:4px 16px calc(40px + env(safe-area-inset-bottom,0))}
 .meal{display:inline-block;font-size:12px;font-weight:700;color:var(--ac);background:rgba(var(--acrgb),.14);border-radius:10px;padding:2px 9px;margin-right:4px;white-space:nowrap}
 .r1:empty,.r1:not(:has(span)){display:none}
 .card{scroll-margin-top:84px}
+.menu{position:absolute;right:12px;top:56px;z-index:40;background:var(--card);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:6px;min-width:190px}
+.menu button{display:block;width:100%;text-align:left;border:0;background:transparent;color:var(--tx);font-size:16px;font-weight:600;padding:13px 14px;border-radius:12px;min-height:46px}
+.menu button:active{background:rgba(var(--acrgb),.14)}
+.view{position:fixed;inset:0;z-index:50;background:var(--bg) linear-gradient(180deg,rgba(120,190,240,.28),rgba(120,190,240,0) 300px) no-repeat;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.view[hidden]{display:none}
+.vh{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg)}
+.vh b{font-size:19px}
+.vh button{border:0;border-radius:16px;background:var(--card);color:var(--ac);font-weight:700;font-size:15px;padding:9px 14px;min-height:40px;box-shadow:var(--shadow)}
+.vbody{padding:0 16px calc(40px + env(safe-area-inset-bottom,0))}
+.cg{display:inline-block;margin:16px 0 6px;padding:5px 14px;border-radius:16px;background:rgba(var(--acrgb),.16);color:var(--ac);font-size:14px;font-weight:700}
+.cl{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;border:0;background:var(--card);color:var(--tx);border-radius:18px;padding:12px 14px;margin:6px 0;font-size:15px;box-shadow:var(--shadow);min-height:48px}
+.cl i{flex:0 0 26px;height:26px;border-radius:13px;border:2.5px solid var(--ac);font-style:normal;color:transparent;text-align:center;line-height:21px;font-weight:800}
+.cl.on{opacity:.55}.cl.on i{background:var(--green);border-color:var(--green);color:#fff}.cl.on span{text-decoration:line-through}
+.bkc{background:var(--card);border-radius:22px;padding:14px;margin:10px 0;box-shadow:var(--shadow);border:2px solid transparent}
+.bkc.flash{border-color:var(--ac);animation:fl 1.6s ease}
+@keyframes fl{0%,60%{box-shadow:0 0 0 6px rgba(var(--acrgb),.35)}100%{box-shadow:var(--shadow)}}
+.bkc .bt{font-weight:800;font-size:17px}
+.bkc .bw{color:var(--ac);font-weight:700;font-size:14px;margin:2px 0 6px}
+.bkc ul{margin:4px 0 6px;padding-left:18px;color:var(--sub);font-size:14px}
+.bkc textarea{width:100%;min-height:54px;border:1.5px solid var(--line);border-radius:12px;background:transparent;color:var(--tx);font:inherit;font-size:14px;padding:8px 10px;resize:vertical}
+.vn{color:var(--sub);font-size:13px;margin:4px 2px}
+.card.flash,.donerow.flash{animation:fl 1.6s ease}
 .card.now{border-color:var(--ac);box-shadow:0 0 0 4px rgba(var(--acrgb),.22),0 6px 18px rgba(var(--acrgb),.35)}
 .badge.now{background:#2e9e5b}
 .where{display:block;width:100%;margin-top:10px;border:0;border-radius:16px;background:rgba(var(--acrgb),.14);color:var(--ac);padding:10px 14px;text-align:left;font-size:16px;font-weight:700}
@@ -69,10 +91,16 @@ details div{white-space:pre-line;font-size:14px;color:var(--sub);margin-top:6px}
 </style>
 </head>
 <body>
-<div class="banner"><button class="iconbtn" id="bell" title="提醒">🔔</button></div>
+<div class="banner"><button class="iconbtn" id="menuBtn" title="選單">☰</button>
+  <div class="menu" id="menu" hidden>
+    <button data-m="notif">🔔 開啟通知</button>
+    <button data-m="check">✅ 出發前清單</button>
+    <button data-m="book">📋 已預訂</button>
+  </div></div>
 <nav class="tabs" id="tabs"></nav>
 <main id="main"></main>
 <button class="fab" id="fab" style="display:none">📍 現在</button>
+<div class="view" id="view" hidden><div class="vh"><button id="vback">← 返回</button><b id="vt"></b></div><div class="vbody" id="vbody"></div></div>
 
 <script>
 /* ============ 資料區（改行程只要改這裡，推上 GitHub 即自動更新） ============ */
@@ -85,16 +113,16 @@ const DS=s=>'東京ディズニーシー '+s;
 
 const DAYS=[
 {d:'2026-10-21',c:'#f0689a',rgb:'240,104,154',em:'✈️',wd:'三',name:'抵達・淺草・丸之內',start:'03:50',items:[
- P({at:'03:50',tz:8,rem:1,title:'機場接送',badge:'‼️'}),
- P({at:'05:00',tz:8,rem:1,title:'CHECK IN 報到',sub:'桃園機場 第1航廈',q:'桃園國際機場第一航廈',badge:'‼️'}),
- P({at:'06:45',tz:8,rem:1,title:'✈️ 酷航 Scoot TR866',sub:'06:45 桃園 T1 ➜ 11:15 成田 T1',q:'成田国際空港 第1ターミナル',note:'行李規定見下方 註1'}),
+ P({at:'03:50',tz:8,rem:1,bk:'p1',title:'機場接送',badge:'‼️'}),
+ P({at:'05:00',tz:8,rem:1,bk:'f1',title:'CHECK IN 報到',sub:'桃園機場 第1航廈',q:'桃園國際機場第一航廈',badge:'‼️'}),
+ P({at:'06:45',tz:8,rem:1,bk:'f1',title:'✈️ 酷航 Scoot TR866',sub:'06:45 桃園 T1 ➜ 11:15 成田 T1',q:'成田国際空港 第1ターミナル',note:'行李規定見下方 註1'}),
  T({at:'11:48',rem:1,title:'京成電鐵 成田Sky Access線 Access特急',lines:['11:48 KS42 成田機場 往京成上野・押上・西馬込・京急線方向','➜ 12:54 KS45 押上 A1出口'],cost:'1,194日圓（IC卡）',dur:'66分',dir:['成田空港駅','押上駅'],note:'時刻表見下方 註2'}),
  w(12),
- P({title:'寄放行李',sub:HOTEL,q:'Season Hotel 押上',badge:'‼️'}),
+ P({bk:'hotel',title:'寄放行李',sub:HOTEL,q:'Season Hotel 押上',badge:'‼️'}),
  w(3),
  T({at:'13:32',rem:1,title:'都營巴士',lines:['13:32 十間橋通 往上野松坂屋前','➜ 13:49 淺草一丁目'],cost:'210日圓（IC卡）',dur:'17分',dir:['十間橋通り バス停','浅草一丁目 バス停'],note:'時刻表見下方 註3'}),
  w(5),
- P({at:'14:00',rem:1,res:1,meal:'午餐',title:'牛舌之檸檬 淺草店',hrs:'11:30 - 15:00',q:'牛たんの檸檬 浅草店'}),
+ P({at:'14:00',rem:1,res:1,meal:'午餐',bk:'lemon',title:'牛舌之檸檬 淺草店',hrs:'11:30 - 15:00',q:'牛たんの檸檬 浅草店'}),
  P({title:'OS藥妝 淺草店',hrs:'10:00 - 19:45',q:'OSドラッグ 浅草店'}),
  P({title:'鳴門鯛燒本舖 淺草新仲見世店',hrs:'09:00 - 23:00',q:'鳴門鯛焼本舗 浅草新仲見世店'}),
  w(8),
@@ -129,9 +157,9 @@ const DAYS=[
  T({at:'06:08',title:'迪士尼度假區線',lines:['06:08 海灣站（Bayside Station）','➜ 06:12 東京迪士尼海洋站'],cost:'300日圓（IC卡）',dur:'4分',dir:['舞浜駅','東京ディズニーシー・ステーション']}),
  w(3),
  P({title:'東京迪士尼海洋',hrs:'09:00 - 21:00',q:'東京ディズニーシー'}),
- P({at:'09:00',rem:1,title:'入園申請（Entry Request）',badge:'‼️',q:'東京ディズニーシー'}),
- P({title:'夢想起飛（Dreams Take Flight）',sub:'Exp 15:55 - 16:20、17:20 - 17:45',q:DS('ドリームス・テイク・フライト')}),
- P({title:'舞動地球！（Dance the Globe!）',sub:'Exp 16:45 - 17:10、18:30 - 18:55',q:DS('ダンス・ザ・グローブ')}),
+ P({at:'09:00',rem:1,bk:'dsea',title:'入園申請（Entry Request）',badge:'‼️',q:'東京ディズニーシー'}),
+ P({bk:'dsea',title:'夢想起飛（Dreams Take Flight）',sub:'Exp 15:55 - 16:20、17:20 - 17:45',q:DS('ドリームス・テイク・フライト')}),
+ P({bk:'dsea',title:'舞動地球！（Dance the Globe!）',sub:'Exp 16:45 - 17:10、18:30 - 18:55',q:DS('ダンス・ザ・グローブ')}),
  P({title:'安娜與艾莎的冰雪旅程',q:DS('アナとエルサのフローズンジャーニー')}),
  P({title:'小飛俠的夢幻島冒險',q:DS('ピーターパンのネバーランドアドベンチャー')}),
  P({title:'樂佩的燈籠節',q:DS('ラプンツェルのランタンフェスティバル')}),
@@ -166,7 +194,7 @@ const DAYS=[
  w(3),
  P({title:'Onitsuka Tiger 新宿南',hrs:'11:00 - 20:00',q:'オニツカタイガー 新宿南'}),
  w(22),
- P({at:'12:30',rem:1,res:1,meal:'午餐',title:'人形町今半 新宿第一生命大樓店',hrs:'11:00 - 15:00',q:'人形町今半 新宿第一生命ビル店'}),
+ P({at:'12:30',rem:1,res:1,meal:'午餐',bk:'imahan',title:'人形町今半 新宿第一生命大樓店',hrs:'11:00 - 15:00',q:'人形町今半 新宿第一生命ビル店'}),
  w(16),
  P({title:'Alpen Tokyo（Sports wear Disc.）',hrs:'11:00 - 22:00',q:'Sports wear Disc. Alpen Tokyo'}),
  w(8),
@@ -179,7 +207,7 @@ const DAYS=[
  w(20),
  P({title:'迪士尼商店 澀谷公園通店',hrs:'11:00 - 20:00',q:'ディズニーストア 渋谷公園通り店'}),
  P({title:'SHIBUYA109',hrs:'10:00 - 21:00',q:'SHIBUYA109'}),
- P({at:'19:30',rem:1,res:1,meal:'晚餐',title:'和牛吃到飽殿堂 肉屋橫丁 澀谷宇田川町店',hrs:'14:00 - 23:00',q:'和牛放題の殿堂 肉屋横丁 渋谷宇田川町店'}),
+ P({at:'19:30',rem:1,res:1,meal:'晚餐',bk:'nikuya',title:'和牛吃到飽殿堂 肉屋橫丁 澀谷宇田川町店',hrs:'14:00 - 23:00',q:'和牛放題の殿堂 肉屋横丁 渋谷宇田川町店'}),
  w(4),
  T({title:'東京Metro 半藏門線',lines:['Z01 澀谷 往押上方向','➜ Z14 押上 A1出口'],dir:['渋谷駅','押上駅']}),
  w(12),
@@ -190,10 +218,10 @@ const DAYS=[
  w(12),
  T({title:'都營地下鐵 淺草線',lines:['A20 押上 往西馬込・羽田機場・京急線方向','➜ A18 淺草 5號出口'],cost:'180日圓（IC卡）',dur:'3分',dir:['押上駅','浅草駅']}),
  w(1),
- P({at:'08:30',rem:1,res:1,meal:'早餐',title:'SUKE6 DINER',hrs:'08:00 - 18:00',q:'SUKE6 DINER 浅草'}),
+ P({at:'08:30',rem:1,res:1,meal:'早餐',bk:'suke6',title:'SUKE6 DINER',hrs:'08:00 - 18:00',q:'SUKE6 DINER 浅草'}),
  w(1),
- P({at:'09:40',rem:1,res:1,title:'東京都觀光汽船 淺草營業所',sub:'乘船報到',q:'東京都観光汽船 浅草営業所'}),
- T({at:'10:00',rem:1,title:'東京都觀光汽船 螢月號 HOTALUNA',lines:['10:00 淺草 往台場海濱公園','➜ 11:05 台場海濱公園'],cost:'2,000日圓',dur:'65分',dir:['浅草 東京都観光汽船','お台場海浜公園']}),
+ P({at:'09:40',rem:1,res:1,bk:'boat',title:'東京都觀光汽船 淺草營業所',sub:'乘船報到',q:'東京都観光汽船 浅草営業所'}),
+ T({at:'10:00',rem:1,bk:'boat',title:'東京都觀光汽船 螢月號 HOTALUNA',lines:['10:00 淺草 往台場海濱公園','➜ 11:05 台場海濱公園'],cost:'2,000日圓',dur:'65分',dir:['浅草 東京都観光汽船','お台場海浜公園']}),
  w(5),
  T({title:'百合海鷗號',lines:['U07 台場 往豐洲方向','➜ U14 市場前 2A出口'],cost:'325日圓（IC卡）',dur:'13分',dir:['台場駅','市場前駅']}),
  w(3),
@@ -213,7 +241,7 @@ const DAYS=[
  w(4),
  T({title:'東京Metro 有樂町線 → JR 前往橫濱',lines:['有樂町線 Y22 豐洲 往和光市方向 ➜ Y18 有樂町 D6出口','JR山手線 JY30 有樂町 往品川・澀谷方向（外環）➜ JY29 新橋','JR東海道線・橫須賀線 JT02 新橋 往品川・橫濱・小田原方向（下行）➜ JT05 橫濱','或 JO18 新橋 往橫濱・鎌倉方向（下行）➜ JO13 橫濱'],cost:'180 + 530日圓（IC卡）',dur:'約32分',dir:['豊洲駅','横浜駅']}),
  w(4),
- P({at:'19:45',rem:1,noanchor:1,title:'Antenor 橫濱崇光店',sub:'‼️ 先付款・19:45 取貨',hrs:'10:00 - 20:00',q:'アンテノール 横浜そごう店'}),
+ P({at:'19:45',rem:1,noanchor:1,bk:'ante',title:'Antenor 橫濱崇光店',sub:'‼️ 先付款・19:45 取貨',hrs:'10:00 - 20:00',q:'アンテノール 横浜そごう店'}),
  P({title:'HARBS LUMINE橫濱店',hrs:'10:00 - 20:30',q:'HARBS ハーブス ルミネ横浜店'}),
  w(4),
  T({title:'JR東日本 京濱東北線・根岸線',lines:['JK12 橫濱 往磯子・大船方向（南行）','➜ JK09 石川町 北口'],cost:'200日圓（IC卡）',dur:'7分',dir:['横浜駅','石川町駅']}),
@@ -230,7 +258,7 @@ const DAYS=[
  w(10),
  T({title:'港未來線',lines:['MM03 港未來 往橫濱・澀谷・池袋方向','➜ MM01 橫濱 西口'],cost:'200日圓（IC卡）',dur:'3分',dir:['みなとみらい駅','横浜駅']}),
  w(6),
- P({at:'20:00',rem:1,res:1,meal:'晚餐',title:'炎 橫濱店',hrs:'11:00 - 24:00',q:'炎 横浜店'}),
+ P({at:'20:00',rem:1,res:1,meal:'晚餐',bk:'homura',title:'炎 橫濱店',hrs:'11:00 - 24:00',q:'炎 横浜店'}),
  w(5),
  T({at:'22:42',rem:1,title:'京急電鐵 本線 特急 → 都營淺草線',lines:['22:42 KK37 橫濱 往泉岳寺方向','➜ 23:37 A20 押上 A1出口（直通）'],cost:'619日圓（IC卡）',dur:'51分',dir:['横浜駅','押上駅']}),
  w(12),
@@ -241,7 +269,7 @@ const DAYS=[
  w(7),
  P({at:'08:00',rem:1,meal:'早餐',title:'PERTH Sandwiches & All Day Breakfast',sub:'‼️ 08:00 外帶',hrs:'08:00 - 15:00',q:'PERTH Sandwiches & All Day Breakfast 押上'}),
  w(7),
- P({at:'10:00',rem:1,title:'CHECK OUT 退房',sub:HOTEL,badge:'‼️',q:'Season Hotel 押上'}),
+ P({at:'10:00',rem:1,bk:'hotel',title:'CHECK OUT 退房',sub:HOTEL,badge:'‼️',q:'Season Hotel 押上'}),
  w(13),
  P({title:'東京晴空塔城',hrs:'10:00 - 21:00',q:'東京スカイツリータウン'}),
  P({meal:'午餐',title:'鰻魚三吃 名古屋備長 東京晴空塔城Solamachi店',hrs:'11:00 - 21:00',q:'ひつまぶし 名古屋 備長 東京スカイツリータウン ソラマチ店'}),
@@ -257,16 +285,43 @@ const DAYS=[
  P({title:'成田山新勝寺',hrs:'08:00 - 16:00',q:'成田山新勝寺'}),
  w(12),
  P({meal:'晚餐',title:'披薩店 Positano',hrs:'17:00 - 24:00',q:'ピッツェリア ポジターノ 成田'}),
- P({at:'18:00',rem:1,res:1,title:'Flying pig N',hrs:'17:30 - 21:00（最後點餐 20:30）',q:'Flying pig N 成田'}),
+ P({at:'18:00',rem:1,res:1,bk:'fpig',title:'Flying pig N',hrs:'17:30 - 21:00（最後點餐 20:30）',q:'Flying pig N 成田'}),
  T({at:'20:10',rem:1,title:'京成電鐵 京成本線',lines:['20:10 KS40 京成成田 往成田機場方向','➜ 20:16 KS41 機場第2航廈（成田第2・第3航廈）'],cost:'280日圓（IC卡）',dur:'6分',dir:['京成成田駅','空港第2ビル駅'],note:'時刻表見下方 註2'}),
  P({title:'I.A.S.S 貴賓室（Executive Lounge）',hrs:'07:00 - 21:00',q:'I.A.S.S Executive Lounge 成田空港'}),
- P({at:'20:25',rem:1,title:'CHECK IN 報到',badge:'‼️',q:'成田国際空港 第3ターミナル'}),
- P({at:'22:25',rem:1,title:'✈️ 捷星 Jetstar GK11',sub:'22:25 成田 T3 ➜ 01:30（+1）桃園 T1',q:'成田国際空港 第3ターミナル',note:'行李規定見下方 註3'}),
- P({at:'01:30',date:'2026-10-26',tz:8,rem:1,title:'‼️ 10/26（一）01:30 機場接送',sub:'抵達桃園後',q:'桃園國際機場第一航廈'})
+ P({at:'20:25',rem:1,bk:'f2',title:'CHECK IN 報到',badge:'‼️',q:'成田国際空港 第3ターミナル'}),
+ P({at:'22:25',rem:1,bk:'f2',title:'✈️ 捷星 Jetstar GK11',sub:'22:25 成田 T3 ➜ 01:30（+1）桃園 T1',q:'成田国際空港 第3ターミナル',note:'行李規定見下方 註3'}),
+ P({at:'01:30',date:'2026-10-26',tz:8,rem:1,bk:'p2',title:'‼️ 10/26（一）01:30 機場接送',sub:'抵達桃園後',q:'桃園國際機場第一航廈'})
 ],notes:[
  {h:'註1｜成田站 投幣式置物櫃',l:'小：400日圓\n中：500日圓\n大：700日圓'},
  {h:'註2｜京成本線 京成成田 ➜ 機場第2航廈 時刻表',l:'20:35 發 ➜ 20:41 抵達\n21:00 發 ➜ 21:06 抵達'},
  {h:'註3｜捷星 Jetstar 行李規定',l:'隨身行李 1 件：56 × 36 × 23 cm\n小型行李 1 件\n兩件合計 7 kg'}]}
+];
+
+/* ===== 已預訂清單（id 要和上面行程裡的 bk 對得上；改內容改這裡） ===== */
+const BK=[
+ {id:'p1',ic:'🚐',t:'去程 機場接送',when:'10/21（三）03:50',info:['台灣出發時間，接送到桃園機場'],q:'桃園國際機場第一航廈'},
+ {id:'f1',ic:'✈️',t:'酷航 Scoot TR866（去程）',when:'10/21（三）06:45 起飛',info:['05:00 CHECK IN','桃園 T1 06:45 ➜ 成田 T1 11:15','隨身行李 1 件 54×38×23 cm＋小型行李 1 件 40×30×10 cm，兩件合計 10 kg'],q:'桃園國際機場第一航廈'},
+ {id:'hotel',ic:'🏨',t:'Season Hotel 押上',when:'10/21 先寄放行李｜10/25 10:00 退房',info:['10/21 抵達後先到飯店寄放行李','10/25 10:00 CHECK OUT'],q:'Season Hotel 押上'},
+ {id:'lemon',ic:'🍽️',t:'牛舌之檸檬 淺草店',when:'10/21（三）14:00',info:['營業時間 11:30 - 15:00'],q:'牛たんの檸檬 浅草店'},
+ {id:'dsea',ic:'🎢',t:'東京迪士尼海洋',when:'10/22（四）09:00 入園申請',info:['09:00 入園申請（Entry Request）','Exp 夢想起飛：15:55 - 16:20、17:20 - 17:45','Exp 舞動地球！：16:45 - 17:10、18:30 - 18:55'],q:'東京ディズニーシー'},
+ {id:'imahan',ic:'🍽️',t:'人形町今半 新宿第一生命大樓店',when:'10/23（五）12:30',info:['營業時間 11:00 - 15:00'],q:'人形町今半 新宿第一生命ビル店'},
+ {id:'nikuya',ic:'🍽️',t:'和牛吃到飽殿堂 肉屋橫丁 澀谷宇田川町店',when:'10/23（五）19:30',info:['營業時間 14:00 - 23:00'],q:'和牛放題の殿堂 肉屋横丁 渋谷宇田川町店'},
+ {id:'suke6',ic:'🍽️',t:'SUKE6 DINER',when:'10/24（六）08:30',info:['營業時間 08:00 - 18:00'],q:'SUKE6 DINER 浅草'},
+ {id:'boat',ic:'🚢',t:'東京都觀光汽船 螢月號 HOTALUNA',when:'10/24（六）09:40 報到｜10:00 出航',info:['淺草營業所報到','10:00 淺草 ➜ 11:05 台場海濱公園（65 分鐘）','票價 2,000 日圓'],q:'東京都観光汽船 浅草営業所'},
+ {id:'ante',ic:'🛍️',t:'Antenor 橫濱崇光店（先付款取貨）',when:'10/24（六）19:45 取貨',info:['已付款，19:45 取貨','營業時間 10:00 - 20:00'],q:'アンテノール 横浜そごう店'},
+ {id:'homura',ic:'🍽️',t:'炎 橫濱店',when:'10/24（六）20:00',info:['營業時間 11:00 - 24:00'],q:'炎 横浜店'},
+ {id:'fpig',ic:'🍽️',t:'Flying pig N',when:'10/25（日）18:00',info:['營業時間 17:30 - 21:00（最後點餐 20:30）'],q:'Flying pig N 成田'},
+ {id:'f2',ic:'✈️',t:'捷星 Jetstar GK11（回程）',when:'10/25（日）22:25 起飛',info:['20:25 CHECK IN','成田 T3 22:25 ➜ 桃園 T1 01:30（+1）','隨身行李 1 件 56×36×23 cm＋小型行李 1 件，兩件合計 7 kg'],q:'成田国際空港 第3ターミナル'},
+ {id:'p2',ic:'🚐',t:'回程 機場接送',when:'10/26（一）01:30',info:['抵達桃園後的接送（台灣時間）'],q:'桃園國際機場第一航廈'}
+];
+/* ===== 出發前清單（建議清單，可自行增減；勾選只存在這支手機） ===== */
+const CHECK=[
+ {g:'📘 證件與入境',l:['護照（效期足夠，姓名與機票一致）','Visit Japan Web：入境審查、海關申報填好並截圖 QR Code','電子機票／登機證（Scoot TR866、Jetstar GK11）','住宿與各項預約確認信截圖（見「已預訂」）']},
+ {g:'💴 付款與通訊',l:['日幣現金','信用卡（確認海外刷卡與提款密碼）','IC 卡（Suica／PASMO）或加入 Apple 錢包並儲值','網路：eSIM／漫遊／分享器','Google 地圖下載東京、橫濱、成田離線地圖']},
+ {g:'🧳 行李',l:['去程酷航：隨身 54×38×23 cm＋小型 40×30×10 cm，合計 10 kg','回程捷星：隨身 56×36×23 cm＋小型，合計 7 kg（回程只有 7 kg，購物要控制）','行動電源、鋰電池放隨身行李（依航空公司規定）','液體、膠狀物依規定裝袋']},
+ {g:'🔌 隨身小物',l:['手機充電線、充電頭、行動電源','常備藥品','折疊購物袋','雨具']},
+ {g:'🏰 迪士尼與購物',l:['迪士尼 App 登入，確認 10/22 門票與 09:00 入園申請','免稅購物攜帶護照']},
+ {g:'📅 出發前一天',l:['再確認 10/21 03:50 機場接送時間','匯入行事曆提醒（選單最下方「匯出行事曆」）','手機與行動電源充飽電']}
 ];
 /* ============ 程式區 ============ */
 const $=s=>document.querySelector(s);
@@ -350,6 +405,7 @@ function renderTabs(){
   const on=$('.tab.on');if(on)on.scrollIntoView({inline:'center',block:'nearest'});
 }
 function actions(it){let a='';
+  if(it.bk)a+=`<button data-bk="${it.bk}">📄 預訂資料</button>`;
   if(it.dir)a+=`<a href="${dirUrl(it.dir[0],it.dir[1])}" target="_blank" rel="noopener">🚉 路線</a>`;
   if(it.q)a+=`<a href="${mapUrl(it.q)}" target="_blank" rel="noopener">📍 Google 地圖</a>`;
   return a?`<div class="acts">${a}</div>`:''}
@@ -365,7 +421,7 @@ function render(){
     if(it.k==='sec'){h+=`<div class="sec">${esc(it.t)}</div>`;return}
     if(it.k==='walk'){h+=`<div class="walk">🚶 步行 ${it.m} 分鐘</div>`;return}
     if(isDone(it.id)){if(!hideDone)h+=`<button class="donerow" data-undo="${it.id}"><span>✓</span><span style="text-decoration:line-through">${it.at?it.at+'　':''}${esc(it.title)}</span></button>`;return}
-    h+=`<div class="card ${it.id===nextId?'next':''} ${liveInfo&&it.id===nextId?'now':''}"><button class="chk" data-done="${it.id}" aria-label="完成">✓</button><div class="body">
+    h+=`<div class="card ${it.id===nextId?'next':''} ${liveInfo&&it.id===nextId?'now':''}" data-iid="${it.id}"><button class="chk" data-done="${it.id}" aria-label="完成">✓</button><div class="body">
       <div class="r1">${liveInfo&&it.id===nextId?'<span class="badge now">📍 現在</span>':''}${it.at?'<span class="time">'+it.at+'</span>':''}${it.meal?'<span class="meal">'+({'早餐':'🍳','午餐':'🍱','晚餐':'🍽️'}[it.meal])+' '+it.meal+'</span>':''}${it.res?'<span class="badge">★ 已預約</span>':''}${it.badge&&!it.res?'<span class="badge">★ 重要</span>':''}</div>
       <div class="title">${esc(it.title)}</div>
       ${it.sub?`<div class="sub">${esc(it.sub)}</div>`:''}
@@ -390,9 +446,52 @@ document.addEventListener('click',e=>{
   else if(t.id==='tReset'){if(confirm('清除本日所有完成勾選？')){DAYS[cur].items.forEach(i=>store.del('done:'+i.id));render()}}
   else if(t.id==='tIcs')exportIcs();
   else if(t.dataset.now||t.id==='fab')startLive();
-  else if(t.id==='bell')askNotif();
 });
 
+
+/* ---- 選單與頁面（出發前清單／已預訂） ---- */
+const BKI={};DAYS.forEach((d,di)=>d.items.forEach(it=>{if(it.bk&&!BKI[it.bk])BKI[it.bk]={day:di,id:it.id}}));
+const menuEl=()=>$('#menu');
+function openView(kind,anchor){
+  const v=$('#view');$('#vt').textContent=kind==='check'?'✅ 出發前清單':'📋 已預訂';
+  $('#vbody').innerHTML=kind==='check'?checkHtml():bookHtml();
+  v.hidden=false;document.body.style.overflow='hidden';v.scrollTop=0;menuEl().hidden=true;
+  if(anchor){const el=document.getElementById('bk-'+anchor);if(el){el.scrollIntoView({block:'start'});v.scrollTop-=60;el.classList.add('flash')}}
+}
+function closeView(){$('#view').hidden=true;document.body.style.overflow=''}
+function checkHtml(){
+  let n=0,t=0,h='';
+  CHECK.forEach((g,gi)=>{h+=`<div class="cg">${esc(g.g)}</div>`;g.l.forEach((x,i)=>{const id='cl:'+gi+'-'+i,on=store.get(id)==='1';t++;if(on)n++;
+    h+=`<button class="cl ${on?'on':''}" data-cl="${id}"><i>✓</i><span>${esc(x)}</span></button>`})});
+  return `<div class="vn">已完成 ${n}/${t}　（這是建議清單，可在 index.html 的 CHECK 自行增減）</div>`+h;
+}
+function bookHtml(){
+  return `<div class="vn">共 ${BK.length} 筆。下方可記錄訂位代號、人數、電話，只存在這支手機。</div>`+BK.map(b=>{
+    const r=BKI[b.id];
+    return `<div class="bkc" id="bk-${b.id}"><div class="bt">${b.ic} ${esc(b.t)}</div><div class="bw">${esc(b.when)}</div>
+    <ul>${b.info.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+    <textarea data-note="${b.id}" placeholder="訂位代號、人數、電話…">${esc(store.get('note:'+b.id)||'')}</textarea>
+    <div class="acts">${b.q?`<a href="${mapUrl(b.q)}" target="_blank" rel="noopener">📍 Google 地圖</a>`:''}${r?`<button data-goto="${b.id}">↩︎ 回到行程</button>`:''}</div></div>`}).join('');
+}
+function gotoItem(id){
+  const r=BKI[id];if(!r)return;closeView();cur=r.day;render();
+  const el=document.querySelector(`[data-iid="${r.id}"],[data-undo="${r.id}"]`);
+  if(el){el.scrollIntoView({block:'center'});el.classList.add('flash')}else scrollTo(0,0);
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('button');
+  if(!e.target.closest('#menu,#menuBtn'))menuEl().hidden=true;
+  if(!t)return;
+  if(t.id==='menuBtn')menuEl().hidden=!menuEl().hidden;
+  else if(t.dataset.m==='notif'){menuEl().hidden=true;askNotif()}
+  else if(t.dataset.m)openView(t.dataset.m);
+  else if(t.dataset.bk)openView('book',t.dataset.bk);
+  else if(t.id==='vback')closeView();
+  else if(t.dataset.goto)gotoItem(t.dataset.goto);
+  else if(t.dataset.cl){const k=t.dataset.cl;store.get(k)==='1'?store.del(k):store.set(k,'1');
+    const y=$('#view').scrollTop;$('#vbody').innerHTML=checkHtml();$('#view').scrollTop=y}
+});
+document.addEventListener('input',e=>{const n=e.target.dataset&&e.target.dataset.note;if(n)store.set('note:'+n,e.target.value)});
 /* ---- 提醒：事件前 1 小時 ---- */
 const HOUR=3600e3;
 function allTimed(){return DAYS.flatMap(d=>d.items.filter(i=>i.rem&&i.ts))}
