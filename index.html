@@ -43,6 +43,12 @@ main{padding:4px 16px calc(40px + env(safe-area-inset-bottom,0))}
 .body{flex:1;min-width:0}
 .meal{display:inline-block;font-size:12px;font-weight:700;color:var(--ac);background:rgba(var(--acrgb),.14);border-radius:10px;padding:2px 9px;margin-right:4px;white-space:nowrap}
 .r1:empty,.r1:not(:has(span)){display:none}
+.drw{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.drl{flex:1 1 100%;font-size:12px;color:var(--sub);font-weight:600}
+.chip{border:1.5px solid var(--ac);background:transparent;color:var(--ac);border-radius:14px;padding:7px 11px;font-size:13px;font-weight:700;min-height:36px}
+.chip.on{background:var(--ac);color:#fff}
+.dyn{margin:8px 0 6px;padding:10px;border-radius:16px;background:rgba(var(--acrgb),.08)}
+.dt{font-weight:800;font-size:14px;margin:8px 0 2px}.dt:first-child{margin-top:0}
 .card,.grph{scroll-margin-top:120px}
 .badge.tent{background:transparent;color:var(--ac);border:1.5px solid var(--ac)}
 .grph{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;width:100%;text-align:left;border:2px dashed rgba(var(--acrgb),.55);background:rgba(var(--acrgb),.08);color:var(--tx);border-radius:20px;padding:11px 14px;margin:8px 0;font-size:15px;font-weight:700}
@@ -227,10 +233,10 @@ const DAYS=[
  P({at:'11:30',rem:1,title:'閃耀慶典（Sparkling Jubilee Celebration）',hrs:'11:30 - 11:45',badge:'‼️'}),
  P({at:'12:00',rem:1,title:'翱翔：奇幻飛行（Soaring）',badge:'‼️'}),
  P({at:'15:00',rem:1,title:'閃耀慶典（Sparkling Jubilee Celebration）',hrs:'15:00 - 15:15',badge:'‼️'}),
- P({at:'15:55',rem:1,bk:'dsea',title:'夢想起飛（Dreams Take Flight）',sub:'需抽 Entry Request｜可選時段 15:55 - 16:20、17:20 - 17:45',hrs:'15:55 - 16:20',badge:'‼️'}),
+ P({draw:{slots:['15:55 - 16:20','17:20 - 17:45']},bk:'dsea',title:'夢想起飛（Dreams Take Flight）',badge:'‼️'}),
  P({title:'玩具總動員瘋狂遊戲屋'}),
  P({title:'地心探險之旅'}),
- P({at:'18:30',rem:1,bk:'dsea',title:'舞動地球！（Dance the Globe!）',sub:'需抽 Entry Request｜可選時段 16:45 - 17:10、18:30 - 18:55',hrs:'18:30 - 18:55',badge:'‼️'}),
+ P({draw:{slots:['16:45 - 17:10','18:30 - 18:55']},bk:'dsea',title:'舞動地球！（Dance the Globe!）',badge:'‼️'}),
  P({at:'19:30',rem:1,title:'相信！～夢之海～（Believe! Sea of Dreams）',hrs:'19:30 - 20:00',badge:'‼️'}),
  P({at:'20:30',rem:1,title:'Night High Halloween（夜間萬聖節）',hrs:'20:30 - 20:35',badge:'‼️'}),
  P({title:'人魚礁湖'}),
@@ -368,7 +374,7 @@ const BK=[
  {id:'f1',ic:'✈️',t:'酷航 Scoot TR866（去程）',when:'10/21（三）06:45 起飛',info:['05:00 CHECK IN','桃園 T1 06:45 ➜ 成田 T1 11:15','隨身行李 1 件 54×38×23 cm＋小型行李 1 件 40×30×10 cm，兩件合計 10 kg'],q:'桃園國際機場第一航廈'},
  {id:'hotel',ic:'🏨',t:'Season Hotel 押上',when:'10/21 先寄放行李｜10/25 10:00 退房',info:['10/21 抵達後先到飯店寄放行李','10/25 10:00 CHECK OUT'],q:'Season Hotel 押上'},
  {id:'lemon',ic:'🍽️',t:'牛舌之檸檬 淺草店',when:'10/21（三）14:00',info:['營業時間 11:30 - 15:00'],q:'牛たんの檸檬 浅草店'},
- {id:'dsea',ic:'🎢',t:'東京迪士尼海洋',when:'10/22（四）09:00 入園申請（抽選）',info:['09:00 入園申請（Entry Request，需抽選）','夢想起飛：可選時段 15:55 - 16:20、17:20 - 17:45','舞動地球！：可選時段 16:45 - 17:10、18:30 - 18:55'],q:'東京ディズニーシー'},
+ {id:'dsea',ic:'🎢',t:'東京迪士尼海洋',dyn:1,when:'10/22（四）09:00 入園申請（當天抽選）',info:['09:00 入園申請（Entry Request），結果當天才知道','夢想起飛可選：15:55 - 16:20、17:20 - 17:45','舞動地球！可選：16:45 - 17:10、18:30 - 18:55','抽選結果請在下方更新，行程時間和提醒會跟著改'],q:'東京ディズニーシー'},
  {id:'imahan',ic:'🍽️',t:'人形町今半 新宿第一生命大樓店',when:'10/23（五）12:30',info:['營業時間 11:00 - 15:00'],q:'人形町今半 新宿第一生命ビル店'},
  {id:'nikuya',ic:'🍽️',t:'和牛吃到飽殿堂 肉屋橫丁 澀谷宇田川町店',when:'10/23（五）19:30',info:['營業時間 14:00 - 23:00'],q:'和牛放題の殿堂 肉屋横丁 渋谷宇田川町店'},
  {id:'suke6',ic:'🍽️',t:'SUKE6 DINER',when:'10/24（六）08:30',info:['營業時間 08:00 - 18:00'],q:'SUKE6 DINER 浅草'},
@@ -426,6 +432,27 @@ const GRP={};DAYS.forEach(d=>d.items.forEach(it=>{if(it.grp)(GRP[it.grp]=GRP[it.
 const gDone=g=>GRP[g].items.some(i=>isDone(i.id));
 const doneU=it=>it.grp?gDone(it.grp):isDone(it.id);
 const repOf=it=>it.grp?(GRP[it.grp].items.find(i=>i.tent)||GRP[it.grp].items[0]):it;
+/* ---- 抽選項目（Entry Request）：結果當天才知道，可在卡片或「已預訂」更新 ---- */
+const DRAWS=[],DRAWMAP={};DAYS.forEach(d=>d.items.forEach(it=>{if(it.draw){DRAWS.push([d,it]);DRAWMAP[it.id]=1;it.noanchor=1}}));
+const drawState=id=>{try{return JSON.parse(store.get('dr:'+id)||'null')}catch(e){return null}};
+function applyDraw(){
+  DRAWS.forEach(([d,it])=>{
+    const st=drawState(it.id),opts=it.draw.slots;
+    if(st&&st.s==='win'&&opts[st.k]){const sl=opts[st.k];it.at=sl.slice(0,5);it.hrs=sl;it.rem=1;it.res=1;it.sub='✅ 已抽中 '+sl;it.ts=tsOf(d,it);it.state='win'}
+    else{it.at=null;it.ts=null;it.hrs=null;it.rem=0;it.res=0;it.sub='⏳ 待 09:00 入園申請抽選｜可選時段：'+opts.join('、');it.state=st&&st.s==='lose'?'lose':'wait'}
+    if(it.state==='lose')store.set('skip:'+it.id,'1');else store.del('skip:'+it.id);
+  });
+}
+function drawHtml(it){
+  const st=drawState(it.id)||{},ch=(l,a,on)=>`<button class="chip ${on?'on':''}" data-dr="${it.id}|${a}">${l}</button>`;
+  return `<div class="drw"><div class="drl">抽選結果（當天更新）</div>${ch('待抽選','clear',!st.s)}${it.draw.slots.map((s,k)=>ch('抽中 '+s,'win:'+k,st.s==='win'&&st.k===k)).join('')}${ch('沒抽中','lose',st.s==='lose')}</div>`;
+}
+function dynHtml(){
+  const its=DAYS.flatMap(d=>d.items).filter(i=>i.bk==='dsea'),ent=its.find(i=>!i.draw),d=ent&&isDone(ent.id);
+  return `<div class="dyn">${ent?`<div class="dt">① 09:00 入園申請</div><div class="drw"><button class="chip ${d?'on':''}" data-${d?'undo':'done'}="${ent.id}">${d?'✓ 已完成申請':'標記為已完成申請'}</button></div>`:''}`+
+    its.filter(i=>i.draw).map((i,n)=>`<div class="dt">${'②③'[n]} ${esc(i.title)}${i.state==='win'?'　✅ '+esc(i.hrs):''}</div>${drawHtml(i)}`).join('')+'</div>';
+}
+applyDraw();
 const jstDate=t=>new Date(t+9*3600e3).toISOString().slice(0,10);
 function liveDayIdx(now=Date.now()){
   const ts=d=>d.items.filter(i=>i.ts).map(i=>i.ts);
@@ -472,7 +499,7 @@ function startLive(){
 
 const mapUrl=q=>'https://www.google.com/maps/search/?api=1&query='+enc(q);
 const dirUrl=(a,b)=>'https://www.google.com/maps/dir/?api=1&origin='+enc(a)+'&destination='+enc(b)+'&travelmode=transit';
-const isDone=id=>store.get('done:'+id)==='1';
+const isDone=id=>store.get('done:'+id)==='1'||store.get('skip:'+id)==='1';
 let cur=0,hideDone=store.get('hide')==='1',mode=store.get('view')==='map'?'map':'list',refit=false,curNext=null;
 (function pick(){const li=liveDayIdx();if(li>=0){cur=li;return}cur=jstDate(Date.now())>DAYS[DAYS.length-1].d?DAYS.length-1:0})();
 
@@ -488,7 +515,7 @@ function actions(it){let a='';
   if(it.q)a+=`<a href="${mapUrl(it.q)}" target="_blank" rel="noopener">📍 Google 地圖</a>`;
   return a?`<div class="acts">${a}</div>`:''}
 function itemHtml(it,nextId){
-    if(isDone(it.id)){return hideDone?'':`<button class="donerow" data-undo="${it.id}"><span>✓</span><span style="text-decoration:line-through">${it.at?it.at+'　':''}${esc(it.title)}</span></button>`}
+    if(isDone(it.id)){return hideDone?'':`<button class="donerow" data-undo="${it.id}"><span>${it.state==='lose'?'✗':'✓'}</span><span style="text-decoration:line-through">${it.at?it.at+'　':''}${esc(it.title)}${it.state==='lose'?'（未抽中）':''}</span></button>`}
   return `<div class="card ${it.id===nextId?'next':''} ${liveInfo&&it.id===nextId?'now':''}" data-iid="${it.id}"><button class="chk" data-done="${it.id}" aria-label="完成">✓</button><div class="body">
     <div class="r1">${liveInfo&&it.id===nextId?'<span class="badge now">📍 現在</span>':''}${it.at?'<span class="time">'+it.at+'</span>':''}${it.meal?'<span class="meal">'+({'早餐':'🍳','午餐':'🍱','晚餐':'🍽️'}[it.meal])+' '+it.meal+'</span>':''}${it.tent?'<span class="badge tent">暫定</span>':''}${it.res?'<span class="badge">★ 已預約</span>':''}${it.badge&&!it.res?'<span class="badge">★ 重要</span>':''}</div>
     <div class="title">${esc(it.title)}</div>
@@ -497,7 +524,8 @@ function itemHtml(it,nextId){
     ${it.hrs?`<div class="hrs">🕘 ${esc(it.hrs)}</div>`:''}
     ${it.cost||it.dur?`<div class="meta">${[it.cost,it.dur].filter(Boolean).map(esc).join('｜')}</div>`:''}
     ${it.note?`<div class="meta">📝 ${esc(it.note)}</div>`:''}
-    ${actions(it)}</div></div>`;
+    ${it.draw?drawHtml(it):''}
+      ${actions(it)}</div></div>`;
 }
 function groupHtml(g,nextId){
   const G=GRP[g],M=GMETA[g]||{},open=store.get('go:'+g)==='1',dn=G.items.find(i=>isDone(i.id)),tent=repOf(G.items[0]);
@@ -509,6 +537,7 @@ function groupHtml(g,nextId){
   return h;
 }
 function render(){
+  refreshBook();
   const day=DAYS[cur];renderTabs();const R=document.documentElement.style;R.setProperty('--ac',day.c);R.setProperty('--acrgb',day.rgb);const tc=document.querySelector('meta[name=theme-color]');if(tc)tc.content=day.c;
   const cards=day.items.filter(i=>i.k==='place'||i.k==='move');
   const units=cards.filter(i=>!i.grp||GRP[i.grp].items[0]===i);
@@ -540,7 +569,7 @@ document.addEventListener('click',e=>{
   if(t.dataset.i!==undefined){cur=+t.dataset.i;refit=true;render();scrollTo(0,0)}
   else if(t.dataset.grp){const k='go:'+t.dataset.grp;store.get(k)==='1'?store.del(k):store.set(k,'1');render()}
   else if(t.dataset.done){store.set('done:'+t.dataset.done,'1');render()}
-  else if(t.dataset.undo){store.del('done:'+t.dataset.undo);render()}
+  else if(t.dataset.undo){store.del('done:'+t.dataset.undo);if(DRAWMAP[t.dataset.undo]){store.del('dr:'+t.dataset.undo);applyDraw()}render()}
   else if(t.id==='tHide'){hideDone=!hideDone;store.set('hide',hideDone?'1':'0');render()}
   else if(t.id==='tReset'){if(confirm('清除本日所有完成勾選？')){DAYS[cur].items.forEach(i=>store.del('done:'+i.id));render()}}
   else if(t.id==='tIcs')exportIcs();
@@ -666,6 +695,9 @@ document.addEventListener('click',e=>{
   if(t){
     if(t.dataset.seg){mode=t.dataset.seg;store.set('view',mode);refit=true;render();if(mode==='list')goNow(false);else if(!loc)locate().then(p=>{if(p){loc=p;render()}})}
     else if(t.dataset.map){mode='map';store.set('view','map');pendingFocus={id:t.dataset.map,popup:true};render();scrollTo(0,0)}
+    else if(t.dataset.dr){const[id,a]=t.dataset.dr.split('|');
+      if(a==='clear')store.del('dr:'+id);else if(a==='lose')store.set('dr:'+id,JSON.stringify({s:'lose'}));else store.set('dr:'+id,JSON.stringify({s:'win',k:+a.split(':')[1]}));
+      store.del('n:'+id);applyDraw();render()}
     else if(t.id==='mnow')startLive();
     else if(t.id==='tPre')preloadDay(t);
     return;
@@ -676,13 +708,15 @@ addEventListener('resize',()=>{if(mode==='map'&&mapObj){positionMap();mapObj.inv
 /* ---- 選單與頁面（出發前清單／已預訂） ---- */
 const BKI={};DAYS.forEach((d,di)=>d.items.forEach(it=>{if(it.bk&&!BKI[it.bk])BKI[it.bk]={day:di,id:it.id}}));
 const menuEl=()=>$('#menu');
-function openView(kind,anchor){
+let viewKind='';
+function refreshBook(){if(viewKind==='book'&&!$('#view').hidden){const y=$('#view').scrollTop;$('#vbody').innerHTML=bookHtml();$('#view').scrollTop=y}}
+function openView(kind,anchor){viewKind=kind;
   const v=$('#view');$('#vt').textContent=kind==='check'?'✅ 出發前清單':'📋 已預訂';
   $('#vbody').innerHTML=kind==='check'?checkHtml():bookHtml();
   v.hidden=false;document.body.style.overflow='hidden';v.scrollTop=0;menuEl().hidden=true;
   if(anchor){const el=document.getElementById('bk-'+anchor);if(el){el.scrollIntoView({block:'start'});v.scrollTop-=60;el.classList.add('flash')}}
 }
-function closeView(){$('#view').hidden=true;document.body.style.overflow=''}
+function closeView(){viewKind='';$('#view').hidden=true;document.body.style.overflow=''}
 function checkHtml(){
   let n=0,t=0,h='';
   CHECK.forEach((g,gi)=>{h+=`<div class="cg">${esc(g.g)}</div>`;g.l.forEach((x,i)=>{const id='cl:'+gi+'-'+i,on=store.get(id)==='1';t++;if(on)n++;
@@ -693,7 +727,7 @@ function bookHtml(){
   return `<div class="vn">共 ${BK.length} 筆。下方可記錄訂位代號、人數、電話，只存在這支手機。</div>`+BK.map(b=>{
     const r=BKI[b.id];
     return `<div class="bkc" id="bk-${b.id}"><div class="bt">${b.ic} ${esc(b.t)}</div><div class="bw">${esc(b.when)}</div>
-    <ul>${b.info.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+    <ul>${b.info.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>${b.dyn?dynHtml():''}
     <textarea data-note="${b.id}" placeholder="訂位代號、人數、電話…">${esc(store.get('note:'+b.id)||'')}</textarea>
     <div class="acts">${b.q?`<a href="${mapUrl(b.q)}" target="_blank" rel="noopener">📍 Google 地圖</a>`:''}${r?`<button data-goto="${b.id}">↩︎ 回到行程</button>`:''}</div></div>`}).join('');
 }
