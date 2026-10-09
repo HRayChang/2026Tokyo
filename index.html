@@ -657,7 +657,7 @@ function dayModel(day){
   const groups=[],by={},edges=[],rows=[];let prev=null,mv=false;
   /* 每天地圖的 1 號點都從飯店開始 */
   const HLL=LL['Season Hotel 押上'],first=day.d===DAYS[0].d;
-  let seenHotel=!first;
+  let seenHotel=true; /* 第一天維持原本：從機場接送點開始 */
   if(!first){
     const fk={id:'hotelstart:'+day.d,k:'place',title:'🏨 從飯店出發',sub:HOTEL,q:'Season Hotel 押上',ll:HLL,gn:'飯店・押上'};
     const g=by[HLL.join(',')]={key:HLL.join(','),ll:HLL,items:[fk],n:1,name:'飯店・押上'};groups.push(g);rows.push({it:fk,g});prev=g;
