@@ -62,6 +62,7 @@ body.mapmode .mb2{display:flex}
 .mapview .leaflet-popup-content-wrapper{border-radius:18px;background:var(--card);color:var(--tx);box-shadow:var(--shadow)}
 .mapview .leaflet-popup-tip{background:var(--card)}
 .mapview .leaflet-popup-content{margin:12px 14px;font-size:14px;line-height:1.4}
+.mapview.dk .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}
 .mapview .leaflet-container{background:var(--bg);font-family:inherit}
 .mapview .leaflet-control-attribution{font-size:9px;background:rgba(255,255,255,.7)}
 .mapview .acts a{color:var(--ac)}
@@ -523,7 +524,7 @@ function ensureLeaflet(){
   return lfp;
 }
 const darkMap=()=>matchMedia('(prefers-color-scheme: dark)').matches;
-const TILE=()=>'https://{s}.basemaps.cartocdn.com/'+(darkMap()?'dark_all':'rastertiles/voyager')+'/{z}/{x}/{y}{r}.png';
+const TILE=()=>'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'; /* 國土地理院 淡色地圖：免金鑰、日本全區、地名為日文 */
 function dayModel(day){
   const groups=[],by={},edges=[],rows=[];let prev=null,mv=false;
   day.items.forEach(it=>{
@@ -558,7 +559,8 @@ async function showMap(day){
     mapObj=L.map('map',{zoomControl:false,attributionControl:false,tap:true}).setView([35.68,139.77],11);
     L.control.zoom({position:'topleft'}).addTo(mapObj);
     L.control.attribution({position:'bottomleft',prefix:false}).addTo(mapObj);
-    L.tileLayer(TILE(),{subdomains:'abcd',maxZoom:19,attribution:'© OpenStreetMap © CARTO'}).addTo(mapObj);
+    L.tileLayer(TILE(),{maxNativeZoom:18,maxZoom:19,attribution:'<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>'}).addTo(mapObj);
+    $('#mapview').classList.toggle('dk',darkMap());
     mapLayer=L.layerGroup().addTo(mapObj);
   }
   mapObj.invalidateSize();
