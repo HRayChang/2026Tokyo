@@ -79,6 +79,9 @@ body.mapmode .mb2{display:flex}
 .mapview .leaflet-container{background:var(--bg);font-family:inherit}
 .mapview .leaflet-control-attribution{font-size:9px;background:rgba(255,255,255,.7)}
 .mapview .acts a{color:var(--ac)}
+.mapview .leaflet-tooltip.rtt{background:var(--card);color:var(--tx);border:0;border-radius:8px;font-size:11px;font-weight:700;padding:2px 6px;box-shadow:0 1px 5px rgba(0,0,0,.35)}
+.mapview .leaflet-tooltip-top.rtt:before{display:none}
+.mapview #map.lowz .leaflet-tooltip.rtt{display:none}
 .pps{max-height:42vh;overflow-y:auto}
 .ph{font-weight:800;color:var(--ac);margin-bottom:6px}
 .pp{padding:8px 0;border-bottom:1px solid var(--line)}.pp:last-child{border:0}
@@ -150,6 +153,22 @@ details div{white-space:pre-line;font-size:14px;color:var(--sub);margin-top:6px}
 .tools button{border:0;border-radius:16px;background:var(--card);color:var(--tx);padding:11px 14px;font-size:14px;min-height:44px;box-shadow:var(--shadow)}
 .empty{text-align:center;color:var(--ac);padding:26px 0;font-weight:700}
 .bye{text-align:center;margin-top:26px;font:700 24px "Snell Roundhand","Noteworthy",cursive;color:var(--ac);opacity:.85}
+.tour{position:fixed;inset:0;z-index:200;pointer-events:none}
+.tour[hidden]{display:none}
+.tb{position:fixed;pointer-events:auto;touch-action:none;background:transparent}
+.tb.dim{background:rgba(10,20,35,.62);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+.tspot{position:fixed;border-radius:16px;pointer-events:none;box-shadow:0 0 0 3px var(--ac),0 0 0 100vmax rgba(10,20,35,.62);transition:left .25s,top .25s,width .25s,height .25s}
+.ttip{position:fixed;pointer-events:auto;width:min(320px,calc(100vw - 24px));max-height:calc(100dvh - 16px);overflow-y:auto;background:var(--card);color:var(--tx);border-radius:22px;padding:16px 16px 8px;box-shadow:0 14px 40px rgba(0,0,0,.4);text-align:left}
+.tn{font-size:12px;font-weight:700;color:var(--sub);margin-bottom:2px}
+.ttip .tt{font-size:19px;font-weight:800;margin-bottom:6px}
+.tx{font-size:15px;line-height:1.55}
+.tact{margin-top:10px;padding:8px 12px;border-radius:14px;background:rgba(var(--acrgb),.14);color:var(--ac);font-weight:700;font-size:14px}
+.tbtn{display:flex;gap:8px;margin-top:12px}
+.tbtn button{flex:1;border:0;border-radius:16px;min-height:46px;font-size:16px;font-weight:700;background:rgba(var(--acrgb),.14);color:var(--ac)}
+.tbtn button.pri{flex:2;background:var(--ac);color:#fff}
+.tskip{display:block;margin:4px auto 0;border:0;background:transparent;color:var(--sub);font-size:13px;min-height:38px;padding:0 16px}
+.tarr{position:absolute;width:16px;height:16px;background:var(--card);transform:rotate(45deg);border-radius:3px}
+.tarr.up{top:-7px}.tarr.dn{bottom:-7px}
 </style>
 </head>
 <body>
@@ -158,6 +177,7 @@ details div{white-space:pre-line;font-size:14px;color:var(--sub);margin-top:6px}
   <button data-m="notif">🔔 開啟通知</button>
   <button data-m="check">✅ 出發前清單</button>
   <button data-m="book">📋 已預訂</button>
+  <button data-m="tour">❓ 使用教學</button>
 </div>
 <div class="stick" id="stick"><nav class="tabs" id="tabs"></nav>
   <div class="seg"><div class="sg"><button data-seg="list">📋 列表</button><button data-seg="map">🗺️ 地圖</button></div><button class="mb2" data-menu title="選單">☰</button></div></div>
@@ -170,6 +190,8 @@ details div{white-space:pre-line;font-size:14px;color:var(--sub);margin-top:6px}
 <button class="fab" id="fab" style="display:none">📍 現在</button>
 <div class="view" id="view" hidden><div class="vh"><button id="vback">← 返回</button><b id="vt"></b></div><div class="vbody" id="vbody"></div></div>
 
+<div class="tour" id="tour" hidden role="dialog" aria-label="使用教學"><div class="tb"></div><div class="tb"></div><div class="tb"></div><div class="tb"></div><div class="tb"></div><div class="tspot" id="tspot"></div><div class="ttip" id="ttip"></div></div>
+
 <script>
 /* ============ 資料區（改行程只要改這裡，推上 GitHub 即自動更新） ============ */
 const w=m=>({k:'walk',m}), sec=t=>({k:'sec',t});
@@ -179,34 +201,17 @@ const gift=['東京Gift Palette','Vanilla Beans The Roastery Tokyo（香草豆�
 const giftQ=['東京ギフトパレット','バニラビーンズ ザ ロースタリー トーキョー','ブリュレメリゼ 東京ギフトパレット店','C3 TIRAMISÙ 東京ギフトパレット店','PISTA & TOKYO 東京ギフトパレット店'];
 const DS=s=>'東京ディズニーシー '+s;
 
-/* ===== 交通路線的「站點座標」：地圖上的轉乘路線會依序連接這些點（約略位置，可自行改）===== */
-const S={
- '押上':[35.7106,139.8130],'本所吾妻橋':[35.7064,139.8049],'浅草':[35.7100,139.7975],'蔵前':[35.7036,139.7905],'浅草橋':[35.6975,139.7865],'東日本橋':[35.6925,139.7870],'人形町':[35.6868,139.7827],
- '日本橋':[35.6820,139.7745],'宝町':[35.6764,139.7712],'東銀座':[35.6700,139.7670],'新橋':[35.6660,139.7586],'泉岳寺':[35.6386,139.7400],'品川':[35.6285,139.7388],'京急川崎':[35.5328,139.7000],'川崎':[35.5313,139.6968],'横浜':[35.4658,139.6224],
- '上野':[35.7113,139.7770],'神田':[35.6918,139.7708],'京橋':[35.6770,139.7700],'東京':[35.6812,139.7671],'大手町':[35.6867,139.7663],'三越前':[35.6872,139.7733],'水天宮前':[35.6833,139.7855],'清澄白河':[35.6808,139.7997],'住吉':[35.6925,139.8158],'錦糸町':[35.6969,139.8143],
- '渋谷':[35.6590,139.7010],'表参道':[35.6654,139.7123],'青山一丁目':[35.6728,139.7243],'永田町':[35.6787,139.7400],'半蔵門':[35.6856,139.7418],'九段下':[35.6957,139.7518],'神保町':[35.6959,139.7576],
- '八丁堀':[35.6747,139.7770],'越中島':[35.6690,139.7930],'潮見':[35.6540,139.8120],'新木場':[35.6460,139.8260],'葛西臨海公園':[35.6430,139.8590],'舞浜':[35.6358,139.8832],'リゾートゲートウェイ':[35.6350,139.8850],'ベイサイド':[35.6322,139.8900],'ディズニーシー駅':[35.6265,139.8890],
- '馬喰横山':[35.6925,139.7835],'岩本町':[35.6945,139.7760],'小川町':[35.6960,139.7660],'市ヶ谷':[35.6908,139.7368],'曙橋':[35.6921,139.7236],'新宿三丁目':[35.6908,139.7058],
- '新宿':[35.6896,139.7006],'代々木':[35.6830,139.7020],'原宿':[35.6702,139.7027],
- '台場':[35.6270,139.7757],'青海':[35.6250,139.7830],'有明':[35.6350,139.7915],'市場前':[35.6455,139.7860],'新豊洲':[35.6495,139.7910],'豊洲':[35.6553,139.7959],
- '月島':[35.6648,139.7843],'新富町':[35.6745,139.7727],'銀座一丁目':[35.6741,139.7670],'有楽町':[35.6749,139.7632],
- '桜木町':[35.4510,139.6310],'関内':[35.4435,139.6360],'石川町':[35.4344,139.6451],'みなとみらい':[35.4577,139.6322],'新高島':[35.4640,139.6290],
- '成田空港':[35.7737,140.3873],'空港第2ビル':[35.7660,140.3870],'印旛日本医大':[35.8020,140.1970],'千葉NT中央':[35.8000,140.1160],'新鎌ヶ谷':[35.7860,140.0000],'東松戸':[35.7690,139.9310],'京成高砂':[35.7467,139.8678],'青砥':[35.7437,139.8506],'京成曳舟':[35.7170,139.8200],
- '京成船橋':[35.7013,139.9862],'京成津田沼':[35.6903,140.0143],'勝田台':[35.7215,140.0925],'京成佐倉':[35.7240,140.2250],'京成成田':[35.7787,140.3157],
- '十間橋通り':[35.7100,139.8150],'浅草一丁目':[35.7133,139.7930]
-};
-const LG=(n,c,...p)=>({n,c,p:p.map(x=>typeof x==='string'?S[x]:x)});
 
 const DAYS=[
 {d:'2026-10-21',c:'#f0689a',rgb:'240,104,154',em:'✈️',wd:'三',name:'抵達・淺草・丸之內',start:'03:50',items:[
  P({at:'03:50',tz:8,rem:15,bk:'p1',title:'機場接送',badge:'‼️',q:'25.026706941264564,121.47842727069022',type:''}),
  P({at:'05:00',tz:8,rem:15,bk:'f1',title:'CHECK IN 報到',sub:'桃園機場 第1航廈',q:'桃園國際機場第一航廈',badge:'‼️',type:''}),
  P({at:'06:45',tz:8,rem:15,bk:'f1',title:'✈️ 酷航 Scoot TR866',sub:'06:45 桃園 T1 ➜ 11:15 成田 T1',q:'成田国際空港 第1ターミナル',note:'行李規定見下方 註1',type:''}),
- T({at:'11:48',rem:10,title:'京成電鐵 成田Sky Access線 Access特急',lines:['11:48 KS42 成田機場 往京成上野・押上・西馬込・京急線方向','➜ 12:54 KS45 押上 A1出口'],cost:'1,194日圓（IC卡）',dur:'66分',dir:['成田空港駅','押上駅'],note:'時刻表見下方 註2',legs:[LG('成田Sky Access線','#f08300','成田空港','空港第2ビル','印旛日本医大','千葉NT中央','新鎌ヶ谷','東松戸','京成高砂','青砥','京成曳舟','押上')],type:''}),
+ T({at:'11:48',rem:10,title:'京成電鐵 成田Sky Access線 Access特急',lines:['11:48 KS42 成田機場 往京成上野・押上・西馬込・京急線方向','➜ 12:54 KS45 押上 A1出口'],cost:'1,194日圓（IC卡）',dur:'66分',dir:['成田空港駅','押上駅'],note:'時刻表見下方 註2',rt:'k1',type:''}),
  w(12),
  P({bk:'hotel',title:'寄放行李',sub:HOTEL,q:'Season Hotel 押上',badge:'‼️',type:''}),
  w(3),
- T({at:'13:32',rem:10,title:'都營巴士',lines:['13:32 十間橋通 往上野松坂屋前','➜ 13:49 淺草一丁目'],cost:'210日圓（IC卡）',dur:'17分',dir:['十間橋通り バス停','浅草一丁目 バス停'],note:'時刻表見下方 註3',legs:[LG('都營巴士','#0b7d3c','十間橋通り','浅草一丁目')],type:''}),
+ T({at:'13:32',rem:10,title:'都營巴士',lines:['13:32 十間橋通 往上野松坂屋前','➜ 13:49 淺草一丁目'],cost:'210日圓（IC卡）',dur:'17分',dir:['十間橋通り バス停','浅草一丁目 バス停'],note:'時刻表見下方 註3',type:''}),
  w(5),
  P({at:'14:00',rem:15,res:1,meal:'午餐',bk:'lemon',title:'牛舌之檸檬 淺草店',hrs:'11:30 - 15:00',q:'牛たんの檸檬 浅草店',type:''}),
  P({title:'OS藥妝 淺草店',hrs:'10:00 - 19:45',q:'OSドラッグ 浅草店',type:''}),
@@ -216,14 +221,14 @@ const DAYS=[
  P({title:'三鳩堂',hrs:'08:00 - 18:00',q:'三鳩堂 浅草',type:''}),
  P({title:'淺草 mille mele',hrs:'10:00 - 18:00',q:'浅草 mille mele ミレメーレ',type:''}),
  w(4),
- T({title:'東京Metro 銀座線',lines:['G19 淺草 往澀谷方向','➜ G10 京橋 5號出口'],cost:'210日圓（IC卡）',dur:'18分',dir:['浅草駅','京橋駅'],legs:[LG('銀座線','#f39700','浅草','上野','神田','日本橋','京橋')],type:''}),
+ T({title:'東京Metro 銀座線',lines:['G19 淺草 往澀谷方向','➜ G10 京橋 5號出口'],cost:'210日圓（IC卡）',dur:'18分',dir:['浅草駅','京橋駅'],rt:'k3',type:''}),
  w(6),
  P({badge:'‼️',title:'迴轉壽司 根室花丸 KITTE丸之內店',sub:'‼️ 先去抽號碼牌（整理券）',hrs:'11:00 - 22:00',q:'回転寿司 根室花まる KITTE丸の内店',type:''}),
  ...gift.map((t,i)=>P({title:t,hrs:'09:30 - 20:30',q:giftQ[i],type:''})),
  w(10),
  P({meal:'晚餐',title:'迴轉壽司 根室花丸 KITTE丸之內店',hrs:'11:00 - 22:00',q:'回転寿司 根室花まる KITTE丸の内店',type:''}),
  w(8),
- T({title:'東京Metro 丸之內線 → 半藏門線',lines:['丸之內線 M17 東京 往池袋方向 ➜ M18 大手町','半藏門線 Z08 大手町 往押上方向 ➜ Z14 押上 A1出口'],cost:'210日圓（IC卡）',dur:'16分',dir:['東京駅','押上駅'],legs:[LG('丸之內線','#e60012','東京','大手町'),LG('半藏門線','#8f76d6','大手町','三越前','水天宮前','清澄白河','住吉','錦糸町','押上')],type:''}),
+ T({title:'東京Metro 丸之內線 → 半藏門線',lines:['丸之內線 M17 東京 往池袋方向 ➜ M18 大手町','半藏門線 Z08 大手町 往押上方向 ➜ Z14 押上 A1出口'],cost:'210日圓（IC卡）',dur:'16分',dir:['東京駅','押上駅'],rt:'k4',type:''}),
  w(1),
  P({title:'花丸超市 Plus 押上店',hrs:'00:00 - 24:00（24小時）',q:'肉のハナマサ プラス押上店',type:''}),
  w(12),
@@ -235,13 +240,13 @@ const DAYS=[
 
 {d:'2026-10-22',c:'#25b0d6',rgb:'37,176,214',em:'🐭',wd:'四',name:'東京迪士尼海洋',start:'05:00',items:[
  w(12),
- T({at:'05:00',rem:10,title:'都營地下鐵 淺草線',lines:['05:00 A20 押上 往西馬込・羽田機場・京急線方向','➜ 05:10 A14 人形町'],cost:'220日圓（IC卡）',dur:'10分',dir:['押上駅','人形町駅'],legs:[LG('淺草線','#e85298','押上','本所吾妻橋','浅草','蔵前','浅草橋','東日本橋','人形町')],type:''}),
+ T({at:'05:00',rem:10,title:'都營地下鐵 淺草線',lines:['05:00 A20 押上 往西馬込・羽田機場・京急線方向','➜ 05:10 A14 人形町'],cost:'220日圓（IC卡）',dur:'10分',dir:['押上駅','人形町駅'],rt:'k5',type:''}),
  w(3),
- T({at:'05:15',title:'東京Metro 日比谷線',lines:['05:15 H14 人形町 往中目黑方向','➜ 05:19 H12 八丁堀 A1出口'],cost:'180日圓（IC卡）',dur:'4分',dir:['人形町駅','八丁堀駅'],legs:[LG('日比谷線','#9a9a8e','人形町','八丁堀')],type:''}),
+ T({at:'05:15',title:'東京Metro 日比谷線',lines:['05:15 H14 人形町 往中目黑方向','➜ 05:19 H12 八丁堀 A1出口'],cost:'180日圓（IC卡）',dur:'4分',dir:['人形町駅','八丁堀駅'],rt:'k6',type:''}),
  w(3),
- T({at:'05:36',title:'JR東日本 京葉線',lines:['05:36 JE02 八丁堀 往舞濱・新浦安・府中本町方向（下行）','➜ 05:50 JE07 舞濱 南口'],cost:'260日圓（IC卡）',dur:'14分',dir:['八丁堀駅','舞浜駅'],legs:[LG('京葉線','#c9242f','八丁堀','越中島','潮見','新木場','葛西臨海公園','舞浜')],type:''}),
+ T({at:'05:36',title:'JR東日本 京葉線',lines:['05:36 JE02 八丁堀 往舞濱・新浦安・府中本町方向（下行）','➜ 05:50 JE07 舞濱 南口'],cost:'260日圓（IC卡）',dur:'14分',dir:['八丁堀駅','舞浜駅'],rt:'k7',type:''}),
  w(3),
- T({at:'06:08',title:'迪士尼度假區線',lines:['06:08 海灣站（Bayside Station）','➜ 06:12 東京迪士尼海洋站'],cost:'300日圓（IC卡）',dur:'4分',dir:['舞浜駅','東京ディズニーシー・ステーション'],legs:[LG('迪士尼度假區線','#e50012','舞浜','リゾートゲートウェイ','ベイサイド','ディズニーシー駅')],type:''}),
+ T({at:'06:08',title:'迪士尼度假區線',lines:['06:08 海灣站（Bayside Station）','➜ 06:12 東京迪士尼海洋站'],cost:'300日圓（IC卡）',dur:'4分',dir:['舞浜駅','東京ディズニーシー・ステーション'],rt:'k8',type:''}),
  w(3),
  P({title:'東京迪士尼海洋',hrs:'09:00 - 21:00',q:'東京ディズニーシー',type:''}),
  P({at:'09:00',rem:10,bk:'dsea',title:'入園申請（Entry Request）',sub:'夢想起飛、舞動地球 需抽 Entry Request',badge:'‼️',q:'東京ディズニーシー',type:''}),
@@ -260,15 +265,15 @@ const DAYS=[
  P({title:'人魚礁湖',type:''}),
  P({at:'20:55',rem:10,title:'【環境演出】閃耀慶典之夜',hrs:'20:55 - 21:00',badge:'‼️',type:''}),
  w(3),
- T({title:'迪士尼度假區線',lines:['東京迪士尼海洋站 ➜ 海灣站（Bayside Station）'],cost:'300日圓（IC卡）',dur:'8分',dir:['東京ディズニーシー・ステーション','ベイサイド・ステーション'],legs:[LG('迪士尼度假區線','#e50012','ディズニーシー駅','ベイサイド')],type:''}),
+ T({title:'迪士尼度假區線',lines:['東京迪士尼海洋站 ➜ 海灣站（Bayside Station）'],cost:'300日圓（IC卡）',dur:'8分',dir:['東京ディズニーシー・ステーション','ベイサイド・ステーション'],type:''}),
  w(3),
  P({grp:'g22',title:'凜屋 Ikspiari店',hrs:'11:00 - 22:30（最後點餐 21:30）',q:'凜や イクスピアリ店',type:''}),
  P({grp:'g22',title:'一風堂 Ikspiari店',hrs:'11:00 - 22:00（最後點餐 21:40）',q:'一風堂 イクスピアリ店',type:''}),
  P({grp:'g22',tent:1,meal:'晚餐',title:'稻庭烏龍麵與丼飯 金子半之助 Ikspiari店',hrs:'11:00 - 22:30（最後點餐 21:30）',q:'稲庭うどんと丼めし 金子半之助 イクスピアリ店',type:''}),
  w(4),
- T({title:'JR東日本 京葉線',lines:['JE07 舞濱 往東京方向（上行）','➜ JE02 八丁堀 A3出口'],cost:'260日圓（IC卡）',dur:'15分',dir:['舞浜駅','八丁堀駅'],legs:[LG('京葉線','#c9242f','舞浜','葛西臨海公園','新木場','潮見','越中島','八丁堀')],type:''}),
+ T({title:'JR東日本 京葉線',lines:['JE07 舞濱 往東京方向（上行）','➜ JE02 八丁堀 A3出口'],cost:'260日圓（IC卡）',dur:'15分',dir:['舞浜駅','八丁堀駅'],rt:'k9',type:''}),
  w(13),
- T({at:'00:13',date:'2026-10-23',rem:30,title:'‼️ 末班車 00:13｜都營地下鐵 淺草線',lines:['A12 寶町 往押上・京成線・北總線方向','➜ A20 押上 A1出口'],cost:'220日圓（IC卡）',dur:'14分',dir:['宝町駅','押上駅'],note:'時刻表見下方 註1',legs:[LG('淺草線','#e85298','宝町','日本橋','人形町','東日本橋','浅草橋','蔵前','浅草','本所吾妻橋','押上')],type:''}),
+ T({at:'00:13',date:'2026-10-23',rem:30,title:'‼️ 末班車 00:13｜都營地下鐵 淺草線',lines:['A12 寶町 往押上・京成線・北總線方向','➜ A20 押上 A1出口'],cost:'220日圓（IC卡）',dur:'14分',dir:['宝町駅','押上駅'],note:'時刻表見下方 註1',rt:'k10',type:''}),
  w(12),
  P({title:'返回飯店',sub:HOTEL,q:'Season Hotel 押上',type:''})
 ],notes:[
@@ -278,7 +283,7 @@ const DAYS=[
  w(9),
  P({meal:'早餐',title:'摩斯漢堡 押上店',hrs:'08:00 - 21:00',q:'モスバーガー押上店',type:''}),
  w(4),
- T({title:'都營淺草線 → 都營新宿線',lines:['淺草線 A20 押上 往西馬込・羽田機場・京急線方向 ➜ A15 東日本橋','新宿線 S09 馬喰橫山 往新宿・京王線方向 ➜ S02 新宿三丁目 E6、E7出口'],cost:'280日圓（IC卡）',dur:'25分',dir:['押上駅','新宿三丁目駅'],legs:[LG('淺草線','#e85298','押上','本所吾妻橋','浅草','蔵前','浅草橋','東日本橋'),LG('新宿線','#6cbb5a','馬喰横山','岩本町','小川町','神保町','九段下','市ヶ谷','曙橋','新宿三丁目')],type:''}),
+ T({title:'都營淺草線 → 都營新宿線',lines:['淺草線 A20 押上 往西馬込・羽田機場・京急線方向 ➜ A15 東日本橋','新宿線 S09 馬喰橫山 往新宿・京王線方向 ➜ S02 新宿三丁目 E6、E7出口'],cost:'280日圓（IC卡）',dur:'25分',dir:['押上駅','新宿三丁目駅'],rt:'k11',type:''}),
  w(3),
  P({title:'Onitsuka Tiger 新宿南',hrs:'11:00 - 20:00',q:'オニツカタイガー 新宿南',type:''}),
  w(22),
@@ -286,7 +291,7 @@ const DAYS=[
  w(16),
  P({title:'Alpen Tokyo（Sports wear Disc.）',hrs:'11:00 - 22:00',q:'Sports wear Disc. Alpen Tokyo',type:''}),
  w(8),
- T({title:'JR東日本 山手線',lines:['JY17 新宿 往澀谷・品川方向（內環）','➜ JY19 原宿 東口'],cost:'160日圓（IC卡）',dur:'4分',dir:['新宿駅','原宿駅'],legs:[LG('山手線','#9acd32','新宿','代々木','原宿')],type:''}),
+ T({title:'JR東日本 山手線',lines:['JY17 新宿 往澀谷・品川方向（內環）','➜ JY19 原宿 東口'],cost:'160日圓（IC卡）',dur:'4分',dir:['新宿駅','原宿駅'],rt:'k12',type:''}),
  w(10),
  P({title:'HUMAN MADE TOKYO',hrs:'11:00 - 19:00',q:'HUMAN MADE TOKYO',type:''}),
  P({title:'On Store 東京貓街',hrs:'11:00 - 19:00',q:'On Store 東京キャットストリート',type:''}),
@@ -297,21 +302,21 @@ const DAYS=[
  P({title:'SHIBUYA109',hrs:'10:00 - 21:00',q:'SHIBUYA109',type:''}),
  P({at:'19:30',rem:15,res:1,meal:'晚餐',bk:'nikuya',title:'和牛吃到飽殿堂 肉屋橫丁 澀谷宇田川町店',hrs:'14:00 - 23:00',q:'和牛放題の殿堂 肉屋横丁 渋谷宇田川町店',type:''}),
  w(4),
- T({title:'東京Metro 半藏門線',lines:['Z01 澀谷 往押上方向','➜ Z14 押上 A1出口'],dir:['渋谷駅','押上駅'],legs:[LG('半藏門線','#8f76d6','渋谷','表参道','青山一丁目','永田町','半蔵門','九段下','神保町','大手町','三越前','水天宮前','清澄白河','住吉','錦糸町','押上')],type:''}),
+ T({title:'東京Metro 半藏門線',lines:['Z01 澀谷 往押上方向','➜ Z14 押上 A1出口'],dir:['渋谷駅','押上駅'],rt:'k13',type:''}),
  w(12),
  P({title:'返回飯店',sub:HOTEL,q:'Season Hotel 押上',type:''})
 ],notes:[]},
 
 {d:'2026-10-24',c:'#f0a81c',rgb:'240,168,28',em:'⛵',wd:'六',name:'豐洲・橫濱',start:'08:00',items:[
  w(12),
- T({title:'都營地下鐵 淺草線',lines:['A20 押上 往西馬込・羽田機場・京急線方向','➜ A18 淺草 5號出口'],cost:'180日圓（IC卡）',dur:'3分',dir:['押上駅','浅草駅'],legs:[LG('淺草線','#e85298','押上','本所吾妻橋','浅草')],type:''}),
+ T({title:'都營地下鐵 淺草線',lines:['A20 押上 往西馬込・羽田機場・京急線方向','➜ A18 淺草 5號出口'],cost:'180日圓（IC卡）',dur:'3分',dir:['押上駅','浅草駅'],rt:'k14',type:''}),
  w(1),
  P({at:'08:30',rem:15,res:1,meal:'早餐',bk:'suke6',title:'SUKE6 DINER',hrs:'08:00 - 18:00',q:'SUKE6 DINER 浅草',type:''}),
  w(1),
  P({at:'09:40',rem:10,res:1,bk:'boat',title:'東京都觀光汽船 淺草營業所',sub:'乘船報到',q:'東京都観光汽船 浅草営業所',type:''}),
- T({at:'10:00',rem:10,bk:'boat',title:'東京都觀光汽船 螢月號 HOTALUNA',lines:['10:00 淺草 往台場海濱公園','➜ 11:05 台場海濱公園'],cost:'2,000日圓',dur:'65分',dir:['浅草 東京都観光汽船','お台場海浜公園'],legs:[LG('螢月號（水上巴士）','#00a0e9',[35.7098,139.7985],[35.6978,139.7922],[35.6800,139.7837],[35.6640,139.7770],[35.6500,139.7700],[35.6370,139.7660],[35.6290,139.7745])],type:''}),
+ T({at:'10:00',rem:10,bk:'boat',title:'東京都觀光汽船 螢月號 HOTALUNA',lines:['10:00 淺草 往台場海濱公園','➜ 11:05 台場海濱公園'],cost:'2,000日圓',dur:'65分',dir:['浅草 東京都観光汽船','お台場海浜公園'],type:''}),
  w(5),
- T({title:'百合海鷗號',lines:['U07 台場 往豐洲方向','➜ U14 市場前 2A出口'],cost:'325日圓（IC卡）',dur:'13分',dir:['台場駅','市場前駅'],legs:[LG('百合海鷗號','#1a6fba','台場','青海','有明','市場前')],type:''}),
+ T({title:'百合海鷗號',lines:['U07 台場 往豐洲方向','➜ U14 市場前 2A出口'],cost:'325日圓（IC卡）',dur:'13分',dir:['台場駅','市場前駅'],rt:'k16',type:''}),
  w(3),
  P({grp:'g24',title:'豐洲市場',hrs:'05:00 - 15:00',q:'豊洲市場',type:''}),
  P({grp:'g24',tent:1,meal:'午餐',title:'大和壽司 東京 豐洲市場',hrs:'06:00 - 13:00',q:'大和寿司 東京 豊洲市場',type:''}),
@@ -323,16 +328,16 @@ const DAYS=[
  P({grp:'g24',title:'炸豬排 小田保 場內店',hrs:'06:00 - 14:00',q:'とんかつ小田保 場内店',type:''}),
  P({grp:'g24',title:'鳥藤 豐洲市場店',hrs:'06:30 - 12:40',q:'鳥藤 豊洲市場店',type:''}),
  w(4),
- T({title:'百合海鷗號',lines:['U14 市場前 往豐洲方向','➜ U16 豐洲 1A出口'],cost:'190日圓（IC卡）',dur:'3分',dir:['市場前駅','豊洲駅'],legs:[LG('百合海鷗號','#1a6fba','市場前','新豊洲','豊洲')],type:''}),
+ T({title:'百合海鷗號',lines:['U14 市場前 往豐洲方向','➜ U16 豐洲 1A出口'],cost:'190日圓（IC卡）',dur:'3分',dir:['市場前駅','豊洲駅'],rt:'k17',type:''}),
  w(4),
  P({title:'RINGO 豐洲LaLaport 3店',hrs:'10:00 - 21:00',q:'RINGO ららぽーと豊洲',type:''}),
  w(4),
- T({title:'東京Metro 有樂町線 → JR 前往橫濱',lines:['有樂町線 Y22 豐洲 往和光市方向 ➜ Y18 有樂町 D6出口','JR山手線 JY30 有樂町 往品川・澀谷方向（外環）➜ JY29 新橋','JR東海道線・橫須賀線 JT02 新橋 往品川・橫濱・小田原方向（下行）➜ JT05 橫濱','或 JO18 新橋 往橫濱・鎌倉方向（下行）➜ JO13 橫濱'],cost:'180 + 530日圓（IC卡）',dur:'約32分',dir:['豊洲駅','横浜駅'],legs:[LG('有樂町線','#c1a470','豊洲','月島','新富町','銀座一丁目','有楽町'),LG('山手線','#9acd32','有楽町','新橋'),LG('東海道線','#f68b1e','新橋','品川','川崎','横浜')],type:''}),
+ T({title:'東京Metro 有樂町線 → JR 前往橫濱',lines:['有樂町線 Y22 豐洲 往和光市方向 ➜ Y18 有樂町 D6出口','JR山手線 JY30 有樂町 往品川・澀谷方向（外環）➜ JY29 新橋','JR東海道線・橫須賀線 JT02 新橋 往品川・橫濱・小田原方向（下行）➜ JT05 橫濱','或 JO18 新橋 往橫濱・鎌倉方向（下行）➜ JO13 橫濱'],cost:'180 + 530日圓（IC卡）',dur:'約32分',dir:['豊洲駅','横浜駅'],rt:'k18',type:''}),
  w(4),
  P({bk:'ante',badge:'‼️',title:'Antenor 橫濱崇光店',sub:'‼️ 先付款（19:30 回來取蛋糕）',hrs:'10:00 - 20:00',q:'アンテノール 横浜そごう店',type:''}),
  P({title:'HARBS LUMINE橫濱店',hrs:'10:00 - 20:30',q:'HARBS ハーブス ルミネ横浜店',type:''}),
  w(4),
- T({title:'JR東日本 京濱東北線・根岸線',lines:['JK12 橫濱 往磯子・大船方向（南行）','➜ JK09 石川町 北口'],cost:'200日圓（IC卡）',dur:'7分',dir:['横浜駅','石川町駅'],legs:[LG('京濱東北線','#00b2e5','横浜','桜木町','関内','石川町')],type:''}),
+ T({title:'JR東日本 京濱東北線・根岸線',lines:['JK12 橫濱 往磯子・大船方向（南行）','➜ JK09 石川町 北口'],cost:'200日圓（IC卡）',dur:'7分',dir:['横浜駅','石川町駅'],rt:'k19',type:''}),
  w(7),
  P({title:'橫濱中華街',hrs:'24小時',q:'横浜中華街',type:''}),
  P({title:'皇朝點心舖 本店',hrs:'10:00 - 21:00',q:'皇朝点心舗 本店',type:''}),
@@ -344,12 +349,12 @@ const DAYS=[
  w(7),
  P({at:'19:00',rem:10,title:'🎆 橫濱 Night Flowers（夜間花火）',sub:'女神橋　19:00 - 19:05',badge:'‼️',hrs:'24小時',q:'女神橋 横浜',type:''}),
  w(10),
- T({title:'港未來線',lines:['MM03 港未來 往橫濱・澀谷・池袋方向','➜ MM01 橫濱 西口'],cost:'200日圓（IC卡）',dur:'3分',dir:['みなとみらい駅','横浜駅'],legs:[LG('港未來線','#0e3a8c','みなとみらい','新高島','横浜')],type:''}),
+ T({title:'港未來線',lines:['MM03 港未來 往橫濱・澀谷・池袋方向','➜ MM01 橫濱 西口'],cost:'200日圓（IC卡）',dur:'3分',dir:['みなとみらい駅','横浜駅'],rt:'k20',type:''}),
  w(6),
  P({at:'19:30',rem:10,bk:'ante',badge:'‼️',title:'Antenor 橫濱崇光店・取蛋糕',sub:'‼️ 19:30 取貨（已先付款）',hrs:'10:00 - 20:00',q:'アンテノール 横浜そごう店',type:''}),
  P({at:'20:00',rem:15,res:1,meal:'晚餐',bk:'homura',title:'炎 橫濱店',hrs:'11:00 - 24:00',q:'炎 横浜店',type:''}),
  w(5),
- T({at:'22:42',rem:30,title:'京急電鐵 本線 特急 → 都營淺草線',lines:['22:42 KK37 橫濱 往泉岳寺方向','➜ 23:37 A20 押上 A1出口（直通）'],cost:'619日圓（IC卡）',dur:'51分',dir:['横浜駅','押上駅'],legs:[LG('京急本線','#e5171f','横浜','京急川崎','品川','泉岳寺'),LG('淺草線（直通）','#e85298','泉岳寺','新橋','東銀座','宝町','日本橋','人形町','東日本橋','浅草橋','蔵前','浅草','本所吾妻橋','押上')],type:''}),
+ T({at:'22:42',rem:30,title:'京急電鐵 本線 特急 → 都營淺草線',lines:['22:42 KK37 橫濱 往泉岳寺方向','➜ 23:37 A20 押上 A1出口（直通）'],cost:'619日圓（IC卡）',dur:'51分',dir:['横浜駅','押上駅'],rt:'k21',type:''}),
  w(12),
  P({title:'返回飯店',sub:HOTEL,q:'Season Hotel 押上',type:''})
 ],notes:[]},
@@ -363,7 +368,7 @@ const DAYS=[
  P({title:'東京晴空塔城',hrs:'10:00 - 21:00',q:'東京スカイツリータウン',type:''}),
  P({meal:'午餐',title:'鰻魚三吃 名古屋備長 東京晴空塔城Solamachi店',hrs:'11:00 - 21:00',q:'ひつまぶし 名古屋 備長 東京スカイツリータウン ソラマチ店',type:''}),
  w(5),
- T({at:'12:57',rem:10,title:'京成電鐵 押上線 → 京成本線',lines:['12:57 KS45 押上 往成田機場・成田Sky Access線・北總線方向','➜ 京成本線 14:12 KS40 京成成田 東口'],cost:'800日圓',dur:'80分',dir:['押上駅','京成成田駅'],legs:[LG('押上線・京成本線','#1a5fb4','押上','京成曳舟','青砥','京成高砂','京成船橋','京成津田沼','勝田台','京成佐倉','京成成田')],type:''}),
+ T({at:'12:57',rem:10,title:'京成電鐵 押上線 → 京成本線',lines:['12:57 KS45 押上 往成田機場・成田Sky Access線・北總線方向','➜ 京成本線 14:12 KS40 京成成田 東口'],cost:'800日圓',dur:'80分',dir:['押上駅','京成成田駅'],rt:'k22',type:''}),
  w(5),
  P({title:'‼️ 投幣式置物櫃',sub:'成田站（小 400 / 中 500 / 大 700 日圓）',q:'成田駅 コインロッカー',type:''}),
  P({title:'黑平饅頭本舖 JR成田站前店',hrs:'09:00 - 17:30',q:'黒平饅頭本舗 JR成田駅前店',type:''}),
@@ -375,7 +380,7 @@ const DAYS=[
  w(12),
  P({at:'18:00',rem:15,res:1,grp:'g25',tent:1,bk:'pos',meal:'晚餐',title:'披薩店 Positano',hrs:'17:00 - 24:00',q:'ピッツェリア ポジターノ 成田',type:''}),
  P({at:'18:00',rem:15,res:1,grp:'g25',bk:'fpig',title:'Flying pig N',hrs:'17:30 - 21:00（最後點餐 20:30）',q:'Flying pig N 成田',type:''}),
- T({at:'20:10',rem:10,title:'京成電鐵 京成本線',lines:['20:10 KS40 京成成田 往成田機場方向','➜ 20:16 KS41 機場第2航廈（成田第2・第3航廈）'],cost:'280日圓（IC卡）',dur:'6分',dir:['京成成田駅','空港第2ビル駅'],note:'時刻表見下方 註2',legs:[LG('京成本線','#1a5fb4','京成成田','空港第2ビル')],type:''}),
+ T({at:'20:10',rem:10,title:'京成電鐵 京成本線',lines:['20:10 KS40 京成成田 往成田機場方向','➜ 20:16 KS41 機場第2航廈（成田第2・第3航廈）'],cost:'280日圓（IC卡）',dur:'6分',dir:['京成成田駅','空港第2ビル駅'],note:'時刻表見下方 註2',rt:'k23',type:''}),
  P({title:'I.A.S.S 貴賓室（Executive Lounge）',hrs:'07:00 - 21:00',q:'I.A.S.S Executive Lounge 成田空港',type:''}),
  P({at:'20:25',rem:15,bk:'f2',title:'CHECK IN 報到',badge:'‼️',q:'成田国際空港 第3ターミナル',type:''}),
  P({at:'22:25',rem:15,bk:'f2',title:'✈️ 捷星 Jetstar GK11',sub:'22:25 成田 T3 ➜ 01:30（+1）桃園 T1',q:'成田国際空港 第3ターミナル',note:'行李規定見下方 註3',type:''}),
@@ -417,6 +422,10 @@ const CHECK=[
 ];
 /* ===== 精確座標（選填）：貼上後會覆蓋約略位置。格式：'搜尋用日文名稱（等於該行程的 q）':[緯度,經度] =====
    例：'牛たんの檸檬 浅草店':[35.7123,139.7961],  */
+/* ===== 交通路線（地圖用）：每個交通項目依線路切成一段一段，key 對應行程裡的 rt。
+   資料來源：車站座標＋各線站序（TrainLCD/StationAPI 資料集），線條是「站與站依序相連」的示意路線，不是精確軌道。
+   格式：{n:線名, c:線路顏色, a:起站, b:迄站, s:[[緯度,經度,站名],...]} ===== */
+const RT={"k1":[{"n":"成田Sky Access線","c":"#FF6600","a":"成田空港","b":"京成高砂","s":[[35.76398,140.38464,"成田空港"],[35.77369,140.38716,"空港第2ビル"],[35.79912,140.2916,"成田湯川"],[35.78751,140.20311,"印旛日本医大"],[35.80018,140.11616,"千葉ニュータウン中央"],[35.77948,139.99836,"新鎌ヶ谷"],[35.76995,139.94296,"東松戸"],[35.75093,139.86687,"京成高砂"]]},{"n":"京成押上線","c":"#005AAA","a":"京成高砂","b":"押上","s":[[35.75093,139.86687,"京成高砂"],[35.74588,139.85629,"青砥"],[35.73828,139.84856,"京成立石"],[35.73196,139.83492,"四ツ木"],[35.72769,139.82874,"八広"],[35.71844,139.82001,"京成曳舟"],[35.7107,139.81294,"押上"]]}],"k3":[{"n":"東京Metro 銀座線","c":"#F39700","a":"浅草","b":"京橋","s":[[35.71073,139.79759,"浅草"],[35.7099,139.7909,"田原町"],[35.71127,139.78259,"稲荷町"],[35.71148,139.77712,"上野"],[35.70768,139.77288,"上野広小路"],[35.70297,139.77171,"末広町"],[35.69359,139.7709,"神田"],[35.6871,139.77359,"三越前"],[35.68208,139.77352,"日本橋"],[35.67686,139.77013,"京橋"]]}],"k4":[{"n":"東京Metro 丸之內線","c":"#E60012","a":"東京","b":"大手町","s":[[35.68175,139.76471,"東京"],[35.68656,139.7662,"大手町"]]},{"n":"東京Metro 半藏門線","c":"#9B7CB6","a":"大手町","b":"押上","s":[[35.68686,139.76411,"大手町"],[35.68491,139.77315,"三越前"],[35.68268,139.78538,"水天宮前"],[35.6821,139.79885,"清澄白河"],[35.68907,139.81568,"住吉"],[35.69758,139.81494,"錦糸町"],[35.7107,139.81294,"押上"]]}],"k5":[{"n":"都營淺草線","c":"#EC6E65","a":"押上","b":"人形町","s":[[35.7107,139.81294,"押上"],[35.70858,139.80462,"本所吾妻橋"],[35.70946,139.79697,"浅草"],[35.70324,139.79093,"蔵前"],[35.69745,139.7863,"浅草橋"],[35.69213,139.78482,"東日本橋"],[35.68631,139.78229,"人形町"]]}],"k6":[{"n":"東京Metro 日比谷線","c":"#9CAEB7","a":"人形町","b":"八丁堀","s":[[35.68631,139.78229,"人形町"],[35.67975,139.78,"茅場町"],[35.67485,139.77698,"八丁堀"]]}],"k7":[{"n":"JR 京葉線","c":"#C9242F","a":"八丁堀","b":"舞浜","s":[[35.67462,139.7777,"八丁堀"],[35.66795,139.79271,"越中島"],[35.6587,139.81734,"潮見"],[35.64617,139.8274,"新木場"],[35.64439,139.86153,"葛西臨海公園"],[35.63611,139.88371,"舞浜"]]}],"k8":[{"n":"迪士尼度假區線","c":"#004499","a":"ベイサイド・ステーション","b":"東京ディズニーシー・ステーション","s":[[35.6281,139.87681,"ベイサイド・ステーション"],[35.62761,139.88951,"東京ディズニーシー・ステーション"]]}],"k9":[{"n":"JR 京葉線","c":"#C9242F","a":"舞浜","b":"八丁堀","s":[[35.63611,139.88371,"舞浜"],[35.64439,139.86153,"葛西臨海公園"],[35.64617,139.8274,"新木場"],[35.6587,139.81734,"潮見"],[35.66795,139.79271,"越中島"],[35.67462,139.7777,"八丁堀"]]}],"k10":[{"n":"都營淺草線","c":"#EC6E65","a":"宝町","b":"押上","s":[[35.67546,139.77177,"宝町"],[35.68169,139.77572,"日本橋"],[35.68631,139.78229,"人形町"],[35.69213,139.78482,"東日本橋"],[35.69745,139.7863,"浅草橋"],[35.70324,139.79093,"蔵前"],[35.70946,139.79697,"浅草"],[35.70858,139.80462,"本所吾妻橋"],[35.7107,139.81294,"押上"]]}],"k11":[{"n":"都營淺草線","c":"#EC6E65","a":"押上","b":"東日本橋","s":[[35.7107,139.81294,"押上"],[35.70858,139.80462,"本所吾妻橋"],[35.70946,139.79697,"浅草"],[35.70324,139.79093,"蔵前"],[35.69745,139.7863,"浅草橋"],[35.69213,139.78482,"東日本橋"]]},{"n":"都營新宿線","c":"#B0BF1E","a":"馬喰横山","b":"新宿三丁目","s":[[35.69212,139.78277,"馬喰横山"],[35.69553,139.77587,"岩本町"],[35.69506,139.76667,"小川町"],[35.69597,139.75761,"神保町"],[35.69559,139.75195,"九段下"],[35.69156,139.73764,"市ヶ谷"],[35.6924,139.72288,"曙橋"],[35.69062,139.70627,"新宿三丁目"]]}],"k12":[{"n":"JR 山手線","c":"#80C241","a":"新宿","b":"原宿","s":[[35.68973,139.70046,"新宿"],[35.68306,139.70204,"代々木"],[35.67065,139.70259,"原宿"]]}],"k13":[{"n":"東京Metro 半藏門線","c":"#9B7CB6","a":"渋谷","b":"押上","s":[[35.65907,139.701,"渋谷"],[35.66525,139.71231,"表参道"],[35.67276,139.72416,"青山一丁目"],[35.67876,139.74026,"永田町"],[35.6857,139.74163,"半蔵門"],[35.69559,139.75195,"九段下"],[35.69597,139.75761,"神保町"],[35.68686,139.76411,"大手町"],[35.68491,139.77315,"三越前"],[35.68268,139.78538,"水天宮前"],[35.6821,139.79885,"清澄白河"],[35.68907,139.81568,"住吉"],[35.69758,139.81494,"錦糸町"],[35.7107,139.81294,"押上"]]}],"k14":[{"n":"都營淺草線","c":"#EC6E65","a":"押上","b":"浅草","s":[[35.7107,139.81294,"押上"],[35.70858,139.80462,"本所吾妻橋"],[35.70946,139.79697,"浅草"]]}],"k16":[{"n":"百合海鷗號","c":"#00418E","a":"台場","b":"市場前","s":[[35.62591,139.77143,"台場"],[35.62146,139.77316,"東京国際クルーズターミナル"],[35.61759,139.77933,"テレコムセンター"],[35.62467,139.78113,"青海"],[35.63016,139.79123,"東京ビッグサイト"],[35.6346,139.79327,"有明"],[35.63996,139.78888,"有明テニスの森"],[35.64568,139.78564,"市場前"]]}],"k17":[{"n":"百合海鷗號","c":"#00418E","a":"市場前","b":"豊洲","s":[[35.64568,139.78564,"市場前"],[35.64872,139.79,"新豊洲"],[35.65379,139.79541,"豊洲"]]}],"k18":[{"n":"東京Metro 有樂町線","c":"#C1A470","a":"豊洲","b":"有楽町","s":[[35.65491,139.79621,"豊洲"],[35.66487,139.78423,"月島"],[35.67046,139.77371,"新富町"],[35.67435,139.76704,"銀座一丁目"],[35.67571,139.76326,"有楽町"]]},{"n":"JR 山手線","c":"#80C241","a":"有楽町","b":"新橋","s":[[35.67544,139.76381,"有楽町"],[35.6662,139.75859,"新橋"]]},{"n":"JR 東海道線","c":"#F68B1E","a":"新橋","b":"横浜","s":[[35.6662,139.75859,"新橋"],[35.62876,139.739,"品川"],[35.53131,139.69749,"川崎"],[35.46619,139.6227,"横浜"]]}],"k19":[{"n":"JR 京濱東北線・根岸線","c":"#00B2E5","a":"横浜","b":"石川町","s":[[35.46619,139.6227,"横浜"],[35.45111,139.63088,"桜木町"],[35.44334,139.63698,"関内"],[35.43881,139.64293,"石川町"]]}],"k20":[{"n":"港未來線","c":"#013274","a":"みなとみらい","b":"横浜","s":[[35.45803,139.63239,"みなとみらい"],[35.46192,139.6265,"新高島"],[35.46637,139.6223,"横浜"]]}],"k21":[{"n":"京急本線","c":"#00CCFF","a":"横浜","b":"泉岳寺","s":[[35.46607,139.62305,"横浜"],[35.4713,139.62736,"神奈川"],[35.47741,139.63467,"京急東神奈川"],[35.48156,139.64015,"神奈川新町"],[35.48456,139.64497,"子安"],[35.48724,139.65585,"京急新子安"],[35.4956,139.6673,"生麦"],[35.50036,139.67281,"花月総持寺"],[35.50703,139.67774,"京急鶴見"],[35.51759,139.68642,"鶴見市場"],[35.52305,139.69135,"八丁畷"],[35.53285,139.70089,"京急川崎"],[35.54058,139.7076,"六郷土手"],[35.54973,139.715,"雑色"],[35.5608,139.72368,"京急蒲田"],[35.56687,139.72827,"梅屋敷"],[35.57243,139.73203,"大森町"],[35.57868,139.73491,"平和島"],[35.58758,139.73544,"大森海岸"],[35.59849,139.73889,"立会川"],[35.60498,139.74223,"鮫洲"],[35.60935,139.74296,"青物横丁"],[35.61762,139.74137,"新馬場"],[35.62246,139.73919,"北品川"],[35.62828,139.73809,"品川"],[35.63869,139.74002,"泉岳寺"]]},{"n":"都營淺草線","c":"#EC6E65","a":"泉岳寺","b":"押上","s":[[35.63869,139.74002,"泉岳寺"],[35.64818,139.74877,"三田"],[35.65678,139.75466,"大門"],[35.66558,139.75945,"新橋"],[35.66946,139.76725,"東銀座"],[35.67546,139.77177,"宝町"],[35.68169,139.77572,"日本橋"],[35.68631,139.78229,"人形町"],[35.69213,139.78482,"東日本橋"],[35.69745,139.7863,"浅草橋"],[35.70324,139.79093,"蔵前"],[35.70946,139.79697,"浅草"],[35.70858,139.80462,"本所吾妻橋"],[35.7107,139.81294,"押上"]]}],"k22":[{"n":"京成押上線","c":"#005AAA","a":"押上","b":"京成高砂","s":[[35.7107,139.81294,"押上"],[35.71844,139.82001,"京成曳舟"],[35.72769,139.82874,"八広"],[35.73196,139.83492,"四ツ木"],[35.73828,139.84856,"京成立石"],[35.74588,139.85629,"青砥"],[35.75093,139.86687,"京成高砂"]]},{"n":"京成本線","c":"#005AAA","a":"京成高砂","b":"京成成田","s":[[35.75093,139.86687,"京成高砂"],[35.74216,139.88371,"京成小岩"],[35.73772,139.89623,"江戸川"],[35.7363,139.90322,"国府台"],[35.73121,139.91172,"市川真間"],[35.72827,139.91941,"菅野"],[35.72381,139.92816,"京成八幡"],[35.71978,139.93793,"鬼越"],[35.717,139.9442,"京成中山"],[35.71439,139.95268,"東中山"],[35.71163,139.95886,"京成西船"],[35.70589,139.97189,"海神"],[35.70016,139.98545,"京成船橋"],[35.69394,139.99143,"大神宮下"],[35.68961,139.998,"船橋競馬場"],[35.68526,140.00766,"谷津"],[35.68364,140.02482,"京成津田沼"],[35.68602,140.04863,"京成大久保"],[35.68685,140.06829,"実籾"],[35.70146,140.09094,"八千代台"],[35.71231,140.10858,"京成大和田"],[35.71545,140.12605,"勝田台"],[35.71741,140.14498,"志津"],[35.7218,140.15635,"ユーカリが丘"],[35.73002,140.1808,"京成臼井"],[35.72521,140.22963,"京成佐倉"],[35.72991,140.25079,"大佐倉"],[35.73687,140.27013,"京成酒々井"],[35.75267,140.28098,"宗吾参道"],[35.76045,140.2949,"公津の杜"],[35.77631,140.31547,"京成成田"]]}],"k23":[{"n":"京成本線","c":"#005AAA","a":"京成成田","b":"空港第2ビル","s":[[35.77631,140.31547,"京成成田"],[35.77369,140.38716,"空港第2ビル"]]}]};
 const LL={
  'Season Hotel 押上':[35.71053554606709,139.81979706040775],
  'モスバーガー押上店':[35.710237459147216,139.81464614514778],
@@ -592,7 +601,7 @@ function renderTabs(){
 }
 function actions(it){let a='';
   if(it.bk)a+=`<button data-bk="${it.bk}">📄 預訂資料</button>`;
-  if(it.ll)a+=`<button data-map="${it.id}">🗺️ 在地圖上看</button>`;
+  if(it.ll||RT[it.rt])a+=`<button data-map="${it.id}">🗺️ 在地圖上看</button>`;
   if(it.dir)a+=`<a href="${dirUrl(it.dir[0],it.dir[1])}" target="_blank" rel="noopener">🚉 路線</a>`;
   if(it.q)a+=`<a href="${mapUrl(it.q)}" target="_blank" rel="noopener">📍 Google 地圖</a>`;
   return a?`<div class="acts">${a}</div>`:''}
@@ -688,7 +697,7 @@ function dayModel(day){
     const key=it.ll.join(',');let g=by[key];
     if(!g){g=by[key]={key,ll:it.ll,items:[],n:groups.length+1,name:it.gn};groups.push(g)}
     g.items.push(it);rows.push({it,g});
-    if(prev&&prev!==g)edges.push({a:prev,b:g,t:mv,mvs});
+    if(prev&&prev!==g)edges.push({a:prev,b:g,t:mv,rt:mvs.length>0&&mvs.every(m=>RT[m.rt])});
     prev=g;mv=false;mvs=[];
   });
   return {groups,edges,rows};
@@ -716,25 +725,40 @@ async function showMap(day){
     L.tileLayer(TILE(),{maxNativeZoom:18,maxZoom:19,attribution:'<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>'}).addTo(mapObj);
     $('#mapview').classList.toggle('dk',darkMap());
     mapLayer=L.layerGroup().addTo(mapObj);
+    mapObj.on('zoomend',()=>$('#map').classList.toggle('lowz',mapObj.getZoom()<13));
   }
   mapObj.invalidateSize();
   drawMap(day);buildSheet(day);setSheet(sheetS,false);
   if(refit){refit=false;fitDay()}
   if(pendingFocus){const p=pendingFocus;pendingFocus=null;setTimeout(()=>focusItem(p.id,p.popup),80)}
 }
+let mapRtB={},mapRtP={};
+function drawRoutes(day){
+  mapRtB={};mapRtP={};
+  day.items.forEach(it=>{
+    const legs=it.k==='move'&&RT[it.rt];if(!legs)return;
+    const all=[],done=isDone(it.id);let prevEnd=null;
+    legs.forEach(lg=>{
+      const pts=lg.s.map(p=>[p[0],p[1]]);all.push(...pts);
+      if(prevEnd&&dist(prevEnd[0],prevEnd[1],pts[0][0],pts[0][1])>40)
+        L.polyline([prevEnd,pts[0]],{color:'#6a7c93',weight:3,opacity:.9,dashArray:'2 7',interactive:false}).addTo(mapLayer);
+      L.polyline(pts,{color:'#fff',weight:9,opacity:done?.5:.95,lineCap:'round',lineJoin:'round',interactive:false}).addTo(mapLayer);
+      const pl=L.polyline(pts,{color:lg.c,weight:5,opacity:done?.45:.95,lineCap:'round',lineJoin:'round'}).addTo(mapLayer);
+      pl.bindPopup(`<div class="ph" style="color:${lg.c}">${esc(lg.n)}</div><div style="font-weight:700">${esc(lg.a)} ➜ ${esc(lg.b)}</div><div class="meta">${lg.s.length-1} 站${it.at?'｜'+it.at+' 發':''}${it.dur?'｜'+(legs.length>1?'全程 ':'')+esc(it.dur):''}${it.cost?'｜'+esc(it.cost):''}</div>`);
+      lg.s.forEach((q,i)=>{const end=i===0||i===lg.s.length-1;
+        L.circleMarker([q[0],q[1]],{radius:end?6:3.5,color:lg.c,weight:end?4:2.5,fillColor:'#fff',fillOpacity:1}).addTo(mapLayer)
+          .bindTooltip(esc(q[2]),end?{permanent:true,direction:'top',offset:[0,-6],className:'rtt'}:{direction:'top',offset:[0,-4],className:'rtt'})});
+      if(!mapRtP[it.id])mapRtP[it.id]=pl;
+      prevEnd=pts[pts.length-1];
+    });
+    mapRtB[it.id]=L.latLngBounds(all);
+  });
+}
 function drawMap(day){
   const M=dayModel(day);mapM=M;mapLayer.clearLayers();mapMarkers={};
-  M.edges.forEach(e=>{if(dist(e.a.ll[0],e.a.ll[1],e.b.ll[0],e.b.ll[1])>300000)return;
-    const lg=[];(e.mvs||[]).forEach(m=>(m.legs||[]).forEach(l=>lg.push(l)));
-    if(!lg.length){L.polyline([e.a.ll,e.b.ll],{color:day.c,weight:e.t?4:3,opacity:.8,dashArray:e.t?null:'6 8'}).addTo(mapLayer);return}
-    /* 有轉乘路線：每一段（每條線）各畫一條，段與段、起訖點之間用虛線（步行）銜接 */
-    const walk=(a,b)=>{if(dist(a[0],a[1],b[0],b[1])>20)L.polyline([a,b],{color:day.c,weight:3,opacity:.8,dashArray:'6 8'}).addTo(mapLayer)};
-    let cur=e.a.ll;
-    lg.forEach(l=>{walk(cur,l.p[0]);
-      L.polyline(l.p,{color:'#fff',weight:8,opacity:.9}).addTo(mapLayer);
-      L.polyline(l.p,{color:l.c,weight:5,opacity:1}).addTo(mapLayer).bindTooltip(l.n,{sticky:true});
-      cur=l.p[l.p.length-1]});
-    walk(cur,e.b.ll)});
+  M.edges.forEach(e=>{if(e.rt)return;if(dist(e.a.ll[0],e.a.ll[1],e.b.ll[0],e.b.ll[1])>300000)return;
+    L.polyline([e.a.ll,e.b.ll],{color:day.c,weight:e.t?4:3,opacity:.8,dashArray:e.t?null:'6 8'}).addTo(mapLayer)});
+  drawRoutes(day);
   M.groups.forEach(g=>{
     const all=g.items.every(i=>isDone(i.id)),now=liveInfo&&g.items.some(i=>i.id===liveInfo.item.id),nx=!liveInfo&&g.items.some(i=>i.id===curNext)&&!all;
     const icon=L.divIcon({className:'',iconSize:[32,32],iconAnchor:[16,16],popupAnchor:[0,-18],
@@ -747,6 +771,7 @@ function drawMap(day){
 }
 function fitDay(){
   let pts=mapM.groups.filter(g=>g.ll[0]>30).map(g=>g.ll);
+  DAYS[cur].items.forEach(i=>{if(i.k==='move'&&RT[i.rt])RT[i.rt].forEach(l=>l.s.forEach(q=>pts.push([q[0],q[1]])))}); /* 路線經過的車站也納入縮放範圍 */
   if(!pts.length){mapObj.setView([35.68,139.77],11);return}
   /* 離群點（例如成田機場）不納入縮放範圍，避免市區的點擠在一起 */
   const med=a=>[...a].sort((x,y)=>x-y)[Math.floor(a.length/2)],mc=[med(pts.map(p=>p[0])),med(pts.map(p=>p[1]))];
@@ -756,6 +781,7 @@ function fitDay(){
 }
 function focusItem(id,popup){
   if(!mapObj||!mapM||!id)return;
+  if(mapRtB[id]){mapObj.flyToBounds(mapRtB[id],{paddingTopLeft:[24,24],paddingBottomRight:[24,110],maxZoom:15,duration:.6});const pl=mapRtP[id];if(popup&&pl)setTimeout(()=>pl.openPopup(),700);return}
   const g=mapM.groups.find(g=>g.items.some(i=>i.id===id));if(!g)return;
   mapObj.flyTo(g.ll,Math.max(mapObj.getZoom(),16),{duration:.6});
   const mk=mapMarkers[g.key];if(popup&&mk)setTimeout(()=>mk.openPopup(),700);
@@ -841,6 +867,7 @@ document.addEventListener('click',e=>{
   if(!t)return;
   if('menu' in t.dataset){const m=menuEl();m.hidden=!m.hidden;const r=t.getBoundingClientRect();m.style.top=(r.bottom+6)+'px'}
   else if(t.dataset.m==='notif'){menuEl().hidden=true;askNotif()}
+  else if(t.dataset.m==='tour'){menuEl().hidden=true;openTour()}
   else if(t.dataset.m)openView(t.dataset.m);
   else if(t.dataset.bk)openView('book',t.dataset.bk);
   else if(t.id==='vback')closeView();
@@ -885,7 +912,111 @@ if('serviceWorker' in navigator){
 }
 let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden)hiddenAt=Date.now();else if(hiddenAt&&Date.now()-hiddenAt>5*60e3)startLive()});
+
+/* ============ 使用教學（聚光燈導覽） ============
+   教學是依「畫面上的按鈕」定位（選擇器），不是依行程內容寫死的，所以之後改行程不用重做教學；
+   只有在你改了「按鈕／版面本身」時才需要來調整下面的 TS。畫面上找不到的步驟會自動跳過（例如某天沒有項目）。
+   sel：要框住的元素（選擇器或函式）　act：有這行字的步驟，使用者可以真的點高亮處（within＝點到哪裡算完成）
+   pre：進入這步前先整理畫面　miss:'center'：找不到元素時改成置中說明　when：回傳 false 就略過此步 */
+const isStandalone=()=>!!(navigator.standalone||matchMedia('(display-mode: standalone)').matches);
+const isIOS=()=>/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const installText=()=>isIOS()
+  ?'1. 請用 Safari 開啟這個網頁（其他瀏覽器不能加入）\n2. 點瀏覽器的「分享」圖示（方框加向上箭頭，iPhone 在畫面下方、iPad 在右上）\n3. 往下滑，選「加入主畫面」\n4. 按右上角「新增」\n之後從主畫面的圖示開啟，就會像 App 一樣全螢幕，行程有更新時也會自動載入新版。'
+  :/Android/.test(navigator.userAgent)
+  ?'1. 請用 Chrome 開啟這個網頁\n2. 點右上角「⋮」選單\n3. 選「安裝應用程式」或「加到主畫面」\n4. 按「安裝／新增」\n之後從主畫面的圖示開啟，就會像 App 一樣全螢幕，行程有更新時也會自動載入新版。'
+  :'手機：iPhone 用 Safari 點「分享」→「加入主畫面」；Android 用 Chrome 點「⋮」→「安裝應用程式」。\n電腦：Chrome／Edge 網址列右側的「安裝」圖示。\n加入後就能像 App 一樣從桌面開啟。';
+const TS=[
+ {t:'歡迎使用東京行程 👋',x:'接下來先教你把它放到手機桌面變成 App，再直接在實際畫面上帶你操作一遍，約 1–2 分鐘。\n每一步都可以按「結束教學」離開，之後也能從選單 ☰ →「使用教學」重看。'},
+ {when:()=>!isStandalone(),t:'📲 加到桌面變成 App',x:installText,act:'瀏覽器的按鈕在網頁之外，沒辦法框起來，請依上面步驟操作；完成後再回到這裡按「下一步」。'},
+ {sel:'#tabs',pre:forceList,t:'📅 切換日期',x:'每一天一個分頁。打開 App 會自動跳到今天，出發前則顯示第一天。',act:'👆 請點一下其他日期試試',within:'#tabs'},
+ {sel:'.dayhead',pre:forceList,t:'當天概況',x:'這裡有出發時間和完成進度條，走到哪、做完幾項一眼就知道。'},
+ {sel:'.card .chk',pre:forceList,t:'✅ 標記完成',x:'走完一站就點這個圓形 ✓，進度條會前進。完成的項目會縮成一列，點它可以取消。'},
+ {sel:'.card .acts',pre:forceList,t:'🧭 路線與預訂資料',x:'🚉 路線：開啟 Google 地圖的大眾運輸路線\n📍 Google 地圖：查看該地點\n📄 預訂資料：查看並記錄訂位代號'},
+ {sel:()=>$('.where')||$('#fab'),miss:'center',t:'📍 現在在哪一站',x:'旅途中按「現在」，會依時間與你的位置找出目前該在的那一站（第一次會詢問定位權限，允許後更準）。出發前還看不到這個按鈕，出發後就會出現。'},
+ {sel:'[data-seg=map]',pre:forceList,t:'🗺️ 地圖模式',x:'切到地圖，看當天路線與每個地點；搭車的路線會依各線畫出來。',act:'👆 請點一下「地圖」',within:'[data-seg=map]'},
+ {sel:'#sheet',pre:forceMap,miss:'center',t:'地點面板',x:'編號對應行程順序，點標記可看詳情、導航、標記完成。往上拖曳這個面板可展開清單。'},
+ {sel:'[data-seg=list]',pre:forceMap,t:'回到列表',x:'要回到時間軸，就點「列表」。',act:'👆 請點一下「列表」',within:'[data-seg=list]'},
+ {sel:'.tools',pre:forceList,t:'🧰 本日工具',x:'在每天頁面最下方：隱藏／顯示已完成項目、重置本日勾選。'},
+ {sel:'#menuBtn',pre:forceList,t:'☰ 選單',x:'通知、清單、預訂資料都收在這裡。',act:'👆 請點一下開啟選單',within:'[data-menu]'},
+ {sel:'#menu',pre:openMenuForTour,t:'選單內容',x:'🔔 開啟通知：事件前依各項設定提前提醒\n✅ 出發前清單\n📋 已預訂：可記訂位代號，只存在這支手機\n❓ 使用教學：隨時重看'},
+ {t:'準備出發 ✈️',x:'祝旅途愉快！之後想重看，點選單 ☰ →「使用教學」。'}
+];
+let tourI=0,tourSeen=false,tourCur=0,tourMode='list',tourTimer=null,tourTok=0;
+const tvis=e=>!!e&&e.getClientRects().length>0;
+function tgt(s){if(!s||!s.sel)return null;const e=typeof s.sel==='function'?s.sel():$(s.sel);return tvis(e)?e:null}
+function forceList(){if(mode==='map'){mode='list';store.set('view','list');refit=true;render()}scrollTo(0,0)}
+function forceMap(){if(mode!=='map'){mode='map';store.set('view','map');refit=true;render()}}
+function openMenuForTour(){forceList();const m=menuEl();if(m.hidden){const r=$('#menuBtn').getBoundingClientRect();m.hidden=false;m.style.top=(r.bottom+6)+'px'}}
+function tourShow(dir){
+  const tok=++tourTok;let i=tourI;
+  for(;;){
+    if(i<0){i=0;dir=1;continue}
+    if(i>=TS.length){tourClose();return}
+    const s=TS[i];
+    if(s.when&&!s.when()){i+=dir;continue}
+    if(s.sel!=='#menu')menuEl().hidden=true;
+    if(s.pre)s.pre();
+    if(!s.sel||tgt(s)||s.miss==='center')break;
+    i+=dir;
+  }
+  tourI=i;const el=tgt(TS[i]);
+  if(el&&(el.closest('#main')||el.closest('.tools')))el.scrollIntoView({block:'center'});
+  tourDraw();tourPos();setTimeout(tourPos,250);setTimeout(tourPos,800);
+}
+function tourDraw(){
+  const s=TS[tourI],last=tourI===TS.length-1,X=typeof s.x==='function'?s.x():s.x;
+  $('#ttip').innerHTML=`<i class="tarr" id="tarr"></i><div class="tn">${tourI+1} / ${TS.length}</div><div class="tt">${esc(s.t)}</div><div class="tx">${esc(X).replace(/\n/g,'<br>')}</div>${s.act?`<div class="tact">${esc(s.act)}</div>`:''}
+  <div class="tbtn">${tourI>0?'<button data-tour="prev">上一步</button>':''}<button class="pri" data-tour="next">${last?'開始使用 ✈️':tourI===0?'開始':s.act&&s.within?'略過這步':'下一步'}</button></div>${last?'':'<button class="tskip" data-tour="skip">結束教學</button>'}`;
+}
+function tourPos(){
+  const root=$('#tour');if(root.hidden)return;
+  const s=TS[tourI],el=tgt(s),vw=innerWidth,vh=innerHeight,B=root.querySelectorAll('.tb'),sp=$('#tspot'),tip=$('#ttip'),ar=$('#tarr');
+  const box=(b,l,t,w,h)=>{b.style.cssText=`left:${l}px;top:${t}px;width:${Math.max(0,w)}px;height:${Math.max(0,h)}px`};
+  B[0].classList.toggle('dim',!el);
+  if(!el){
+    B.forEach((b,n)=>{if(n===0)box(b,0,0,vw,vh);else b.style.cssText='display:none'});
+    sp.style.display='none';tip.style.cssText='left:50%;top:50%;transform:translate(-50%,-50%)';if(ar)ar.style.display='none';return;
+  }
+  const r=el.getBoundingClientRect(),p=s.pad??8;
+  const L=Math.max(0,r.left-p),T=Math.max(0,r.top-p),R=Math.min(vw,r.right+p),Bt=Math.min(vh,r.bottom+p);
+  sp.style.cssText=`left:${L}px;top:${T}px;width:${R-L}px;height:${Bt-T}px`;
+  box(B[0],0,0,vw,T);box(B[1],0,Bt,vw,vh-Bt);box(B[2],0,T,L,Bt-T);box(B[3],R,T,vw-R,Bt-T);
+  if(s.within)B[4].style.cssText='display:none';else box(B[4],L,T,R-L,Bt-T);
+  const tw=tip.offsetWidth,th=tip.offsetHeight,below=vh-Bt,above=T;let top,up=false;
+  if(below>=th+18||below>=above)top=Bt+12;else{top=T-th-12;up=true}
+  top=Math.min(Math.max(8,top),vh-th-8);
+  const left=Math.min(Math.max(12,(L+R)/2-tw/2),vw-tw-12);
+  tip.style.cssText=`left:${left}px;top:${top}px`;
+  if(ar){const ov=!(top+th<=T||top>=Bt);ar.style.display=ov?'none':'block';ar.className='tarr '+(up?'dn':'up');ar.style.left=Math.min(Math.max(14,(L+R)/2-left-8),tw-30)+'px'}
+}
+function openTour(){
+  tourCur=cur;tourMode=mode;menuEl().hidden=true;if(!$('#view').hidden)closeView();
+  forceList();tourI=0;$('#tour').hidden=false;clearInterval(tourTimer);tourTimer=setInterval(tourPos,400);tourShow(1);
+}
+function tourClose(){
+  $('#tour').hidden=true;clearInterval(tourTimer);tourTok++;menuEl().hidden=true;tourSeen=true;store.set('tour','1');
+  cur=tourCur;mode=tourMode;store.set('view',mode);refit=true;render();scrollTo(0,0);
+  if(mode==='list'&&liveDayIdx()>=0)goNow(false);
+}
+/* 捕獲階段：教學層上的點擊只給教學用；點在「高亮處」的真實操作照常執行，執行後自動進到下一步 */
+document.addEventListener('click',e=>{
+  if($('#tour').hidden)return;
+  if(e.target.closest('#tour')){
+    e.stopPropagation();e.preventDefault();
+    const t=e.target.closest('[data-tour]');if(!t)return;
+    const a=t.dataset.tour;
+    if(a==='next'){if(tourI>=TS.length-1)tourClose();else{tourI++;tourShow(1)}}
+    else if(a==='prev'&&tourI>0){tourI--;tourShow(-1)}
+    else if(a==='skip')tourClose();
+    return;
+  }
+  const s=TS[tourI];
+  if(s&&s.within&&e.target.closest(s.within)){const tk=tourTok;setTimeout(()=>{if(tk===tourTok&&!$('#tour').hidden){tourI++;tourShow(1)}},500)}
+},true);
+addEventListener('resize',tourPos);
+addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#tour').hidden)tourClose()});
 startLive();
+if(!tourSeen&&store.get('tour')!=='1')setTimeout(openTour,400);
 </script>
 </body>
 </html>
