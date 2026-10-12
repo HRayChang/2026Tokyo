@@ -7,14 +7,22 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="東京行程">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#f7b3cd" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#1d1631" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7b3cd">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>東京行程</title>
+<script>
+/* 依裝置當地時間切換主題：17:00～隔天 05:00 深色，其餘淺色（改 DARK_FROM / DARK_TO 即可調整） */
+const DARK_FROM=17,DARK_TO=5;
+function applyTheme(){const h=new Date().getHours(),d=h>=DARK_FROM||h<DARK_TO,r=document.documentElement;
+  if(r.classList.contains('dark')!==d){r.classList.toggle('dark',d);const mv=document.getElementById('mapview');if(mv)mv.classList.toggle('dk',d)}}
+applyTheme();setInterval(applyTheme,60000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)applyTheme()});
+</script>
+
 <style>
 :root{--bg:#fdf3f8;--bgs:rgba(255,246,251,.94);--bgimg:linear-gradient(180deg,#fff3f9,#f5eefc 55%,#eaf5fd);--card:#ffffff;--cardA:rgba(255,255,255,.92);--tx:#4d3b63;--sub:#7f6f96;--line:#f2e2ee;--ac:#e5709a;--acrgb:229,112,154;--green:#4fbf94;--blue:#6d8cff;--warn:#fff4dc;--warntx:#8a5f1a;--shadow:0 6px 20px rgba(214,140,190,.18)}
-@media(prefers-color-scheme:dark){:root{--bg:#1d1631;--bgs:rgba(29,22,49,.94);--bgimg:linear-gradient(180deg,#241a3d,#1d1631 60%,#16213a);--card:#2a2144;--cardA:rgba(42,33,68,.92);--tx:#f6ecff;--sub:#b9a9d4;--line:#3d3159;--blue:#9db4ff;--warn:#3a2f18;--warntx:#ffd98a;--shadow:0 6px 20px rgba(0,0,0,.35)}}
+@media all{html.dark{--bg:#1d1631;--bgs:rgba(29,22,49,.94);--bgimg:linear-gradient(180deg,#241a3d,#1d1631 60%,#16213a);--card:#2a2144;--cardA:rgba(42,33,68,.92);--tx:#f6ecff;--sub:#b9a9d4;--line:#3d3159;--blue:#9db4ff;--warn:#3a2f18;--warntx:#ffd98a;--shadow:0 6px 20px rgba(0,0,0,.35)}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;color:var(--tx);font:16px/1.45 -apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif}
 body{background:var(--bg) linear-gradient(180deg,rgba(120,190,240,.28),rgba(120,190,240,0) 420px) no-repeat}
@@ -179,7 +187,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   radial-gradient(60% 38% at 95% 20%,rgba(205,192,255,.5),transparent 70%),
   radial-gradient(80% 42% at 50% 100%,rgba(172,226,250,.5),transparent 70%),
   var(--bgimg)}
-@media(prefers-color-scheme:dark){body::before{opacity:.55}}
+html.dark body::before{opacity:.55}
 ::selection{background:rgba(var(--acrgb),.25)}
 html,body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;letter-spacing:.01em}
 .banner{border-radius:0 0 36px 36px;box-shadow:0 12px 30px rgba(229,112,154,.28)}
@@ -219,7 +227,7 @@ html,body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans 
 .grp-body{border-left:3px dotted rgba(var(--acrgb),.4)}
 .where{border-radius:22px;background:rgba(var(--acrgb),.12)}
 .donerow{border-radius:20px;background:rgba(255,255,255,.45)}
-@media(prefers-color-scheme:dark){.donerow{background:rgba(255,255,255,.05)}}
+html.dark .donerow{background:rgba(255,255,255,.05)}
 details{border-radius:22px;border:1.5px solid rgba(var(--acrgb),.12)}
 .tools button{border-radius:999px;padding:11px 16px;font-weight:600}
 .empty{font-weight:600}
@@ -779,7 +787,7 @@ function ensureLeaflet(){
     const sc=document.createElement('script');sc.src=LF_JS;sc.onload=ok;sc.onerror=()=>{lfp=null;no()};document.head.appendChild(sc)});
   return lfp;
 }
-const darkMap=()=>matchMedia('(prefers-color-scheme: dark)').matches;
+const darkMap=()=>document.documentElement.classList.contains('dark');
 const TILE=()=>'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'; /* 國土地理院 淡色地圖：免金鑰、日本全區、地名為日文 */
 function dayModel(day){
   const groups=[],by={},edges=[],rows=[];let prev=null,mv=false,mvs=[];
@@ -987,7 +995,7 @@ function fwMake(c,W,H){
   const launch=kind=>{let tx,ty,vy=-(H*.017+R()*2);
     if(kind==='mickey'){tx=W/2;ty=H*.32;vy=-(H*.015)}
     else{tx=R()<.5?W*(.08+.2*R()):W*(.72+.2*R());ty=H*(.12+.38*R())}
-    rk.push({x:kind==='mickey'?tx:tx+(R()-.5)*40,y:H+8,tx,ty,kind,vy,ax:0,ay:H+8})};
+    rk.push({x:kind==='mickey'?tx:tx+(R()-.5)*40,y:H+8,tx,ty,kind,vy,ax:0,ay:H+8,sy:H+8})};
   const add=(x,y,vx,vy,col,o)=>{o=o||{};const life=o.life||(70+R()*30);pt.push({x,y,tx:x,ty:y,vx,vy,col,life,max:life,fr:o.fr||.965,g:o.g==null?.045:o.g,w:o.w||2.2,glow:o.glow,tf:o.tf||.4,spark:o.spark,s:o.s||4,tw:R()*6.28})};
   function explode(x,y,kind){
     const P=FWP[R()*FWP.length|0],pick=()=>P[R()*P.length|0];
@@ -1006,7 +1014,7 @@ function fwMake(c,W,H){
     const env=el>DUR-800?Math.max(0,(DUR-el)/800):1;
     c.lineCap='round';
     for(let i=rk.length-1;i>=0;i--){const r=rk[i];r.y+=r.vy*k;r.x+=(r.tx-r.x)*Math.min(1,k*.06);r.ax+=(r.x-r.ax)*Math.min(1,.3*k);r.ay+=(r.y-r.ay)*Math.min(1,.3*k);
-      c.globalAlpha=env;c.strokeStyle='#f5a623';c.lineWidth=2.4;c.beginPath();c.moveTo(r.ax,r.ay);c.lineTo(r.x,r.y);c.stroke();
+      const pr=(r.sy-r.y)/Math.max(1,r.sy-r.ty);if(pr<.4){r.ax=r.x;r.ay=r.y}else{c.globalAlpha=env;c.strokeStyle='#f5a623';c.lineWidth=2.4;c.beginPath();c.moveTo(r.ax,r.ay);c.lineTo(r.x,r.y);c.stroke()}
       if(r.y<=r.ty){explode(r.x,r.y,r.kind);rk.splice(i,1)}}
     for(let i=fl.length-1;i>=0;i--){const f=fl[i];f.r+=5*k;if(f.r>230){fl.splice(i,1);continue}
       const g=c.createRadialGradient(f.x,f.y,0,f.x,f.y,f.r);g.addColorStop(0,'rgba(255,200,230,0)');g.addColorStop(.6,'rgba(190,160,255,.22)');g.addColorStop(1,'rgba(255,255,255,0)');
