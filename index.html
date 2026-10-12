@@ -7,19 +7,20 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="東京行程">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#d6362f">
+<meta name="theme-color" content="#f7b3cd" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1d1631" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>東京行程</title>
 <style>
-:root{--bg:#eaf5fc;--card:#ffffff;--tx:#23344d;--sub:#6a7c93;--line:#d3e5f3;--ac:#f0689a;--acrgb:240,104,154;--green:#2e9e5b;--blue:#0a6cff;--warn:#fff3d6;--warntx:#7a5200;--shadow:0 4px 14px rgba(60,120,180,.12)}
-@media(prefers-color-scheme:dark){:root{--bg:#0d1a2b;--card:#162538;--tx:#eaf3ff;--sub:#93a8c4;--line:#25384f;--blue:#6db0ff;--warn:#3a2f10;--warntx:#ffd98a;--shadow:0 4px 14px rgba(0,0,0,.35)}}
+:root{--bg:#fdf3f8;--bgs:rgba(255,246,251,.94);--bgimg:linear-gradient(180deg,#fff3f9,#f5eefc 55%,#eaf5fd);--card:#ffffff;--cardA:rgba(255,255,255,.92);--tx:#4d3b63;--sub:#7f6f96;--line:#f2e2ee;--ac:#e5709a;--acrgb:229,112,154;--green:#4fbf94;--blue:#6d8cff;--warn:#fff4dc;--warntx:#8a5f1a;--shadow:0 6px 20px rgba(214,140,190,.18)}
+@media(prefers-color-scheme:dark){:root{--bg:#1d1631;--bgs:rgba(29,22,49,.94);--bgimg:linear-gradient(180deg,#241a3d,#1d1631 60%,#16213a);--card:#2a2144;--cardA:rgba(42,33,68,.92);--tx:#f6ecff;--sub:#b9a9d4;--line:#3d3159;--blue:#9db4ff;--warn:#3a2f18;--warntx:#ffd98a;--shadow:0 6px 20px rgba(0,0,0,.35)}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;color:var(--tx);font:16px/1.45 -apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif}
 body{background:var(--bg) linear-gradient(180deg,rgba(120,190,240,.28),rgba(120,190,240,0) 420px) no-repeat}
 .banner{position:relative;width:100%;aspect-ratio:900/338;background:url(banner.jpg) center/cover no-repeat;border-radius:0 0 26px 26px;box-shadow:var(--shadow)}
 .iconbtn{position:absolute;right:12px;top:10px;border:0;background:rgba(255,255,255,.85);color:#23344d;width:40px;height:40px;border-radius:20px;font-size:18px;backdrop-filter:blur(6px)}
-.stick{position:sticky;top:0;z-index:10;background:linear-gradient(var(--bg) 88%,rgba(0,0,0,0))}
+.stick{position:sticky;top:0;z-index:10;background:linear-gradient(var(--bgs) 88%,rgba(255,255,255,0))}
 .tabs{display:flex;gap:8px;overflow-x:auto;padding:10px 14px 6px;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex:0 0 auto;border:2px solid var(--c);border-radius:18px;background:var(--card);color:var(--tx);padding:6px 12px;min-width:84px;text-align:center;line-height:1.25;font-weight:700;font-size:15px}
@@ -111,7 +112,7 @@ body.mapmode .mb2{display:flex}
 .menu{position:fixed;right:12px;top:56px;z-index:60;background:var(--card);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:6px;min-width:190px}
 .menu button{display:block;width:100%;text-align:left;border:0;background:transparent;color:var(--tx);font-size:16px;font-weight:600;padding:13px 14px;border-radius:12px;min-height:46px}
 .menu button:active{background:rgba(var(--acrgb),.14)}
-.view{position:fixed;inset:0;z-index:50;background:var(--bg) linear-gradient(180deg,rgba(120,190,240,.28),rgba(120,190,240,0) 300px) no-repeat;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.view{position:fixed;inset:0;z-index:50;background:var(--bg) var(--bgimg);overflow-y:auto;-webkit-overflow-scrolling:touch}
 .view[hidden]{display:none}
 .vh{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg)}
 .vh b{font-size:19px}
@@ -169,6 +170,96 @@ details div{white-space:pre-line;font-size:14px;color:var(--sub);margin-top:6px}
 .tskip{display:block;margin:4px auto 0;border:0;background:transparent;color:var(--sub);font-size:13px;min-height:38px;padding:0 16px}
 .tarr{position:absolute;width:16px;height:16px;background:var(--card);transform:rotate(45deg);border-radius:3px}
 .tarr.up{top:-7px}.tarr.dn{bottom:-7px}
+
+/* ===================== 公主系柔和夢幻主題 ===================== */
+body{background:var(--bg)}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+ background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cg fill='%23f4b6d0' opacity='.55'%3E%3Cpath d='M24 20l2.2 6.3 6.3 2.2-6.3 2.2L24 37l-2.2-6.3-6.3-2.2 6.3-2.2z'/%3E%3Cpath d='M118 96l1.6 4.4 4.4 1.6-4.4 1.6-1.6 4.4-1.6-4.4-4.4-1.6 4.4-1.6z'/%3E%3C/g%3E%3Cg fill='%23c9bbf3' opacity='.6'%3E%3Cpath d='M96 24l1.6 4.4 4.4 1.6-4.4 1.6L96 36l-1.6-4.4-4.4-1.6 4.4-1.6z'/%3E%3Cpath d='M40 112l2 5.6 5.6 2-5.6 2-2 5.6-2-5.6-5.6-2 5.6-2z'/%3E%3C/g%3E%3Cg fill='%23f6d98a' opacity='.7'%3E%3Ccircle cx='140' cy='50' r='2'/%3E%3Ccircle cx='70' cy='70' r='1.6'/%3E%3Ccircle cx='12' cy='84' r='1.6'/%3E%3C/g%3E%3C/svg%3E"),
+  radial-gradient(70% 38% at 12% 0%,rgba(255,196,224,.6),transparent 70%),
+  radial-gradient(60% 38% at 95% 20%,rgba(205,192,255,.5),transparent 70%),
+  radial-gradient(80% 42% at 50% 100%,rgba(172,226,250,.5),transparent 70%),
+  var(--bgimg)}
+@media(prefers-color-scheme:dark){body::before{opacity:.55}}
+::selection{background:rgba(var(--acrgb),.25)}
+html,body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;letter-spacing:.01em}
+.banner{border-radius:0 0 36px 36px;box-shadow:0 12px 30px rgba(229,112,154,.28)}
+.banner::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 -30px 34px -22px rgba(255,236,246,.95);pointer-events:none}
+.iconbtn{background:rgba(255,255,255,.8);border:1.5px solid rgba(255,255,255,.9);box-shadow:0 4px 12px rgba(229,112,154,.3);color:#7a5a92}
+.tabs{padding:12px 14px 8px;gap:9px}
+.tab{border:1.5px solid rgba(var(--r),.5);border-radius:999px;background:var(--cardA);padding:7px 14px;font-weight:600;box-shadow:0 3px 10px rgba(var(--r),.14)}
+.tab.on{background:linear-gradient(135deg,var(--c),rgba(var(--r),.72));border-color:rgba(255,255,255,.7);box-shadow:0 5px 14px rgba(var(--r),.4)}
+.dd{background:linear-gradient(90deg,var(--ac),#b99cf0);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;padding-right:4px}
+.em{-webkit-text-fill-color:initial}
+.dn{font-weight:700}
+.bar{height:10px;border-radius:999px;background:rgba(var(--acrgb),.15);box-shadow:inset 0 1px 3px rgba(var(--acrgb),.2)}
+.bar i{border-radius:999px;background:linear-gradient(90deg,rgba(var(--acrgb),.55),var(--ac))}
+.alert{border:1.5px solid rgba(232,170,80,.38);border-radius:22px;font-weight:600;box-shadow:0 4px 12px rgba(232,170,80,.12)}
+.sec,.cg{border-radius:999px;background:linear-gradient(90deg,rgba(var(--acrgb),.2),rgba(190,170,245,.18));font-weight:700}
+.sec::before,.cg::before{content:"✦";font-size:11px;margin-right:6px;opacity:.85}
+.walk{border-left:2px dotted rgba(var(--acrgb),.55)}
+.card{background:var(--cardA);border:1.5px solid rgba(var(--acrgb),.14);border-radius:28px;padding:14px;box-shadow:0 8px 22px rgba(var(--acrgb),.14),inset 0 1px 0 rgba(255,255,255,.8)}
+.card.next{border-color:rgba(var(--acrgb),.65);box-shadow:0 0 0 4px rgba(var(--acrgb),.14),0 10px 26px rgba(var(--acrgb),.3)}
+.card.now{border-color:rgba(var(--acrgb),.7);animation:breathe 3.2s ease-in-out infinite}
+@keyframes breathe{0%,100%{box-shadow:0 0 0 4px rgba(var(--acrgb),.16),0 8px 22px rgba(var(--acrgb),.3)}50%{box-shadow:0 0 0 8px rgba(var(--acrgb),.1),0 12px 28px rgba(var(--acrgb),.38)}}
+.card.flash{animation:fl 1.6s ease}
+.chk{border:2px solid rgba(var(--acrgb),.75);background:rgba(var(--acrgb),.07);transition:transform .15s,background .2s}
+.chk:active{background:linear-gradient(135deg,var(--ac),rgba(var(--acrgb),.7));transform:scale(.92)}
+.meal,.badge{border-radius:999px;font-weight:700}
+.badge{background:linear-gradient(135deg,var(--ac),rgba(var(--acrgb),.72))}
+.badge.tent{background:transparent}
+.badge.now{background:var(--green)}
+.time{font-weight:700}
+.title{font-weight:700}
+.acts a,.acts button{border-radius:999px;background:rgba(var(--acrgb),.13);font-weight:600;padding:9px 16px;transition:background .2s}
+.acts a:active,.acts button:active{background:rgba(var(--acrgb),.28)}
+.chip{border-radius:999px;border-width:1.5px;font-weight:600}
+.chip.on{background:linear-gradient(135deg,var(--ac),rgba(var(--acrgb),.72))}
+.dyn{border-radius:20px;background:rgba(var(--acrgb),.07)}
+.grph{border-radius:24px;border-width:1.5px;background:rgba(var(--acrgb),.07)}
+.grp-body{border-left:3px dotted rgba(var(--acrgb),.4)}
+.where{border-radius:22px;background:rgba(var(--acrgb),.12)}
+.donerow{border-radius:20px;background:rgba(255,255,255,.45)}
+@media(prefers-color-scheme:dark){.donerow{background:rgba(255,255,255,.05)}}
+details{border-radius:22px;border:1.5px solid rgba(var(--acrgb),.12)}
+.tools button{border-radius:999px;padding:11px 16px;font-weight:600}
+.empty{font-weight:600}
+.bye{opacity:.9;font-weight:600}
+.bye::before,.bye::after{content:"✦";font-size:.5em;margin:0 .7em;vertical-align:middle;opacity:.7}
+.fab{border-radius:999px;background:linear-gradient(135deg,var(--ac),rgba(var(--acrgb),.72));border:2px solid rgba(255,255,255,.75);box-shadow:0 8px 22px rgba(var(--acrgb),.45);font-weight:700}
+.sg{border-radius:999px;border:1.5px solid rgba(var(--acrgb),.14);background:var(--cardA)}
+.sg button{border-radius:999px;font-weight:600}
+.sg button.on{background:linear-gradient(135deg,var(--ac),rgba(var(--acrgb),.72));box-shadow:0 3px 10px rgba(var(--acrgb),.35)}
+.mb2{border-radius:50%;background:var(--cardA)}
+.menu{border-radius:26px;border:1.5px solid rgba(var(--acrgb),.16);background:var(--cardA);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 14px 36px rgba(var(--acrgb),.28)}
+.menu button{border-radius:18px;font-weight:600}
+.vh{background:var(--bgs)}
+.vh button{border-radius:999px;font-weight:600}
+.cl{border-radius:24px;background:var(--cardA)}
+.bkc{border-radius:28px;background:var(--cardA);border:1.5px solid rgba(var(--acrgb),.12)}
+.bkc textarea{border-radius:16px;border-color:rgba(var(--acrgb),.25)}
+/* 地圖 */
+.mapview .leaflet-tile-pane{filter:saturate(.88) hue-rotate(8deg) brightness(1.04)}
+.mapview.dk .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}
+.mapview .leaflet-popup-content-wrapper{border-radius:24px;box-shadow:0 10px 28px rgba(var(--acrgb),.3)}
+.mapview .leaflet-tooltip.rtt{border-radius:999px;padding:2px 9px}
+.mnow{border-radius:999px;background:linear-gradient(135deg,var(--ac),rgba(var(--acrgb),.72));border:2px solid rgba(255,255,255,.75);font-weight:700}
+.pin{border:3px solid #fff;box-shadow:0 3px 10px rgba(var(--acrgb),.5)}
+.pin.done{background:#cbbfdc}
+.pin.now{background:var(--green)}
+@keyframes pl{0%{box-shadow:0 0 0 0 rgba(79,191,148,.6)}70%,100%{box-shadow:0 0 0 14px rgba(79,191,148,0)}}
+.sheet{border-radius:32px 32px 0 0;background:var(--cardA);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 -8px 26px rgba(var(--acrgb),.25)}
+.grab i{background:rgba(var(--acrgb),.35)}
+.sh button{border-radius:999px}
+.srow.cu{background:rgba(79,191,148,.14);border-radius:18px}
+.sn{box-shadow:0 2px 6px rgba(0,0,0,.12)}
+/* 教學層 */
+.tb.dim{background:rgba(64,38,92,.55)}
+.tspot{border-radius:22px;box-shadow:0 0 0 3px var(--ac),0 0 0 7px rgba(var(--acrgb),.25),0 0 0 100vmax rgba(64,38,92,.55)}
+.ttip{border-radius:30px;border:1.5px solid rgba(var(--acrgb),.2);box-shadow:0 16px 44px rgba(64,38,92,.4)}
+.tbtn button{border-radius:999px}
+.tbtn button.pri{background:linear-gradient(135deg,var(--ac),rgba(var(--acrgb),.72))}
+.tact{border-radius:18px}
+@media(prefers-reduced-motion:reduce){.card.now,.pin.now{animation:none}*{transition:none!important}}
 </style>
 </head>
 <body>
@@ -203,7 +294,7 @@ const DS=s=>'東京ディズニーシー '+s;
 
 
 const DAYS=[
-{d:'2026-10-21',c:'#f0689a',rgb:'240,104,154',em:'✈️',wd:'三',name:'抵達・淺草・丸之內',start:'03:50',items:[
+{d:'2026-10-21',c:'#e5709a',rgb:'229,112,154',em:'✈️',wd:'三',name:'抵達・淺草・丸之內',start:'03:50',items:[
  P({at:'03:50',tz:8,rem:15,bk:'p1',title:'機場接送',badge:'‼️',q:'25.026706941264564,121.47842727069022',type:''}),
  P({at:'05:00',tz:8,rem:15,bk:'f1',title:'CHECK IN 報到',sub:'桃園機場 第1航廈',q:'桃園國際機場第一航廈',badge:'‼️',type:''}),
  P({at:'06:45',tz:8,rem:15,bk:'f1',title:'✈️ 酷航 Scoot TR866',sub:'06:45 桃園 T1 ➜ 11:15 成田 T1',q:'成田国際空港 第1ターミナル',note:'行李規定見下方 註1',type:''}),
@@ -238,7 +329,7 @@ const DAYS=[
  {h:'註2｜京成電鐵 成田機場 ➜ 押上 時刻表',l:'【快速】11:53 發 ➜ 13:23 抵達\n【Access特急】12:29 發 ➜ 13:35 抵達'},
  {h:'註3｜都營巴士 十間橋通 ➜ 淺草一丁目 時刻表',l:'13:59 發 ➜ 14:16 抵達\n14:28 發 ➜ 14:45 抵達'}]},
 
-{d:'2026-10-22',c:'#25b0d6',rgb:'37,176,214',em:'🐭',wd:'四',name:'東京迪士尼海洋',start:'04:45',items:[
+{d:'2026-10-22',c:'#3fb0c0',rgb:'63,176,192',em:'🐭',wd:'四',name:'東京迪士尼海洋',start:'04:45',items:[
  w(12),
  T({at:'05:00',rem:10,title:'都營地下鐵 淺草線',lines:['05:00 A20 押上 往西馬込・羽田機場・京急線方向','➜ 05:10 A14 人形町'],cost:'220日圓（IC卡）',dur:'10分',dir:['押上駅','人形町駅'],rt:'k5',type:''}),
  w(3),
@@ -279,7 +370,7 @@ const DAYS=[
 ],notes:[
  {h:'註1｜淺草線 寶町 ➜ 押上 時刻表',l:'23:03 發 ➜ 23:17 抵達\n23:14 發 ➜ 23:28 抵達\n23:21 發 ➜ 23:35 抵達\n23:27 發 ➜ 23:41 抵達\n23:33 發 ➜ 23:47 抵達\n23:44 發 ➜ 23:58 抵達\n23:56 發 ➜ 00:10 抵達\n00:13 發 ➜ 00:27 抵達（末班）'}]},
 
-{d:'2026-10-23',c:'#3a72d8',rgb:'58,114,216',em:'🏰',wd:'五',name:'新宿・原宿・澀谷',start:'09:00',items:[
+{d:'2026-10-23',c:'#9a82dc',rgb:'154,130,220',em:'🏰',wd:'五',name:'新宿・原宿・澀谷',start:'09:00',items:[
  w(9),
  P({meal:'早餐',title:'摩斯漢堡 押上店',hrs:'08:00 - 21:00',q:'モスバーガー押上店',type:''}),
  w(4),
@@ -307,7 +398,7 @@ const DAYS=[
  P({title:'返回飯店',sub:HOTEL,q:'Season Hotel 押上',type:''})
 ],notes:[]},
 
-{d:'2026-10-24',c:'#f0a81c',rgb:'240,168,28',em:'⛵',wd:'六',name:'豐洲・橫濱',start:'08:00',items:[
+{d:'2026-10-24',c:'#e0a03a',rgb:'224,160,58',em:'⛵',wd:'六',name:'豐洲・橫濱',start:'08:00',items:[
  w(12),
  T({title:'都營地下鐵 淺草線',lines:['A20 押上 往西馬込・羽田機場・京急線方向','➜ A18 淺草 5號出口'],cost:'180日圓（IC卡）',dur:'3分',dir:['押上駅','浅草駅'],rt:'k14',type:''}),
  w(1),
@@ -359,7 +450,7 @@ const DAYS=[
  P({title:'返回飯店',sub:HOTEL,q:'Season Hotel 押上',type:''})
 ],notes:[]},
 
-{d:'2026-10-25',c:'#e8554e',rgb:'232,85,78',em:'🗼',wd:'日',name:'晴空塔・成田・返台',start:'10:00',items:[
+{d:'2026-10-25',c:'#ee7f7a',rgb:'238,127,122',em:'🗼',wd:'日',name:'晴空塔・成田・返台',start:'10:00',items:[
  w(7),
  P({at:'08:00',rem:10,meal:'早餐',title:'PERTH Sandwiches & All Day Breakfast',sub:'‼️ 08:00 外帶',hrs:'08:00 - 15:00',q:'PERTH Sandwiches & All Day Breakfast 押上',type:''}),
  w(7),
@@ -743,7 +834,7 @@ function drawRoutes(day){
     legs.forEach(lg=>{
       const pts=lg.s.map(p=>[p[0],p[1]]);all.push(...pts);
       if(prevEnd&&dist(prevEnd[0],prevEnd[1],pts[0][0],pts[0][1])>40)
-        L.polyline([prevEnd,pts[0]],{color:'#6a7c93',weight:3,opacity:.9,dashArray:'2 7',interactive:false}).addTo(mapLayer);
+        L.polyline([prevEnd,pts[0]],{color:'#a58fc7',weight:3,opacity:.9,dashArray:'2 7',interactive:false}).addTo(mapLayer);
       L.polyline(pts,{color:'#fff',weight:9,opacity:done?.5:.95,lineCap:'round',lineJoin:'round',interactive:false}).addTo(mapLayer);
       const pl=L.polyline(pts,{color:lg.c,weight:5,opacity:done?.45:.95,lineCap:'round',lineJoin:'round'}).addTo(mapLayer);
       pl.bindPopup(`<div class="ph" style="color:${lg.c}">${esc(lg.n)}</div><div style="font-weight:700">${esc(lg.a)} ➜ ${esc(lg.b)}</div><div class="meta">${lg.s.length-1} 站${it.at?'｜'+it.at+' 發':''}${it.dur?'｜'+(legs.length>1?'全程 ':'')+esc(it.dur):''}${it.cost?'｜'+esc(it.cost):''}</div>`);
