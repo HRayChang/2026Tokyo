@@ -278,8 +278,10 @@ details{border-radius:22px;border:1.5px solid rgba(var(--acrgb),.12)}
 .stkh{font:700 26px/1.2 "Snell Roundhand","Noteworthy","Chalkboard SE",cursive,sans-serif;color:rgb(var(--r))}
 .stkm{margin-top:6px;font-size:14px;line-height:1.55;color:var(--sub);font-weight:600}
 /* 禁止文字反白選取（輸入框除外，維持可輸入） */
-*,*::before,*::after{-webkit-user-select:none;user-select:none}
-input,textarea{-webkit-user-select:text;user-select:text}
+*,*::before,*::after{-webkit-user-select:none!important;user-select:none!important}
+input,textarea{-webkit-user-select:text!important;user-select:text!important}
+::selection{background:transparent}
+input::selection,textarea::selection{background:Highlight}
 </style>
 </head>
 <body>
@@ -1259,6 +1261,8 @@ addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#tour').hidden)tourClose
 {const m=location.hash.match(/^#fx(\d|check)$/);if(m)setTimeout(()=>{if(m[1]==='check')celebrate(CHECKT,{rgb:'229,112,154',title:'行李準備完成！'});else{const i=+m[1]-1,d=DAYS[i];if(d)celebrate(THEMES[i%THEMES.length],{rgb:d.rgb,title:`第 ${i+1} 天完成！`})}},900)}
 startLive();
 if(!tourSeen&&store.get('tour')!=='1')setTimeout(openTour,400);
+/* 保險：任何情況冒出選取範圍（例如地圖縮放後切換列表／地圖），立刻清掉；輸入框除外 */
+document.addEventListener('selectionchange',()=>{const a=document.activeElement;if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'))return;const s=getSelection();if(s&&!s.isCollapsed)s.removeAllRanges()});
 </script>
 </body>
 </html>
