@@ -238,7 +238,7 @@ const DAYS=[
  {h:'註2｜京成電鐵 成田機場 ➜ 押上 時刻表',l:'【快速】11:53 發 ➜ 13:23 抵達\n【Access特急】12:29 發 ➜ 13:35 抵達'},
  {h:'註3｜都營巴士 十間橋通 ➜ 淺草一丁目 時刻表',l:'13:59 發 ➜ 14:16 抵達\n14:28 發 ➜ 14:45 抵達'}]},
 
-{d:'2026-10-22',c:'#25b0d6',rgb:'37,176,214',em:'🐭',wd:'四',name:'東京迪士尼海洋',start:'05:00',items:[
+{d:'2026-10-22',c:'#25b0d6',rgb:'37,176,214',em:'🐭',wd:'四',name:'東京迪士尼海洋',start:'04:45',items:[
  w(12),
  T({at:'05:00',rem:10,title:'都營地下鐵 淺草線',lines:['05:00 A20 押上 往西馬込・羽田機場・京急線方向','➜ 05:10 A14 人形町'],cost:'220日圓（IC卡）',dur:'10分',dir:['押上駅','人形町駅'],rt:'k5',type:''}),
  w(3),
@@ -382,6 +382,7 @@ const DAYS=[
  P({at:'18:00',rem:15,res:1,grp:'g25',bk:'fpig',title:'Flying pig N',hrs:'17:30 - 21:00（最後點餐 20:30）',q:'Flying pig N 成田',type:''}),
  T({at:'20:10',rem:10,title:'京成電鐵 京成本線',lines:['20:10 KS40 京成成田 往成田機場方向','➜ 20:16 KS41 機場第2航廈（成田第2・第3航廈）'],cost:'280日圓（IC卡）',dur:'6分',dir:['京成成田駅','空港第2ビル駅'],note:'時刻表見下方 註2',rt:'k23',type:''}),
  P({title:'I.A.S.S 貴賓室（Executive Lounge）',hrs:'07:00 - 21:00',q:'I.A.S.S Executive Lounge 成田空港',type:''}),
+ P({title:'Fa-So-La DUTY FREE Cosmetics & Perfumery Terminal3',hrs:'06:00 - 22:00',q:'Fa-So-La DUTY FREE Cosmetics & Perfumery Terminal3',type:''}),
  P({at:'20:25',rem:15,bk:'f2',title:'CHECK IN 報到',badge:'‼️',q:'成田国際空港 第3ターミナル',type:''}),
  P({at:'22:25',rem:15,bk:'f2',title:'✈️ 捷星 Jetstar GK11',sub:'22:25 成田 T3 ➜ 01:30（+1）桃園 T1',q:'成田国際空港 第3ターミナル',note:'行李規定見下方 註3',type:''}),
  P({at:'01:30',date:'2026-10-26',tz:8,rem:15,bk:'p2',title:'‼️ 10/26（一）01:30 機場接送',sub:'抵達桃園後',q:'桃園國際機場第一航廈',type:''})
@@ -489,6 +490,7 @@ const LL={
  '成田山新勝寺':[35.786050433048494,140.3182487711886],
  'ピッツェリア ポジターノ 成田':[35.778444706274335,140.31586585629086],
  'Flying pig N 成田':[35.77789206880927,140.31600588646117],
+ 'Fa-So-La DUTY FREE Cosmetics & Perfumery Terminal3':[35.77941295404802,140.3850397794649],
 };
 /* ============ 程式區 ============ */
 const $=s=>document.querySelector(s);
@@ -880,10 +882,14 @@ document.addEventListener('input',e=>{const n=e.target.dataset&&e.target.dataset
 const HOUR=3600e3;
 function allTimed(){return DAYS.flatMap(d=>d.items.filter(i=>i.rem&&i.ts))}
 async function notify(it){
-  const body=(it.at||'')+' '+it.title;
+  const body=it.nbody||((it.at||'')+' '+it.title),ti=it.ntitle||('⏰ '+it.rem+' 分鐘後：'+it.title);
   try{const reg=await navigator.serviceWorker.getRegistration();
-    if(Notification.permission==='granted'){reg?reg.showNotification('⏰ '+it.rem+' 分鐘後：'+it.title,{body,icon:'icon-192.png',tag:it.id}):new Notification('⏰ '+it.rem+' 分鐘後：'+it.title,{body})}}catch(e){}
+    if(Notification.permission==='granted'){reg?reg.showNotification(ti,{body,icon:'icon-192.png',tag:it.id}):new Notification(ti,{body})}}catch(e){}
 }
+/* ---- 每晚 23:00 提醒隔天集合時間（集合時間＝每天的 start；10/21 為台灣時間 23:00，其餘為日本時間 23:00） ---- */
+const NIGHT=DAYS.map((d,i)=>{const[y,m,dd]=d.d.split('-').map(Number),tz=i===0?8:9,[h,mi]=d.start.split(':').map(Number);
+  return {id:'night:'+d.d,ts:Date.UTC(y,m-1,dd-1,23-tz,0),target:Date.UTC(y,m-1,dd,h-tz,mi),
+    text:'明天 '+m+'/'+dd+'（'+d.wd+'）'+d.start+' 集合'+(i===0?'（台灣時間）':'')+'｜'+d.name}});
 function checkReminders(){
   const now=Date.now(),box=$('#alerts')||$('#mapalert');let h='';
   allTimed().forEach(it=>{
@@ -892,6 +898,12 @@ function checkReminders(){
       const mins=Math.round((it.ts-now)/60e3);
       h+=`<div class="alert">⏰ ${mins>0?mins+' 分鐘後':'現在'}｜${it.at} ${esc(it.title)}</div>`;
       if(!store.get('n:'+it.id)){store.set('n:'+it.id,'1');notify(it)}
+    }
+  });
+  NIGHT.forEach(n=>{
+    if(now>=n.ts&&now<n.target){
+      h+=`<div class="alert">🌙 ${esc(n.text)}</div>`;
+      if(!store.get('n:'+n.id)){store.set('n:'+n.id,'1');notify({id:n.id,ntitle:'🌙 明天集合時間',nbody:n.text})}
     }
   });
   if(box)box.innerHTML=h;
