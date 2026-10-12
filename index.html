@@ -278,17 +278,11 @@ details{border-radius:22px;border:1.5px solid rgba(var(--acrgb),.12)}
 .stkh{font:700 26px/1.2 "Snell Roundhand","Noteworthy","Chalkboard SE",cursive,sans-serif;color:rgb(var(--r))}
 .stkm{margin-top:6px;font-size:14px;line-height:1.55;color:var(--sub);font-weight:600}
 /* 禁止文字反白選取（輸入框除外，維持可輸入） */
-*,*::before,*::after{-webkit-user-select:none!important;user-select:none!important}
-input,textarea{-webkit-user-select:text!important;user-select:text!important}
-::selection{background:transparent}
-html,body,button{touch-action:manipulation}
-#shield{position:fixed;inset:0;z-index:99999;background:transparent;display:none}
-#shield.on{display:block}
-input::selection,textarea::selection{background:Highlight}
+*,*::before,*::after{-webkit-user-select:none;user-select:none}
+input,textarea{-webkit-user-select:text;user-select:text}
 </style>
 </head>
 <body>
-<div id="shield"></div>
 <div class="banner"><button class="iconbtn" id="menuBtn" data-menu title="選單">☰</button></div>
 <div class="menu" id="menu" hidden>
   <button data-m="notif">🔔 開啟通知</button>
@@ -937,7 +931,7 @@ async function preloadDay(btn){
 document.addEventListener('click',e=>{
   const t=e.target.closest('button');
   if(t){
-    if(t.dataset.seg){if(t.dataset.seg!==mode){const sh=document.getElementById('shield');sh.classList.add('on');setTimeout(()=>sh.classList.remove('on'),450)}mode=t.dataset.seg;store.set('view',mode);refit=true;render();try{getSelection().removeAllRanges()}catch(e){}requestAnimationFrame(()=>{try{getSelection().removeAllRanges()}catch(e){}});if(mode==='list')goNow(false);else if(!loc)locate().then(p=>{if(p){loc=p;render()}})}
+    if(t.dataset.seg){mode=t.dataset.seg;store.set('view',mode);refit=true;render();if(mode==='list')goNow(false);else if(!loc)locate().then(p=>{if(p){loc=p;render()}})}
     else if(t.dataset.map){mode='map';store.set('view','map');pendingFocus={id:t.dataset.map,popup:true};render();scrollTo(0,0)}
     else if(t.dataset.dr){const[id,a]=t.dataset.dr.split('|');
       if(a==='clear')store.del('dr:'+id);else if(a==='lose')store.set('dr:'+id,JSON.stringify({s:'lose'}));else store.set('dr:'+id,JSON.stringify({s:'win',k:+a.split(':')[1]}));
@@ -1265,10 +1259,6 @@ addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#tour').hidden)tourClose
 {const m=location.hash.match(/^#fx(\d|check)$/);if(m)setTimeout(()=>{if(m[1]==='check')celebrate(CHECKT,{rgb:'229,112,154',title:'行李準備完成！'});else{const i=+m[1]-1,d=DAYS[i];if(d)celebrate(THEMES[i%THEMES.length],{rgb:d.rgb,title:`第 ${i+1} 天完成！`})}},900)}
 startLive();
 if(!tourSeen&&store.get('tour')!=='1')setTimeout(openTour,400);
-/* 保險：任何情況冒出選取範圍（例如地圖縮放後切換列表／地圖），立刻清掉；輸入框除外 */
-/* 直接擋掉選取動作本身（iOS 在版面位移、banner 隱藏時仍可能開始選字，CSS 擋不住）；輸入框除外 */
-document.addEventListener('selectstart',e=>{const n=e.target,el=n&&(n.nodeType===1?n:n.parentElement);if(el&&el.closest&&el.closest('input,textarea'))return;e.preventDefault()},true);
-document.addEventListener('selectionchange',()=>{const a=document.activeElement;if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'))return;const s=getSelection();if(s&&!s.isCollapsed)s.removeAllRanges()});
 </script>
 </body>
 </html>
