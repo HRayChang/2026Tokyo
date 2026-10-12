@@ -933,7 +933,7 @@ async function preloadDay(btn){
 document.addEventListener('click',e=>{
   const t=e.target.closest('button');
   if(t){
-    if(t.dataset.seg){mode=t.dataset.seg;store.set('view',mode);refit=true;render();if(mode==='list')goNow(false);else if(!loc)locate().then(p=>{if(p){loc=p;render()}})}
+    if(t.dataset.seg){mode=t.dataset.seg;store.set('view',mode);refit=true;render();try{getSelection().removeAllRanges()}catch(e){}requestAnimationFrame(()=>{try{getSelection().removeAllRanges()}catch(e){}});if(mode==='list')goNow(false);else if(!loc)locate().then(p=>{if(p){loc=p;render()}})}
     else if(t.dataset.map){mode='map';store.set('view','map');pendingFocus={id:t.dataset.map,popup:true};render();scrollTo(0,0)}
     else if(t.dataset.dr){const[id,a]=t.dataset.dr.split('|');
       if(a==='clear')store.del('dr:'+id);else if(a==='lose')store.set('dr:'+id,JSON.stringify({s:'lose'}));else store.set('dr:'+id,JSON.stringify({s:'win',k:+a.split(':')[1]}));
@@ -1262,6 +1262,8 @@ addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#tour').hidden)tourClose
 startLive();
 if(!tourSeen&&store.get('tour')!=='1')setTimeout(openTour,400);
 /* 保險：任何情況冒出選取範圍（例如地圖縮放後切換列表／地圖），立刻清掉；輸入框除外 */
+/* 直接擋掉選取動作本身（iOS 在版面位移、banner 隱藏時仍可能開始選字，CSS 擋不住）；輸入框除外 */
+document.addEventListener('selectstart',e=>{const n=e.target,el=n&&(n.nodeType===1?n:n.parentElement);if(el&&el.closest&&el.closest('input,textarea'))return;e.preventDefault()},true);
 document.addEventListener('selectionchange',()=>{const a=document.activeElement;if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'))return;const s=getSelection();if(s&&!s.isCollapsed)s.removeAllRanges()});
 </script>
 </body>
