@@ -277,6 +277,9 @@ details{border-radius:22px;border:1.5px solid rgba(var(--acrgb),.12)}
 @keyframes stkOut{to{opacity:0;transform:translateX(-50%) translateY(-18px) scale(.96)}}
 .stkh{font:700 26px/1.2 "Snell Roundhand","Noteworthy","Chalkboard SE",cursive,sans-serif;color:rgb(var(--r))}
 .stkm{margin-top:6px;font-size:14px;line-height:1.55;color:var(--sub);font-weight:600}
+/* 禁止文字反白選取（輸入框除外，維持可輸入） */
+*,*::before,*::after{-webkit-user-select:none;user-select:none}
+input,textarea{-webkit-user-select:text;user-select:text}
 </style>
 </head>
 <body>
