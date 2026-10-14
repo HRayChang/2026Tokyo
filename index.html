@@ -1313,6 +1313,8 @@ const GUARD_DB='https://tokyo-f332d-default-rtdb.asia-southeast1.firebasedatabas
 const GUARD_MS=3*60e3,GUARD_OLD=10*60e3,GUARD_DROP=12*3600e3;
 const GEMOJI=['🐰','🐻','🐱','🐶','🦊','🐼','🐸','🐥'];
 const rid=n=>{const a='abcdefghjkmnpqrstuvwxyz23456789',b=new Uint8Array(n);crypto.getRandomValues(b);return[...b].map(x=>a[x%a.length]).join('')};
+const GLOG=[];addEventListener('error',e=>{GLOG.push(new Date().toLocaleTimeString('zh-TW',{hour12:false})+' '+(e.message||'錯誤')+(e.lineno?' (行'+e.lineno+')':''));if(GLOG.length>8)GLOG.shift()});
+addEventListener('unhandledrejection',e=>{GLOG.push('Promise：'+((e.reason&&e.reason.message)||e.reason||'錯誤'));if(GLOG.length>8)GLOG.shift()});
 const G={uid:store.get('g:uid')||(()=>{const u=rid(8);store.set('g:uid',u);return u})(),mem:[],last:0,err:'',timer:0,busy:false,wl:null,lay:null,me:null};
 const gOn=()=>store.get('g:on')==='1',gShare=()=>store.get('g:share')!=='0',gWakeOn=()=>store.get('g:wake')==='1';
 const gRoom=()=>(store.get('g:room')||'').trim().toLowerCase(),gName=()=>store.get('g:name')||'',gEmo=()=>store.get('g:emo')||GEMOJI[0];
@@ -1405,12 +1407,13 @@ function guardHtml(){
     ${gSw('wake',gWakeOn(),'🔆 保持螢幕開啟','iPhone 鎖屏後網頁會暫停更新；開啟後只要 App 在前景就不休眠（較耗電）')}
     <div id="gst" style="margin-top:6px">${gStatHtml()}</div></div>
   <div class="gcard"><h4>夥伴位置</h4><div id="gmem">${gMemHtml()}</div></div>
+  ${GLOG.length?`<div class="gcard"><h4>除錯訊息</h4><div class="gnote">${GLOG.map(esc).join('<br>')}</div></div>`:''}
   <div class="gnote" style="padding:0 6px">⚠️ 網頁 App 無法真正在背景定位：App 被切到背景或鎖屏時會暫停，回到畫面後立刻補更新；位置旁會顯示「幾分鐘前」。</div>`;
 }
-const gOpen=()=>viewKind==='guard'&&!$('#view').hidden;
-function gPanel(){if(!gOpen())return;const v=$('#view'),y=v.scrollTop;$('#vbody').innerHTML=guardHtml();v.scrollTop=y}
+const gPanelOpen=()=>viewKind==='guard'&&!$('#view').hidden;
+function gPanel(){if(!gPanelOpen())return;const v=$('#view'),y=v.scrollTop;$('#vbody').innerHTML=guardHtml();v.scrollTop=y}
 function gUi(){
-  if(gOpen()&&$('#gmem')){$('#gmem').innerHTML=gMemHtml();$('#gst').innerHTML=gStatHtml()}
+  if(gPanelOpen()&&$('#gmem')){$('#gmem').innerHTML=gMemHtml();$('#gst').innerHTML=gStatHtml()}
   drawGuard();gChip();
 }
 function gSetRoom(v){
