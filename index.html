@@ -280,12 +280,39 @@ details{border-radius:22px;border:1.5px solid rgba(var(--acrgb),.12)}
 /* 禁止文字反白選取（輸入框除外，維持可輸入） */
 *,*::before,*::after{-webkit-user-select:none;user-select:none}
 input,textarea{-webkit-user-select:text;user-select:text}
+/* ---- 🛟 防走失 ---- */
+.gcard{background:var(--card);border-radius:22px;padding:14px;margin:10px 0;box-shadow:var(--shadow)}
+.gcard h4{margin:0 0 8px;font-size:15px;color:var(--ac)}
+.gcard input[type=text]{width:100%;border:1.5px solid var(--line);background:transparent;color:var(--tx);border-radius:14px;padding:10px 12px;font:inherit;font-size:16px;margin-bottom:8px}
+.gemo{display:flex;flex-wrap:wrap;gap:6px}
+.gemo button{width:42px;height:42px;border-radius:21px;border:2px solid transparent;background:rgba(var(--acrgb),.1);font-size:22px}
+.gemo button.on{border-color:var(--ac);background:rgba(var(--acrgb),.25)}
+.gbtns{display:flex;gap:8px;flex-wrap:wrap}
+.gbtn{border:1.5px solid var(--ac);background:transparent;color:var(--ac);border-radius:14px;padding:8px 12px;font-size:14px;font-weight:700;min-height:38px}
+.grow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.grow:last-child{border-bottom:0}
+.grow>div{flex:1;min-width:0}.grow small{display:block;color:var(--sub);font-size:12px;font-weight:500;margin-top:2px}
+.gsw{flex:0 0 52px;width:52px;height:30px;border-radius:15px;border:0;background:rgba(127,111,150,.35);position:relative;transition:background .2s}
+.gsw i{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:12px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3);transition:transform .2s}
+.gsw.on{background:var(--green)}.gsw.on i{transform:translateX(22px)}
+.gnote{color:var(--sub);font-size:13px;line-height:1.5}
+.gerr{color:#d9534f;font-weight:700;font-size:13px;margin-top:6px}
+.gm{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.gm:last-child{border-bottom:0}
+.gm .ge{flex:0 0 40px;height:40px;border-radius:20px;background:hsl(var(--h) 70% 60%);display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid #fff}
+.gm .gi{flex:1;min-width:0}.gm .gi b{display:block}.gm .gi small{color:var(--sub);font-size:12px}
+.gm.old{opacity:.6}
+.gchip{position:absolute;top:8px;left:54px;max-width:calc(100% - 170px);z-index:500;border:0;border-radius:999px;background:var(--cardA);color:var(--tx);font-size:12px;font-weight:700;padding:7px 11px;box-shadow:0 3px 10px rgba(0,0,0,.25);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gpin{position:relative;width:36px;height:36px;border-radius:18px;background:hsl(var(--h) 70% 60%);border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:20px}
+.gpin.old{opacity:.55}
+.gpin span{position:absolute;top:36px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--tx);border-radius:999px;padding:1px 8px;font-size:11px;font-weight:800;white-space:nowrap;box-shadow:0 1px 5px rgba(0,0,0,.35)}
 </style>
 </head>
 <body>
 <div class="banner"><button class="iconbtn" id="menuBtn" data-menu title="選單">☰</button></div>
 <div class="menu" id="menu" hidden>
   <button data-m="notif">🔔 開啟通知</button>
+  <button data-m="guard">🛟 防走失</button>
   <button data-m="check">✅ 出發前清單</button>
   <button data-m="book">📋 已預訂</button>
   <button data-m="tour">❓ 使用教學</button>
@@ -1083,8 +1110,8 @@ function checkCount(){let n=0,t=0;CHECK.forEach((g,gi)=>g.l.forEach((x,i)=>{t++;
 let viewKind='';
 function refreshBook(){if(viewKind==='book'&&!$('#view').hidden){const y=$('#view').scrollTop;$('#vbody').innerHTML=bookHtml();$('#view').scrollTop=y}}
 function openView(kind,anchor){viewKind=kind;
-  const v=$('#view');$('#vt').textContent=kind==='check'?'✅ 出發前清單':'📋 已預訂';
-  $('#vbody').innerHTML=kind==='check'?checkHtml():bookHtml();
+  const v=$('#view');$('#vt').textContent=kind==='guard'?'🛟 防走失':kind==='check'?'✅ 出發前清單':'📋 已預訂';
+  $('#vbody').innerHTML=kind==='guard'?guardHtml():kind==='check'?checkHtml():bookHtml();
   v.hidden=false;document.body.style.overflow='hidden';v.scrollTop=0;menuEl().hidden=true;
   if(anchor){const el=document.getElementById('bk-'+anchor);if(el){el.scrollIntoView({block:'start'});v.scrollTop-=60;el.classList.add('flash')}}
 }
@@ -1276,6 +1303,149 @@ addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#tour').hidden)tourClose
 {const m=location.hash.match(/^#fx(\d|check)$/);if(m)setTimeout(()=>{if(m[1]==='check')celebrate(CHECKT,{rgb:'229,112,154',title:'行李準備完成！'});else{const i=+m[1]-1,d=DAYS[i];if(d)celebrate(THEMES[i%THEMES.length],{rgb:d.rgb,title:`第 ${i+1} 天完成！`})}},900)}
 startLive();
 if(!tourSeen&&store.get('tour')!=='1')setTimeout(openTour,400);
+</script>
+<script>
+/* ============ 🛟 防走失（夥伴定位分享） ============
+   資料庫：Firebase Realtime Database（REST，不需 SDK）。把網址貼到 GUARD_DB，例如
+   'https://xxxx-default-rtdb.asia-southeast1.firebasedatabase.app'
+   規則：開啟時每 3 分鐘上傳自己的位置＋抓全部人的位置；關閉時完全不抓、不傳，並刪除自己的位置。 */
+const GUARD_DB='https://tokyo-f332d-default-rtdb.asia-southeast1.firebasedatabase.app';
+const GUARD_MS=3*60e3,GUARD_OLD=10*60e3,GUARD_DROP=12*3600e3;
+const GEMOJI=['🐰','🐻','🐱','🐶','🦊','🐼','🐸','🐥'];
+const rid=n=>{const a='abcdefghjkmnpqrstuvwxyz23456789',b=new Uint8Array(n);crypto.getRandomValues(b);return[...b].map(x=>a[x%a.length]).join('')};
+const G={uid:store.get('g:uid')||(()=>{const u=rid(8);store.set('g:uid',u);return u})(),mem:[],last:0,err:'',timer:0,busy:false,wl:null,lay:null,me:null};
+const gOn=()=>store.get('g:on')==='1',gShare=()=>store.get('g:share')!=='0',gWakeOn=()=>store.get('g:wake')==='1';
+const gRoom=()=>(store.get('g:room')||'').trim().toLowerCase(),gName=()=>store.get('g:name')||'',gEmo=()=>store.get('g:emo')||GEMOJI[0];
+const gUrl=(room,p)=>GUARD_DB.replace(/\/$/,'')+'/guard/'+enc(room)+(p?'/'+p:'')+'.json';
+const gHue=s=>{let h=0;for(const c of String(s))h=(h*31+c.charCodeAt(0))%360;return h};
+const gAgo=t=>{const m=Math.max(0,Math.round((Date.now()-t)/60e3));return m<1?'剛剛':m<60?m+' 分鐘前':Math.floor(m/60)+' 小時前'};
+const gClock=t=>new Date(t).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',hour12:false});
+const gPos=()=>new Promise(res=>{if(!navigator.geolocation)return res({err:0});
+  navigator.geolocation.getCurrentPosition(p=>res({la:+p.coords.latitude.toFixed(5),ln:+p.coords.longitude.toFixed(5),ac:Math.round(p.coords.accuracy)}),e=>res({err:e.code}),{enableHighAccuracy:true,timeout:15000,maximumAge:60000})});
+const gDel=room=>{if(GUARD_DB&&room)fetch(gUrl(room,G.uid),{method:'DELETE'}).catch(()=>{})};
+
+async function gTick(){
+  if(!gOn()||G.busy||!GUARD_DB||!gRoom())return;
+  G.busy=true;G.err='';const room=gRoom();
+  try{
+    if(gShare()){
+      const p=await gPos();
+      if(p.la!=null){G.me=p;
+        const w=await fetch(gUrl(room,G.uid),{method:'PUT',body:JSON.stringify({n:gName()||'旅伴',e:gEmo(),la:p.la,ln:p.ln,ac:p.ac,t:Date.now()})});if(!w.ok)throw 0}
+      else G.err=p.err===1?'沒有定位權限：請到 iPhone「設定」允許此 App 使用定位':'暫時抓不到定位，3 分鐘後重試';
+    }
+    const r=await fetch(gUrl(room),{cache:'no-store'});if(!r.ok)throw 0;
+    const d=(await r.json())||{},now=Date.now();
+    G.mem=Object.entries(d).filter(([k,v])=>k!==G.uid&&v&&typeof v.la==='number'&&now-v.t<GUARD_DROP).map(([k,v])=>({id:k,...v}));
+    G.last=now;
+  }catch(e){G.err=G.err||'連線失敗，3 分鐘後重試'}
+  G.busy=false;gUi();
+}
+async function gWL(){try{if(G.wl){G.wl.release();G.wl=null}
+  if(gOn()&&gWakeOn()&&navigator.wakeLock&&!document.hidden)G.wl=await navigator.wakeLock.request('screen')}catch(e){}}
+function gStart(){clearInterval(G.timer);if(!gOn())return;gTick();G.timer=setInterval(gTick,GUARD_MS);gWL()}
+function gStop(room){clearInterval(G.timer);G.timer=0;G.mem=[];G.last=0;G.err='';gDel(room||gRoom());gWL();gUi()}
+document.addEventListener('visibilitychange',()=>{if(document.hidden||!gOn())return;gWL();if(Date.now()-G.last>GUARD_MS)gTick()});
+addEventListener('pageshow',()=>{if(gOn()&&Date.now()-G.last>GUARD_MS)gTick()});
+
+/* ---- 地圖上的夥伴標記 ---- */
+function drawGuard(){
+  if(!mapObj||!window.L)return;
+  if(!G.lay)G.lay=L.layerGroup().addTo(mapObj);
+  G.lay.clearLayers();if(!gOn())return;
+  G.mem.forEach(m=>{const old=Date.now()-m.t>GUARD_OLD;
+    const ic=L.divIcon({className:'',iconSize:[36,36],iconAnchor:[18,18],popupAnchor:[0,-20],html:`<div class="gpin ${old?'old':''}" style="--h:${gHue(m.n)}">${esc(m.e||'🙂')}<span>${esc(m.n||'旅伴')}</span></div>`});
+    L.marker([m.la,m.ln],{icon:ic,zIndexOffset:900}).addTo(G.lay).bindPopup(`<b>${esc(m.e||'')} ${esc(m.n||'旅伴')}</b><br>${gAgo(m.t)}更新${old?'（可能已離線）':''}`);
+  });
+}
+const _showMap=showMap;showMap=async function(d){await _showMap.call(this,d);drawGuard();gChip()};
+function gChip(){
+  const mv=$('#mapview');let c=$('#gchip');
+  if(!c){c=document.createElement('button');c.id='gchip';c.className='gchip';c.dataset.m='guard';mv.appendChild(c)}
+  c.hidden=!gOn();if(gOn())c.textContent='🛟 '+G.mem.length+' 位夥伴｜'+(G.last?gClock(G.last)+' 更新':'更新中…');
+}
+function gFocus(id){
+  closeView();forceMap();let n=0;
+  const go=()=>{if(!mapObj||!window.L){if(n++<15)setTimeout(go,300);return}
+    drawGuard();const m=id&&G.mem.find(x=>x.id===id);
+    if(m){mapObj.flyTo([m.la,m.ln],17,{duration:.6});return}
+    const pts=G.mem.map(x=>[x.la,x.ln]);if(G.me)pts.push([G.me.la,G.me.ln]);
+    if(pts.length>1)mapObj.fitBounds(L.latLngBounds(pts),{padding:[50,50],maxZoom:17});else if(pts.length)mapObj.flyTo(pts[0],16)};
+  setTimeout(go,400);
+}
+
+/* ---- 設定頁 ---- */
+const gSw=(k,on,t,s)=>`<div class="grow"><div><b>${t}</b><small>${s}</small></div><button class="gsw ${on?'on':''}" data-g="${k}" aria-pressed="${on}"><i></i></button></div>`;
+function gMemHtml(){
+  if(!gOn())return '<div class="gnote">防走失目前關閉：不會上傳、也不會抓取任何人的位置。</div>';
+  const me=G.me?{lat:G.me.la,lng:G.me.ln}:loc;
+  const L2=G.mem.map(m=>({...m,d:me?dist(me.lat,me.lng,m.la,m.ln):null})).sort((a,b)=>(a.d??1e9)-(b.d??1e9));
+  const fmt=d=>d<1000?'約 '+Math.round(d/10)*10+' 公尺':'約 '+(d/1000).toFixed(1)+' 公里';
+  return (L2.length?L2.map(m=>{const old=Date.now()-m.t>GUARD_OLD;
+    return `<div class="gm ${old?'old':''}"><div class="ge" style="--h:${gHue(m.n)}">${esc(m.e||'🙂')}</div><div class="gi"><b>${esc(m.n||'旅伴')}</b><small>${gAgo(m.t)}${old?' ⚠️ 可能已離線':''}${m.d!=null?'｜距離你 '+fmt(m.d):''}</small></div><button class="gbtn" data-g="see" data-id="${m.id}">📍</button></div>`}).join('')
+    :'<div class="gnote">還沒有其他人分享位置。請夥伴也填入同一組代碼並開啟「分享我的位置」。</div>')
+    +(L2.length?'<div class="gbtns" style="margin-top:10px"><button class="gbtn" data-g="all">🗺️ 在地圖看全部</button></div>':'');
+}
+function gStatHtml(){
+  return `<div class="gnote">${G.busy?'更新中…':G.last?'最後更新 '+gClock(G.last)+'｜之後每 3 分鐘自動更新':gOn()?'等待第一次更新…':'尚未開啟'}</div>${G.err?`<div class="gerr">⚠️ ${esc(G.err)}</div>`:''}
+  ${gOn()?'<div class="gbtns" style="margin-top:8px"><button class="gbtn" data-g="now">🔄 立即更新</button></div>':''}`;
+}
+function guardHtml(){
+  if(!GUARD_DB)return `<div class="gcard"><h4>🛟 防走失</h4><div class="gnote">尚未設定資料庫。請在 index.html 的 <b>GUARD_DB</b> 填入 Firebase Realtime Database 網址後，就能使用。</div></div>`;
+  return `<div class="gcard"><h4>我的資料</h4>
+    <input type="text" id="gname" placeholder="暱稱（夥伴會看到）" maxlength="12" value="${esc(gName())}">
+    <div class="gemo">${GEMOJI.map(e=>`<button class="${e===gEmo()?'on':''}" data-g="emo" data-e="${e}">${e}</button>`).join('')}</div></div>
+  <div class="gcard"><h4>群組代碼</h4>
+    <input type="text" id="groom" placeholder="輸入夥伴給你的代碼，或按「建立新代碼」" maxlength="20" autocapitalize="off" autocomplete="off" value="${esc(gRoom())}">
+    <div class="gbtns"><button class="gbtn" data-g="new">✨ 建立新代碼</button><button class="gbtn" data-g="share">📤 分享代碼</button></div>
+    <div class="gnote" style="margin-top:8px">知道代碼的人才看得到彼此位置，請只傳給同行夥伴。</div></div>
+  <div class="gcard">
+    ${gSw('on',gOn(),'🛟 開啟防走失','開啟後每 3 分鐘更新一次；關閉後完全不抓取')}
+    ${gSw('share',gShare(),'📡 分享我的位置','關掉＝別人看不到我（我還是能看大家），並立即刪除我的位置')}
+    ${gSw('wake',gWakeOn(),'🔆 保持螢幕開啟','iPhone 鎖屏後網頁會暫停更新；開啟後只要 App 在前景就不休眠（較耗電）')}
+    <div id="gst" style="margin-top:6px">${gStatHtml()}</div></div>
+  <div class="gcard"><h4>夥伴位置</h4><div id="gmem">${gMemHtml()}</div></div>
+  <div class="gnote" style="padding:0 6px">⚠️ 網頁 App 無法真正在背景定位：App 被切到背景或鎖屏時會暫停，回到畫面後立刻補更新；位置旁會顯示「幾分鐘前」。</div>`;
+}
+const gOpen=()=>viewKind==='guard'&&!$('#view').hidden;
+function gPanel(){if(!gOpen())return;const v=$('#view'),y=v.scrollTop;$('#vbody').innerHTML=guardHtml();v.scrollTop=y}
+function gUi(){
+  if(gOpen()&&$('#gmem')){$('#gmem').innerHTML=gMemHtml();$('#gst').innerHTML=gStatHtml()}
+  drawGuard();gChip();
+}
+function gSetRoom(v){
+  v=v.trim().toLowerCase().replace(/[^a-z0-9_-]/g,'');if(v===gRoom())return;
+  const old=gRoom();if(gOn())gStop(old);store.set('g:room',v);G.mem=[];
+  if(gOn()&&v)gStart();gPanel();
+}
+document.addEventListener('change',e=>{
+  if(e.target.id==='gname'){store.set('g:name',e.target.value.trim());if(gOn()&&gShare())gTick()}
+  else if(e.target.id==='groom')gSetRoom(e.target.value);
+});
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-g]');if(!t)return;const k=t.dataset.g;
+  if(k==='on'){
+    if(!gOn()){
+      const n=$('#gname'),r=$('#groom');if(n)store.set('g:name',n.value.trim());if(r)store.set('g:room',r.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g,''));
+      if(!gName()||gRoom().length<6){alert('請先填暱稱，以及至少 6 碼的群組代碼（可按「建立新代碼」）');return}
+      store.set('g:on','1');gStart();
+    }else{const room=gRoom();store.set('g:on','0');gStop(room)}
+    gPanel();gChip();
+  }else if(k==='share'&&t.classList.contains('gsw')){
+    const was=gShare();store.set('g:share',was?'0':'1');
+    if(gOn()){if(was)gDel(gRoom());else gTick()}gPanel();
+  }else if(k==='wake'){store.set('g:wake',gWakeOn()?'0':'1');gWL();gPanel()}
+  else if(k==='emo'){store.set('g:emo',t.dataset.e);gPanel();if(gOn()&&gShare())gTick()}
+  else if(k==='new'){gSetRoom(rid(8))}
+  else if(k==='share'){const c=gRoom();if(!c){alert('請先建立或輸入群組代碼');return}
+    const txt='東京行程防走失群組代碼：'+c;
+    if(navigator.share)navigator.share({title:'防走失群組',text:txt}).catch(()=>{});
+    else if(navigator.clipboard)navigator.clipboard.writeText(c).then(()=>alert('已複製代碼：'+c))}
+  else if(k==='now')gTick();
+  else if(k==='see')gFocus(t.dataset.id);
+  else if(k==='all')gFocus(null);
+});
+if(gOn())gStart();
 </script>
 </body>
 </html>
