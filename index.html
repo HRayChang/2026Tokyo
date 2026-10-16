@@ -1408,12 +1408,17 @@ async function hCheckin(note,photo,man){
 }
 
 /* ---- 照片：縮成約 30–50KB 再上傳（寬最長 560px、JPEG） ---- */
-function hShrink(file){return new Promise((res,rej)=>{const im=new Image(),u=URL.createObjectURL(file);
-  im.onload=()=>{URL.revokeObjectURL(u);let S=560,q=.6,out='';
-    for(let i=0;i<5;i++){const k=Math.min(1,S/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
-      c.getContext('2d').drawImage(im,0,0,c.width,c.height);out=c.toDataURL('image/jpeg',q);if(out.length<70000)break;S=Math.round(S*.85);q=Math.max(.35,q-.05)}
-    res(out)};
-  im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('圖片無法讀取'))};im.src=u})}
+/* 省記憶體解碼：優先用 createImageBitmap 在解碼時就縮小（避免整張原圖展開成數億像素） */
+async function imgDecode(file,rw){
+  if(window.createImageBitmap){try{return await createImageBitmap(file,{resizeWidth:rw,resizeQuality:'medium'})}catch(e){try{return await createImageBitmap(file)}catch(e2){}}}
+  return new Promise((res,rej)=>{const im=new Image(),u=URL.createObjectURL(file);im.onload=()=>{URL.revokeObjectURL(u);res(im)};im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('圖片無法讀取'))};im.src=u})}
+function imgFree(im,c){try{if(im&&im.close)im.close()}catch(e){}if(c){c.width=c.height=0}}
+async function hShrink(file){
+  const im=await imgDecode(file,900);let S=560,q=.6,out='',c=document.createElement('canvas');
+  try{for(let i=0;i<5;i++){const k=Math.min(1,S/Math.max(im.width,im.height));c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+    c.getContext('2d').drawImage(im,0,0,c.width,c.height);out=c.toDataURL('image/jpeg',q);if(out.length<70000)break;S=Math.round(S*.85);q=Math.max(.35,q-.05)}}
+  finally{imgFree(im,c)}
+  return out}
 const HPH=/^data:image\/jpeg;base64,/;
 async function hLoadPh(id,v,pop){
   const box=pop&&pop.getElement()&&pop.getElement().querySelector('.hph2');if(!box)return;
@@ -1438,6 +1443,8 @@ function hForm(anc){
   <img class="hprev" id="hprev" ${H.photo?`src="${H.photo}"`:'hidden'} alt="">
   <input type="file" id="hfile" accept="image/*" capture="environment" hidden>
   <div class="gbtns" style="margin-bottom:4px"><button class="gbtn" data-h="pick">📷 拍照（選填，讓夥伴更好找）</button><button class="gbtn" id="hunpic" data-h="unpic" ${H.photo?'':'hidden'}>移除照片</button></div>
+  ${(()=>{const c=hAutoCfg(),on=!!(c&&H.autoT);return `<div style="margin:8px 2px 6px;font-size:14px"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="hauto" data-h="autotg" ${on?'checked':''} style="width:18px;height:18px;margin:0"> ⏱️ 自動定時打卡</label>
+  <div id="hautob" ${on?'':'hidden'} style="margin:6px 0 0 26px;color:var(--sub);font-size:13px;line-height:1.6">每 <input type="number" id="hmin" inputmode="numeric" min="5" max="180" placeholder="30" value="${on?c.min:''}" style="width:64px;display:inline-block;margin:0;padding:6px 8px"> 分鐘（不填＝30）<br><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="hwake" ${!c||c.wake?'checked':''} style="width:16px;height:16px;margin:0"> 保持螢幕不熄滅（較耗電）</label>${on?`<div style="color:var(--ac)">目前自動中，下次約 ${hClock(H.autoAt)}</div>`:''}<div>⚠️ 需讓 App 停留在前景。切到背景、鎖屏或關閉後 iOS 會暫停，回到 App 時會立刻補打卡。</div></div></div>`})()}
   <button class="hgo" data-h="send">${anc?'📍 用這個位置打卡':'📍 打卡'}</button>${anc?'<button class="hgo2" data-h="anchor">↩︎ 回地圖重新選位置</button>':''}<button class="hgo2" data-h="close">取消</button>`);
 }
 async function hRun(){
@@ -1470,6 +1477,21 @@ function hAncOk(){
   if(!mapObj)return;const c=mapObj.getCenter();
   H.man={la:+c.lat.toFixed(5),ln:+c.lng.toFixed(5)};hAncOff();hForm(true);
 }
+/* ---- 自動定時打卡（只在 App 前景運作；iOS 網頁無法在背景/關閉時取得定位） ---- */
+function hAutoCfg(){try{return JSON.parse(store.get('g:auto')||'null')}catch(e){return null}}
+function hAutoStop(){clearInterval(H.autoT);H.autoT=0;H.autoAt=0;store.del('g:auto');try{H.wl&&H.wl.release()}catch(e){}H.wl=null}
+async function hWake(){try{const c=hAutoCfg();if(!H.autoT||document.hidden||!c||!c.wake||!navigator.wakeLock)return;if(H.wl&&!H.wl.released)return;H.wl=await navigator.wakeLock.request('screen')}catch(e){}}
+function hAutoStart(cfg,delay){hAutoStop();store.set('g:auto',JSON.stringify(cfg));H.autoAt=Date.now()+(delay!=null?delay:cfg.min*60e3);H.autoT=setInterval(hAutoTick,15000);hWake()}
+async function hAutoTick(){
+  const cfg=hAutoCfg();if(!H.autoT||!cfg)return;
+  if(document.hidden||H.autoBusy||Date.now()<H.autoAt||!hRoom())return;
+  H.autoBusy=1;let r;try{r=await hCheckin(cfg.note||'','')}catch(e){r={net:1}}H.autoBusy=0;
+  if(r.ok){H.autoAt=Date.now()+cfg.min*60e3;hToast('⏱️ 已自動打卡 '+hClock(r.ok.t),'下次約 '+hClock(H.autoAt)+(r.ok.note?'｜'+r.ok.note:''),H.uid);try{hUi()}catch(e){}}
+  else{H.autoAt=Date.now()+2*60e3;hToast('⏱️ 自動打卡失敗','定位或網路有問題，2 分鐘後再試')}
+}
+function hAutoResume(){const c=hAutoCfg();if(c&&c.min&&hRoom())hAutoStart(c,4000)}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&H.autoT){hWake();hAutoTick()}});
+setTimeout(hAutoResume,2500);
 function hOpen(){hRoom()?hForm():hJoin()}
 function hJoin(msg){hDlg(`<h3>👥 先加入群組</h3><div class="gnote" style="margin-bottom:10px">只有知道群組代碼的人才看得到彼此的打卡。請輸入夥伴給你的代碼，或建立新群組再把邀請連結傳給夥伴。</div>${msg?`<div class="gerr">${esc(msg)}</div>`:''}
   <input type="text" id="hcode" placeholder="輸入群組代碼" maxlength="24" autocapitalize="off" autocomplete="off">
@@ -1636,7 +1658,7 @@ document.addEventListener('change',e=>{
   if(e.target.id==='gname')store.set('g:name',e.target.value.trim());
   else if(e.target.id==='hfile'&&e.target.files&&e.target.files[0]){
     const f=e.target.files[0];e.target.value='';
-    hShrink(f).then(d=>{H.photo=d;const pv=$('#hprev');if(pv){pv.src=d;pv.hidden=false}const u=$('#hunpic');if(u)u.hidden=false}).catch(()=>alert('照片讀取失敗，請再拍一次'))}
+    hShrink(f).then(d=>{H.photo=d;const pv=$('#hprev');if(pv){pv.src=d;pv.hidden=false}const u=$('#hunpic');if(u)u.hidden=false}).catch(()=>alert('照片讀取失敗（可能是手機記憶體不足），請先關閉其他 App 再拍一次'))}
 });
 document.addEventListener('click',e=>{
   const t=e.target.closest('[data-h]');if(!t)return;const k=t.dataset.h;
@@ -1653,10 +1675,13 @@ document.addEventListener('click',e=>{
   else if(k==='unpic'){H.photo='';const pv=$('#hprev');if(pv)pv.hidden=true;t.hidden=true}
   else if(k==='zoom'){const im=t.tagName==='IMG'?t:t.querySelector('img');if(im)hZoom(im.src)}
   else if(k==='q'){const n=$('#hnote');if(n)n.value=t.dataset.t}
+  else if(k==='autotg'){const b=$('#hautob');if(b)b.hidden=!t.checked}
   else if(k==='send'){
     const n=$('#hname'),o=$('#hnote'),nm=((n&&n.value)||'').trim();
     if(!nm){if(n){n.focus();n.placeholder='請先填暱稱'}return}
-    store.set('g:name',nm);H.pend=((o&&o.value)||'').trim().slice(0,30);hRun();
+    store.set('g:name',nm);H.pend=((o&&o.value)||'').trim().slice(0,30);
+    const au=$('#hauto');if(au){if(au.checked){const mi=Math.min(180,Math.max(5,parseInt(($('#hmin')||{}).value)||30)),wk=$('#hwake');hAutoStart({min:mi,note:H.pend,wake:wk&&wk.checked?1:0})}else if(hAutoCfg())hAutoStop()}
+    hRun();
   }
   else if(k==='retry'){H.man=null;hRun()}
   else if(k==='send2')hRun();
@@ -1694,13 +1719,13 @@ function cpState(c){
 }
 const cpRank=c=>{const s=cpState(c).k;return(s==='used'||s==='exp')?1:0};
 function cpSorted(){return cpAll().sort((a,b)=>cpRank(a)-cpRank(b)||(a.u||'9999').localeCompare(b.u||'9999')||(b.c||0)-(a.c||0))}
-function cpShrink(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();
-  im.onload=()=>{URL.revokeObjectURL(u);let S=1000,q=.75,out='';
-    for(let i=0;i<5;i++){const k=Math.min(1,S/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
-      const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);out=c.toDataURL('image/jpeg',q);
-      if(out.length<180000)break;S=Math.round(S*.85);q=Math.max(.5,q-.05)}
-    res(out)};
-  im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('圖片無法讀取'))};im.src=u})}
+async function cpShrink(file){
+  const im=await imgDecode(file,1400);let S=1000,q=.75,out='',c=document.createElement('canvas');
+  try{for(let i=0;i<5;i++){const k=Math.min(1,S/Math.max(im.width,im.height));c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+    const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);out=c.toDataURL('image/jpeg',q);
+    if(out.length<180000)break;S=Math.round(S*.85);q=Math.max(.5,q-.05)}}
+  finally{imgFree(im,c)}
+  return out}
 function cpCard(c){
   const s=cpState(c),im=cpImgOf(c),show=im||c.k;
   return `<div class="bkc cp ${s.k}"><div class="bt">${c.used?'✅':'🎫'} ${esc(c.t)}${c.prov?' <span class="badge" style="margin-left:4px;vertical-align:middle">🎁 提供</span>':''}</div><div class="bw">${esc(s.t)}${c.s?'｜'+esc(c.s):''}</div>
