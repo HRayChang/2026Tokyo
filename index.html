@@ -766,12 +766,17 @@ function whereHtml(){
   return `<button class="where" data-now="1">📍 現在：${esc(liveInfo.item.title)}<small>${note}</small></button>`;
 }
 function goNow(smooth){const el=document.querySelector('.card.now,.grph.now')||document.querySelector('.card.next,.grph.next');if(el)el.scrollIntoView({block:'start',behavior:smooth?'smooth':'auto'})}
-function locate(){return new Promise(res=>{if(!navigator.geolocation)return res(null);
+/* 定位權限狀態：granted / prompt / denied / unknown（部分 iOS 不支援 Permissions API） */
+async function geoState(){try{if(navigator.permissions&&navigator.permissions.query)return (await navigator.permissions.query({name:'geolocation'})).state}catch(e){}return 'unknown'}
+/* silent=true：沒有使用者操作時（例如開啟 App 自動定位）只在「已允許」時才定位，
+   避免 Android Chrome 把沒有手勢的定位詢問視為騷擾而自動封鎖，導致之後再也不跳詢問 */
+function locate(silent){return new Promise(async res=>{if(!navigator.geolocation)return res(null);
+  if(silent&&(await geoState())!=='granted')return res(null);
   navigator.geolocation.getCurrentPosition(p=>res({lat:p.coords.latitude,lng:p.coords.longitude}),()=>res(null),{timeout:8000,maximumAge:120000})})}
 function startLive(){
   const li=liveDayIdx();if(li<0){refit=true;render();return}
   cur=li;refit=true;render();if(mode==='map')focusItem(curNext,false);else goNow(false);const y0=scrollY;
-  locate().then(p=>{if(!p)return;loc=p;const stay=Math.abs(scrollY-y0)<40;render();if(stay&&mode==='list')goNow(false)});
+  locate(true).then(p=>{if(!p)return;loc=p;const stay=Math.abs(scrollY-y0)<40;render();if(stay&&mode==='list')goNow(false)});
 }
 
 const MU={
@@ -1378,7 +1383,13 @@ const hLive=p=>!!p&&typeof p.la==='number'&&typeof p.ln==='number'&&typeof p.t==
 const hLeft=p=>Math.max(1,Math.ceil((p.t+HERE_TTL-Date.now())/60e3));
 const hList=()=>Object.entries(H.pins).map(([id,p])=>({id,...p})).filter(hLive).sort((a,b)=>b.t-a.t);
 const hPos=()=>new Promise(res=>{if(!navigator.geolocation)return res({err:0});
-  navigator.geolocation.getCurrentPosition(p=>res({la:+p.coords.latitude.toFixed(5),ln:+p.coords.longitude.toFixed(5),ac:Math.round(p.coords.accuracy)}),e=>res({err:e.code}),{enableHighAccuracy:true,timeout:15000,maximumAge:0})});
+  const ok=p=>res({la:+p.coords.latitude.toFixed(5),ln:+p.coords.longitude.toFixed(5),ac:Math.round(p.coords.accuracy)});
+  /* 先用高精度；逾時／暫時取不到時（Android 室內常見）改用一般精度再試一次。被拒絕（code 1）則直接回報 */
+  navigator.geolocation.getCurrentPosition(ok,e=>{
+    if(e.code===1)return res({err:1});
+    navigator.geolocation.getCurrentPosition(ok,e2=>res({err:e2.code}),{enableHighAccuracy:false,timeout:15000,maximumAge:60000})
+  },{enableHighAccuracy:true,timeout:12000,maximumAge:0})});
+const hAndroid=/Android/i.test(navigator.userAgent);
 const hDel=id=>{if(!hRoom())return;fetch(hUrl('pins/'+id),{method:'DELETE'}).catch(()=>{});fetch(hUrl('photos/'+id),{method:'DELETE'}).catch(()=>{})};
 
 /* ---- 打卡 ---- */
@@ -1436,11 +1447,14 @@ async function hRun(){
   const r=await hCheckin(H.pend,H.photo);
   if(r.ok){H.photo='';hClose();hToast('✅ 已打卡 '+hClock(r.ok.t),r.ok.note||'夥伴會收到通知，地圖顯示 30 分鐘',H.uid);hFocus(H.uid);return}
   const retry='<button class="hgo" data-h="retry">🔄 重新定位</button><button class="hgo2" data-h="close">取消</button>';
-  if(r.weak!=null)hDlg(`<h3>📡 定位不準，要再試一次嗎？</h3><div class="gnote">目前誤差${r.weak>0?'約 '+r.weak+' 公尺':'很大'}（超過 ${HERE_ACC} 公尺），位置可能不可靠。到空曠處或靠窗邊再試一次會更準。</div>${retry}`);
+  if(r.weak!=null)hDlg(`<h3>📡 定位不準，要再試一次嗎？</h3><div class="gnote">目前誤差${r.weak>0?'約 '+r.weak+' 公尺':'很大'}（超過 ${HERE_ACC} 公尺），位置可能不可靠。到空曠處或靠窗邊再試一次會更準。${hAndroid?'<br>Android 也請確認定位權限選的是「精確」而不是「概略」。':''}</div>${retry}`);
   else if(r.net)hDlg(`<h3>連線失敗</h3><div class="gnote">打卡沒有送出，請確認網路後再試一次。</div>${retry}`);
   else if(r.err===-1)hJoin();
-  else if(r.err===1)hDlg(`<h3>沒有定位權限</h3><div class="gnote">請到 iPhone「設定」→ 隱私權與安全性 → 定位服務，允許此 App 或 Safari 使用定位，再回來打卡。</div>${retry}`);
-  else hDlg(`<h3>抓不到定位</h3><div class="gnote">暫時取得不到 GPS，要再試一次嗎？</div>${retry}`);
+  else if(r.err===1)hDlg(hAndroid
+    ?`<h3>沒有定位權限</h3><div class="gnote" style="text-align:left">Android 請依序檢查：<br>① 手機下拉選單，確認「位置資訊」已開啟<br>② 開啟 Chrome →右上角「⋮」→「設定」→「網站設定」→「位置資訊」，確認已開啟，且此網站不在「禁止」清單；若在，點進去改成「允許」<br>③ 手機「設定」→「應用程式」→ Chrome →「權限」→「位置資訊」，選「允許」，並開啟「使用精確位置」<br>④ 若是從主畫面開啟：長按主畫面圖示 →「應用程式資訊」→「權限」→ 位置資訊 →「允許」<br>改完回來按「重新定位」。</div>${retry}`
+    :`<h3>沒有定位權限</h3><div class="gnote">請到 iPhone「設定」→ 隱私權與安全性 → 定位服務，允許此 App 或 Safari 使用定位，再回來打卡。</div>${retry}`);
+  else if(r.err===2)hDlg(`<h3>手機的定位功能沒開</h3><div class="gnote">${hAndroid?'請從螢幕上方下拉，開啟「位置資訊」（GPS），再按重新定位。':'請確認「定位服務」已開啟，再按重新定位。'}</div>${retry}`);
+  else hDlg(`<h3>抓不到定位</h3><div class="gnote">暫時取得不到 GPS，要再試一次嗎？${hAndroid?'（也請確認手機「位置資訊」已開啟）':''}</div>${retry}`);
 }
 function hOpen(){hRoom()?hForm():hJoin()}
 function hJoin(msg){hDlg(`<h3>👥 先加入群組</h3><div class="gnote" style="margin-bottom:10px">只有知道群組代碼的人才看得到彼此的打卡。請輸入夥伴給你的代碼，或建立新群組再把邀請連結傳給夥伴。</div>${msg?`<div class="gerr">${esc(msg)}</div>`:''}
