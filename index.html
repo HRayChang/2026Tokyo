@@ -326,6 +326,12 @@ body.mapmode #hbtn{display:none}
 .hph2 img{display:block;width:100%;max-width:220px;border-radius:12px;margin-top:4px}
 .hlight{position:fixed;inset:0;z-index:260;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;padding:12px}
 .hlight img{max-width:100%;max-height:100%;border-radius:10px}
+/* 優惠券 */
+.cpim{display:block;width:100%;max-height:180px;object-fit:contain;background:#fff;border-radius:12px;margin:8px 0}
+.bkc.cp.exp,.bkc.cp.used{opacity:.55}
+.bkc.cp.warn .bw{color:#d9534f}
+.cplight{position:fixed;inset:0;z-index:270;background:#fff;color:#222;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;text-align:center}
+.cplight img{max-width:100%;max-height:68vh;object-fit:contain}
 /* App 內提示 */
 .htoast{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0));transform:translateX(-50%);z-index:320;width:min(420px,calc(100vw - 24px));display:flex;flex-direction:column;gap:8px;pointer-events:none}
 .ht{pointer-events:auto;background:var(--card);color:var(--tx);border:1.5px solid rgba(var(--acrgb),.4);border-radius:22px;padding:12px 14px;box-shadow:0 10px 30px rgba(0,0,0,.3);font-size:14px;font-weight:700;animation:hin .35s ease both}
@@ -340,6 +346,7 @@ body.mapmode #hbtn{display:none}
   <button data-m="here">📍 I'm here</button>
   <button data-m="check">✅ 出發前清單</button>
   <button data-m="book">📋 已預訂</button>
+  <button data-m="coupon">🎫 優惠券</button>
   <button data-m="tour">❓ 使用教學</button>
 </div>
 <div class="stick" id="stick"><nav class="tabs" id="tabs"></nav>
@@ -557,6 +564,19 @@ const DAYS=[
 ];
 
 /* ===== 已預訂清單（id 要和上面行程裡的 bk 對得上；改內容改這裡） ===== */
+/* 🎫 優惠券（由你提供，所有人都看得到）：圖片放進 GitHub 的 coupons/ 資料夾，再在下面新增一筆。
+   範例：{id:'matsu1',t:'松本清 5% 折價券',s:'松本清 淺草店',u:'2026-10-31',k:'優惠碼',n:'備註',img:'coupons/matsu1.jpg'},
+   id 不可重複、建立後不要改（用來記每個人的「已使用」）；s（店家）、q（地圖搜尋字）、u（到期日）、k（代碼）、n（備註）、img（圖片）、url（優惠券網頁，會出現按鈕）都可省略。 */
+const COUPONS=[
+ {id:'donki',t:'唐吉訶德 免稅10% ＋ 最高7%折扣',s:'全國約600間（含淺草、上野、新宿）',q:'ドン・キホーテ',url:'https://livejapan.com/public/operation/coupon/donki/zh-tw.html',
+  n:'免稅後滿 10,000 日圓（未稅）再折最高 5%，滿 30,000 日圓最高 7%。\n結帳時要現場打開優惠券頁面給店員掃條碼（不接受截圖），並出示護照。\n不可與其他折扣、majica 併用；酒、菸、遊戲機、Apple 等不適用。'},
+ {id:'bic',t:'BIC CAMERA 免稅10% ＋ 最高7%OFF',s:'全國各店（含新宿、池袋、機場店）',q:'ビックカメラ',u:'2026-10-31',url:'https://livejapan.com/public/operation/coupon/biccamera/zh-tw.html',
+  n:'7%：相機、家電、玩具等；5%：藥品、化妝品、日用品、食品；3%：日本酒。\n免稅後滿 5,000 日圓（未稅）、限外國旅客，需出示護照。\n結帳前打開頁面給店員掃條碼；Apple、遊戲機、手錶等不適用，不可與其他優惠併用。'},
+ {id:'alpen',t:'Alpen TOKYO 免稅 ＋ 5%OFF',s:'Alpen TOKYO（新宿）與全國 Alpen 集團店',q:'Alpen TOKYO 新宿',u:'2026-12-31',url:'https://app.likejapan.com/zh-hk/coupon/alpen-coupon',
+  n:'免稅購物滿 5,500 日圓（含稅）可再折 5%，限外國旅客，需出示護照。\n結帳時出示優惠券畫面；不可與其他折扣併用，部分商品不適用。\n※ 不同網站標示的期限不一（2025 或 2026 年底），到店前請再確認。'},
+ {id:'anadf',t:'ANA DUTY FREE SHOP 成田機場 5%OFF',s:'成田機場 第1航廈',q:'ANA DUTY FREE SHOP 成田空港',u:'2027-03-31',url:'https://fun-japan.jp/tw/light-coupons/48',
+  n:'成田機場 ANA 免稅店的優惠券，打開頁面結帳時出示。適用商品與條件請以頁面為準。'}
+];
 const BK=[
  {id:'p1',ic:'🚐',t:'去程 機場接送',when:'10/21（三）03:50',info:['台灣出發時間，接送到桃園機場'],q:'25.026706941264564,121.47842727069022'},
  {id:'f1',ic:'✈️',t:'酷航 Scoot TR866（去程）',when:'10/21（三）06:45 起飛',info:['05:00 CHECK IN','桃園 T1 06:45 ➜ 成田 T1 11:15','隨身行李 1 件 54×38×23 cm＋小型行李 1 件 40×30×10 cm，兩件合計 10 kg']},
@@ -1136,8 +1156,8 @@ function checkCount(){let n=0,t=0;CHECK.forEach((g,gi)=>g.l.forEach((x,i)=>{t++;
 let viewKind='';
 function refreshBook(){if(viewKind==='book'&&!$('#view').hidden){const y=$('#view').scrollTop;$('#vbody').innerHTML=bookHtml();$('#view').scrollTop=y}}
 function openView(kind,anchor){viewKind=kind;
-  const v=$('#view');$('#vt').textContent=kind==='here'?'📍 I\'m here':kind==='check'?'✅ 出發前清單':'📋 已預訂';
-  $('#vbody').innerHTML=kind==='here'?hereHtml():kind==='check'?checkHtml():bookHtml();
+  const v=$('#view');$('#vt').textContent=kind==='here'?'📍 I\'m here':kind==='coupon'?'🎫 優惠券':kind==='check'?'✅ 出發前清單':'📋 已預訂';
+  $('#vbody').innerHTML=kind==='here'?hereHtml():kind==='coupon'?cpHtml():kind==='check'?checkHtml():bookHtml();
   v.hidden=false;document.body.style.overflow='hidden';v.scrollTop=0;menuEl().hidden=true;
   if(anchor){const el=document.getElementById('bk-'+anchor);if(el){el.scrollIntoView({block:'start'});v.scrollTop-=60;el.classList.add('flash')}}
 }
@@ -1249,7 +1269,7 @@ const TS=[
  {sel:'[data-seg=list]',pre:forceMap,t:'回到列表',x:'要回到時間軸，就點「列表」。',act:'👆 請點一下「列表」',within:'[data-seg=list]'},
  {sel:'.tools',pre:forceList,t:'🧰 本日工具',x:'在每天頁面最下方：隱藏／顯示已完成項目、重置本日勾選。'},
  {sel:'#menuBtn',pre:forceList,t:'☰ 選單',x:'通知、清單、預訂資料都收在這裡。',act:'👆 請點一下開啟選單',within:'[data-menu]'},
- {sel:'#menu',pre:openMenuForTour,t:'選單內容',x:'📍 I\'m here：打卡目前位置，夥伴會收到通知\n🔔 開啟通知：事件前依各項設定提前提醒\n✅ 出發前清單\n📋 已預訂：可記訂位代號，只存在這支手機\n❓ 使用教學：隨時重看'},
+ {sel:'#menu',pre:openMenuForTour,t:'選單內容',x:'📍 I\'m here：打卡目前位置，夥伴會收到通知\n🔔 開啟通知：事件前依各項設定提前提醒\n✅ 出發前清單\n📋 已預訂：可記訂位代號，只存在這支手機\n🎫 優惠券：存折價券截圖／條碼，結帳一鍵放大\n❓ 使用教學：隨時重看'},
  {t:'準備出發 ✈️',x:'祝旅途愉快！之後想重看，點選單 ☰ →「使用教學」。'}
 ];
 let tourI=0,tourSeen=false,tourCur=0,tourMode='list',tourTimer=null,tourTok=0;
@@ -1619,6 +1639,99 @@ document.addEventListener('click',e=>{
 });
 hBtn2();
 hConnect();hSub();
+</script>
+<script>
+/* ============ 🎫 優惠券（只存在這支手機，不上傳） ============
+   每張：名稱、店家、到期日、代碼、備註、截圖／條碼照片。資料放 localStorage（清除 Safari 網站資料會一起消失）。 */
+const CP={list:[],img:'',cur:null};
+function cpLoad(){try{CP.list=JSON.parse(store.get('cp:list')||'[]')||[]}catch(e){CP.list=[]}}
+function cpSave(){try{localStorage.setItem('cp:list',JSON.stringify(CP.list));return true}catch(e){return false}}
+const cpImg=id=>store.get('cp:i:'+id)||'';
+const cpAll=()=>{cpLoad();return[...COUPONS.map(c=>({...c,prov:1,used:store.get('cp:u:'+c.id)==='1'})),...CP.list]};   /* prov＝你提供的 */
+const cpFind=id=>cpAll().find(x=>x.id===id);
+const cpImgOf=c=>c.prov?(c.img||''):cpImg(c.id);
+function cpDays(u){if(!u)return null;const[y,m,d]=u.split('-').map(Number),e=new Date(y,m-1,d),n=new Date();n.setHours(0,0,0,0);return Math.round((e-n)/864e5)}
+function cpState(c){
+  if(c.used)return{k:'used',t:'已使用'};
+  const d=cpDays(c.u);
+  if(d==null)return{k:'ok',t:'無期限'};
+  if(d<0)return{k:'exp',t:'已過期'};
+  if(d===0)return{k:'warn',t:'今天到期'};
+  if(d<=3)return{k:'warn',t:'剩 '+d+' 天到期'};
+  return{k:'ok',t:c.u.slice(5).replace('-','/')+' 到期（剩 '+d+' 天）'};
+}
+const cpRank=c=>{const s=cpState(c).k;return(s==='used'||s==='exp')?1:0};
+function cpSorted(){return cpAll().sort((a,b)=>cpRank(a)-cpRank(b)||(a.u||'9999').localeCompare(b.u||'9999')||(b.c||0)-(a.c||0))}
+function cpShrink(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();
+  im.onload=()=>{URL.revokeObjectURL(u);let S=1000,q=.75,out='';
+    for(let i=0;i<5;i++){const k=Math.min(1,S/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+      const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);out=c.toDataURL('image/jpeg',q);
+      if(out.length<180000)break;S=Math.round(S*.85);q=Math.max(.5,q-.05)}
+    res(out)};
+  im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('圖片無法讀取'))};im.src=u})}
+function cpCard(c){
+  const s=cpState(c),im=cpImgOf(c),show=im||c.k;
+  return `<div class="bkc cp ${s.k}"><div class="bt">${c.used?'✅':'🎫'} ${esc(c.t)}${c.prov?' <span class="badge" style="margin-left:4px;vertical-align:middle">🎁 提供</span>':''}</div><div class="bw">${esc(s.t)}${c.s?'｜'+esc(c.s):''}</div>
+  ${c.k?`<div class="vn" style="font:700 15px ui-monospace,Menlo,monospace;-webkit-user-select:text;user-select:text;word-break:break-all">${esc(c.k)}</div>`:''}
+  ${c.n?`<div class="vn" style="white-space:pre-wrap">${esc(c.n)}</div>`:''}
+  ${im?`<img class="cpim" src="${im}" data-cp="show" data-id="${c.id}" alt="">`:''}
+  <div class="acts">${c.url?`<a href="${esc(c.url)}" target="_blank" rel="noopener" style="background:var(--ac);color:#fff">🔗 開啟優惠券頁面</a>`:''}${show?`<button data-cp="show" data-id="${c.id}">🔍 結帳出示</button>`:''}${c.k?`<button data-cp="copy" data-id="${c.id}">📋 複製代碼</button>`:''}
+  <button data-cp="used" data-id="${c.id}">${c.used?'↩︎ 取消已使用':'✓ 已使用'}</button>${(c.q||c.s)?`<a href="${mapUrl(c.q||c.s)}" target="_blank" rel="noopener">📍 附近店家</a>`:''}
+  ${c.prov?'':`<button data-cp="edit" data-id="${c.id}">✏️ 編輯</button>`}</div></div>`;
+}
+function cpHtml(){
+  cpLoad();const L=cpSorted(),today=L.filter(c=>!c.used&&cpDays(c.u)===0).length;
+  return `<div class="vn">共 ${L.length} 張。標示「🎁 提供」的是行程提供的；「已使用」與自己新增的只存在這支手機。</div>${today?`<div class="alert">⏰ 今天有 ${today} 張優惠券到期</div>`:''}
+  <div class="gbtns" style="margin:8px 0"><button class="gbtn" data-cp="new">＋ 新增優惠券</button></div>`
+  +(L.length?L.map(cpCard).join(''):'<div class="empty">目前沒有優惠券<br><small style="color:var(--sub);font-weight:500">之後有新的會出現在這裡，也可以自己新增</small></div>');
+}
+function cpRefresh(){if(viewKind==='coupon'&&!$('#view').hidden){const v=$('#view'),y=v.scrollTop;$('#vbody').innerHTML=cpHtml();v.scrollTop=y}}
+function cpPhHtml(){return CP.img?`<img class="cpim" src="${CP.img}" alt=""><button class="gbtn" data-cp="unpic">移除圖片</button>`:`<button class="gbtn" data-cp="pick">🖼️ 加入截圖／條碼照片（選填）</button>`}
+function cpForm(id){
+  cpLoad();const c=id?CP.list.find(x=>x.id===id):null;CP.cur=c?c.id:null;CP.img=c?cpImg(c.id):'';
+  hDlg(`<h3>${c?'編輯優惠券':'新增優惠券'}</h3>
+  <input type="text" id="cpt" placeholder="名稱，例如：松本清 5% 折價券" maxlength="40" value="${esc(c?c.t:'')}">
+  <input type="text" id="cps" placeholder="店家／地點（選填）" maxlength="40" value="${esc(c?c.s||'':'')}">
+  <div class="gnote" style="margin:0 0 2px">到期日（選填）</div><input type="date" id="cpu" value="${esc(c?c.u||'':'')}" style="width:100%;border:1.5px solid var(--line);background:transparent;color:var(--tx);border-radius:14px;padding:10px 12px;font:inherit;font-size:16px;margin-bottom:8px">
+  <input type="text" id="cpk" placeholder="優惠碼（選填）" maxlength="60" autocapitalize="off" autocomplete="off" value="${esc(c?c.k||'':'')}">
+  <input type="text" id="cpn" placeholder="備註（選填），例如：滿 5,000 日圓免稅＋折扣" maxlength="80" value="${esc(c?c.n||'':'')}">
+  <div id="cpph" style="margin:0 0 8px">${cpPhHtml()}</div><input type="file" id="cpfile" accept="image/*" hidden>
+  <button class="hgo" data-cp="save">儲存</button>${c?'<button class="hgo2" data-cp="del" style="color:#d9534f">刪除這張</button>':''}<button class="hgo2" data-h="close">取消</button>`);
+}
+function cpShow(id){
+  const c=cpFind(id);if(!c)return;const im=cpImgOf(c);
+  const d=document.createElement('div');d.className='cplight';
+  d.innerHTML=`<b style="font-size:18px">${esc(c.t)}</b>${im?`<img src="${im}" alt="">`:''}${c.k?`<div style="font:800 24px ui-monospace,Menlo,monospace;word-break:break-all">${esc(c.k)}</div>`:''}<div style="color:#777;font-size:13px">點一下關閉</div>`;
+  d.onclick=()=>d.remove();document.body.appendChild(d);
+}
+document.addEventListener('change',e=>{
+  if(e.target.id!=='cpfile')return;const f=e.target.files&&e.target.files[0];if(!f)return;
+  cpShrink(f).then(d=>{CP.img=d;const b=$('#cpph');if(b)b.innerHTML=cpPhHtml()}).catch(()=>alert('無法讀取這張圖片，請換一張試試'));
+});
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-cp]');if(!t)return;const k=t.dataset.cp,id=t.dataset.id;
+  if(k==='new')cpForm(null);
+  else if(k==='edit')cpForm(id);
+  else if(k==='pick'){const f=$('#cpfile');if(f){f.value='';f.click()}}
+  else if(k==='unpic'){CP.img='';const b=$('#cpph');if(b)b.innerHTML=cpPhHtml()}
+  else if(k==='show')cpShow(id);
+  else if(k==='copy'){const c=cpFind(id);if(c&&navigator.clipboard)navigator.clipboard.writeText(c.k).then(()=>{t.textContent='✓ 已複製';setTimeout(()=>{t.textContent='📋 複製代碼'},1500)}).catch(()=>{})}
+  else if(k==='used'){const c=cpFind(id);if(c){if(c.prov){c.used?store.del('cp:u:'+id):store.set('cp:u:'+id,'1')}else{const r=CP.list.find(x=>x.id===id);if(r){r.used=!r.used;cpSave()}}cpRefresh()}}
+  else if(k==='del'){if(CP.cur&&confirm('刪除這張優惠券？')){CP.list=CP.list.filter(x=>x.id!==CP.cur);store.del('cp:i:'+CP.cur);cpSave();hClose();cpRefresh()}}
+  else if(k==='save'){
+    const v=s=>(($(s)||{}).value||'').trim(),title=v('#cpt');
+    if(!title){const n=$('#cpt');if(n){n.focus();n.placeholder='請先填名稱'}return}
+    cpLoad();let c=CP.cur&&CP.list.find(x=>x.id===CP.cur);const isNew=!c;
+    if(isNew){c={id:rid(8),c:Date.now()};CP.list.push(c)}
+    Object.assign(c,{t:title,s:v('#cps'),u:v('#cpu'),k:v('#cpk'),n:v('#cpn')});
+    let ok=true;
+    try{if(CP.img)localStorage.setItem('cp:i:'+c.id,CP.img);else localStorage.removeItem('cp:i:'+c.id)}catch(err){ok=false}
+    if(!ok||!cpSave()){if(isNew)CP.list=CP.list.filter(x=>x!==c);store.del('cp:i:'+c.id);alert('手機儲存空間不足，存不下這張圖片。請移除圖片，或刪掉不用的優惠券再試一次。');return}
+    hClose();cpRefresh();
+  }
+});
+/* 提供的優惠券圖片：有網路時先載入一次，之後沒網路也看得到（Service Worker 會快取） */
+addEventListener('load',()=>setTimeout(()=>{if(navigator.onLine)COUPONS.forEach(c=>{if(c.img)fetch(c.img).catch(()=>{})})},3000));
 </script>
 </body>
 </html>
