@@ -310,6 +310,15 @@ body.mapmode #hbtn{display:none}
 .hgo,.hgo2{display:block;width:100%;border:0;border-radius:999px;min-height:50px;font-size:17px;font-weight:800;margin-top:8px}
 .hgo{color:#fff;background:linear-gradient(135deg,#3fb0c0,#4f8fe0);box-shadow:0 6px 16px rgba(63,176,192,.4)}
 .hgo2{color:var(--sub);background:rgba(var(--acrgb),.1);font-weight:700;font-size:15px}
+.hanc{position:absolute;left:50%;top:50%;z-index:700;width:0;height:0;pointer-events:none}
+.hanc i{position:absolute;left:-5px;top:-5px;width:10px;height:10px;border-radius:50%;background:rgba(229,112,154,.9);box-shadow:0 0 0 3px rgba(255,255,255,.9),0 0 0 6px rgba(229,112,154,.35)}
+.hanc b{position:absolute;left:-20px;top:-52px;font-size:40px;line-height:40px;filter:drop-shadow(0 3px 3px rgba(0,0,0,.35));animation:hanb 1.4s ease-in-out infinite}
+@keyframes hanb{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.hancbar{position:absolute;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom,0));z-index:710;background:var(--cardA);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-radius:24px;padding:12px 14px;box-shadow:0 8px 26px rgba(0,0,0,.3);text-align:center}
+.hancbar .gnote{margin-bottom:2px}
+.hancbar .row{display:flex;gap:8px}.hancbar .row button{flex:1}
+.hancbar .hgo,.hancbar .hgo2{margin-top:8px;min-height:46px}
+.mapview.anch .sheet,.mapview.anch .gchip,.mapview.anch #hbtn2,.mapview.anch #mapalert{display:none}
 .hspin{width:34px;height:34px;margin:12px auto;border-radius:50%;border:4px solid rgba(var(--acrgb),.2);border-top-color:var(--ac);animation:hsp 1s linear infinite}
 @keyframes hsp{to{transform:rotate(360deg)}}
 /* 地圖上的打卡點 */
@@ -766,17 +775,12 @@ function whereHtml(){
   return `<button class="where" data-now="1">📍 現在：${esc(liveInfo.item.title)}<small>${note}</small></button>`;
 }
 function goNow(smooth){const el=document.querySelector('.card.now,.grph.now')||document.querySelector('.card.next,.grph.next');if(el)el.scrollIntoView({block:'start',behavior:smooth?'smooth':'auto'})}
-/* 定位權限狀態：granted / prompt / denied / unknown（部分 iOS 不支援 Permissions API） */
-async function geoState(){try{if(navigator.permissions&&navigator.permissions.query)return (await navigator.permissions.query({name:'geolocation'})).state}catch(e){}return 'unknown'}
-/* silent=true：沒有使用者操作時（例如開啟 App 自動定位）只在「已允許」時才定位，
-   避免 Android Chrome 把沒有手勢的定位詢問視為騷擾而自動封鎖，導致之後再也不跳詢問 */
-function locate(silent){return new Promise(async res=>{if(!navigator.geolocation)return res(null);
-  if(silent&&(await geoState())!=='granted')return res(null);
+function locate(){return new Promise(res=>{if(!navigator.geolocation)return res(null);
   navigator.geolocation.getCurrentPosition(p=>res({lat:p.coords.latitude,lng:p.coords.longitude}),()=>res(null),{timeout:8000,maximumAge:120000})})}
 function startLive(){
   const li=liveDayIdx();if(li<0){refit=true;render();return}
   cur=li;refit=true;render();if(mode==='map')focusItem(curNext,false);else goNow(false);const y0=scrollY;
-  locate(true).then(p=>{if(!p)return;loc=p;const stay=Math.abs(scrollY-y0)<40;render();if(stay&&mode==='list')goNow(false)});
+  locate().then(p=>{if(!p)return;loc=p;const stay=Math.abs(scrollY-y0)<40;render();if(stay&&mode==='list')goNow(false)});
 }
 
 const MU={
@@ -1383,22 +1387,17 @@ const hLive=p=>!!p&&typeof p.la==='number'&&typeof p.ln==='number'&&typeof p.t==
 const hLeft=p=>Math.max(1,Math.ceil((p.t+HERE_TTL-Date.now())/60e3));
 const hList=()=>Object.entries(H.pins).map(([id,p])=>({id,...p})).filter(hLive).sort((a,b)=>b.t-a.t);
 const hPos=()=>new Promise(res=>{if(!navigator.geolocation)return res({err:0});
-  const ok=p=>res({la:+p.coords.latitude.toFixed(5),ln:+p.coords.longitude.toFixed(5),ac:Math.round(p.coords.accuracy)});
-  /* 先用高精度；逾時／暫時取不到時（Android 室內常見）改用一般精度再試一次。被拒絕（code 1）則直接回報 */
-  navigator.geolocation.getCurrentPosition(ok,e=>{
-    if(e.code===1)return res({err:1});
-    navigator.geolocation.getCurrentPosition(ok,e2=>res({err:e2.code}),{enableHighAccuracy:false,timeout:15000,maximumAge:60000})
-  },{enableHighAccuracy:true,timeout:12000,maximumAge:0})});
-const hAndroid=/Android/i.test(navigator.userAgent);
+  navigator.geolocation.getCurrentPosition(p=>res({la:+p.coords.latitude.toFixed(5),ln:+p.coords.longitude.toFixed(5),ac:Math.round(p.coords.accuracy)}),e=>res({err:e.code}),{enableHighAccuracy:true,timeout:15000,maximumAge:0})});
 const hDel=id=>{if(!hRoom())return;fetch(hUrl('pins/'+id),{method:'DELETE'}).catch(()=>{});fetch(hUrl('photos/'+id),{method:'DELETE'}).catch(()=>{})};
 
 /* ---- 打卡 ---- */
-async function hCheckin(note,photo){
+async function hCheckin(note,photo,man){
   if(!hRoom())return{err:-1};
-  const p=await hPos();
+  const p=man?{la:man.la,ln:man.ln,ac:0}:await hPos();
   if(p.la==null)return{err:p.err};
-  if(!(p.ac<=HERE_ACC))return{weak:p.ac};      /* 誤差超過約 100 公尺：不當作可靠位置 */
+  if(!man&&!(p.ac<=HERE_ACC))return{weak:p.ac};      /* 誤差超過約 100 公尺：不當作可靠位置 */
   const pin={n:hName()||'旅伴',e:hEmo(),la:p.la,ln:p.ln,ac:p.ac,t:Date.now(),note:note||''};
+  if(man)pin.m=1;      /* m＝使用者手動下的錨點（非 GPS） */
   if(photo)pin.ph=pin.t;      /* ph＝照片版本；照片另存 photos/<id>，夥伴點開標記才下載 */
   try{
     if(photo){const r1=await fetch(hUrl('photos/'+H.uid),{method:'PUT',body:JSON.stringify(photo)});if(!r1.ok)throw 0}   /* 先傳照片，夥伴收到打卡時照片已就緒 */
@@ -1431,30 +1430,46 @@ let hDlgEl=null;
 function hDlg(html){if(!hDlgEl){hDlgEl=document.createElement('div');hDlgEl.className='hdlg';hDlgEl.hidden=true;document.body.appendChild(hDlgEl)}
   hDlgEl.innerHTML='<div class="hbox">'+html+'</div>';hDlgEl.hidden=false}
 function hClose(){if(hDlgEl)hDlgEl.hidden=true}
-function hForm(){
-  H.photo='';
-  hDlg(`<h3>📍 I'm here</h3><div class="gnote" style="margin-bottom:10px">會取得目前定位，夥伴會收到通知；地圖上顯示 30 分鐘，重新打卡會立即更新。</div>
+function hForm(anc){
+  if(!anc){H.photo='';H.man=null;H.pend=''}
+  hDlg(`<h3>${anc?'📍 確認錨點位置':"📍 I'm here"}</h3><div class="gnote" style="margin-bottom:10px">${anc?'會用你剛剛在地圖上選的位置打卡，可補充留言或照片。夥伴會收到通知，地圖上顯示 30 分鐘。':'會取得目前定位，夥伴會收到通知；地圖上顯示 30 分鐘，重新打卡會立即更新。'}</div>
   <input type="text" id="hname" placeholder="暱稱（夥伴會看到）" maxlength="12" value="${esc(hName())}">
-  <input type="text" id="hnote" placeholder="位置備註（選填），例如：在 A 出口" maxlength="30" autocomplete="off">
+  <input type="text" id="hnote" placeholder="位置備註（選填），例如：在 A 出口" maxlength="30" autocomplete="off" value="${esc(H.pend||'')}">
   <div class="hq">${HERE_QUICK.map(t=>`<button data-h="q" data-t="${esc(t)}">${esc(t)}</button>`).join('')}</div>
-  <img class="hprev" id="hprev" hidden alt="">
+  <img class="hprev" id="hprev" ${H.photo?`src="${H.photo}"`:'hidden'} alt="">
   <input type="file" id="hfile" accept="image/*" capture="environment" hidden>
-  <div class="gbtns" style="margin-bottom:4px"><button class="gbtn" data-h="pick">📷 拍照（選填，讓夥伴更好找）</button><button class="gbtn" id="hunpic" data-h="unpic" hidden>移除照片</button></div>
-  <button class="hgo" data-h="send">📍 打卡</button><button class="hgo2" data-h="close">取消</button>`);
+  <div class="gbtns" style="margin-bottom:4px"><button class="gbtn" data-h="pick">📷 拍照（選填，讓夥伴更好找）</button><button class="gbtn" id="hunpic" data-h="unpic" ${H.photo?'':'hidden'}>移除照片</button></div>
+  <button class="hgo" data-h="send">${anc?'📍 用這個位置打卡':'📍 打卡'}</button>${anc?'<button class="hgo2" data-h="anchor">↩︎ 回地圖重新選位置</button>':''}<button class="hgo2" data-h="close">取消</button>`);
 }
 async function hRun(){
-  hDlg('<h3>定位中…</h3><div class="hspin"></div><div class="gnote" style="text-align:center">正在取得 GPS（最多 15 秒）</div>');
-  const r=await hCheckin(H.pend,H.photo);
-  if(r.ok){H.photo='';hClose();hToast('✅ 已打卡 '+hClock(r.ok.t),r.ok.note||'夥伴會收到通知，地圖顯示 30 分鐘',H.uid);hFocus(H.uid);return}
-  const retry='<button class="hgo" data-h="retry">🔄 重新定位</button><button class="hgo2" data-h="close">取消</button>';
-  if(r.weak!=null)hDlg(`<h3>📡 定位不準，要再試一次嗎？</h3><div class="gnote">目前誤差${r.weak>0?'約 '+r.weak+' 公尺':'很大'}（超過 ${HERE_ACC} 公尺），位置可能不可靠。到空曠處或靠窗邊再試一次會更準。${hAndroid?'<br>Android 也請確認定位權限選的是「精確」而不是「概略」。':''}</div>${retry}`);
-  else if(r.net)hDlg(`<h3>連線失敗</h3><div class="gnote">打卡沒有送出，請確認網路後再試一次。</div>${retry}`);
+  const man=H.man;
+  hDlg(man?'<h3>打卡中…</h3><div class="hspin"></div>':'<h3>定位中…</h3><div class="hspin"></div><div class="gnote" style="text-align:center">正在取得 GPS（最多 15 秒）</div>');
+  const r=await hCheckin(H.pend,H.photo,man);
+  if(r.ok){H.photo='';H.man=null;hClose();hToast('✅ 已打卡 '+hClock(r.ok.t),r.ok.note||'夥伴會收到通知，地圖顯示 30 分鐘',H.uid);hFocus(H.uid);return}
+  const retry='<button class="hgo" data-h="retry">🔄 重新定位</button>'+(r.net||r.err===-1?'':'<button class="hgo2" data-h="anchor" style="color:var(--ac)">📍 自己在地圖上下錨點</button>')+'<button class="hgo2" data-h="close">取消</button>';
+  if(r.weak!=null)hDlg(`<h3>📡 定位不準，要再試一次嗎？</h3><div class="gnote">目前誤差${r.weak>0?'約 '+r.weak+' 公尺':'很大'}（超過 ${HERE_ACC} 公尺），位置可能不可靠。到空曠處或靠窗邊再試一次會更準。</div>${retry}`);
+  else if(r.net)hDlg(`<h3>連線失敗</h3><div class="gnote">打卡沒有送出，請確認網路後再試一次。</div><button class="hgo" data-h="${man?'send2':'retry'}">🔄 再試一次</button><button class="hgo2" data-h="close">取消</button>`);
   else if(r.err===-1)hJoin();
-  else if(r.err===1)hDlg(hAndroid
-    ?`<h3>沒有定位權限</h3><div class="gnote" style="text-align:left">Android 請依序檢查：<br>① 手機下拉選單，確認「位置資訊」已開啟<br>② 開啟 Chrome →右上角「⋮」→「設定」→「網站設定」→「位置資訊」，確認已開啟，且此網站不在「禁止」清單；若在，點進去改成「允許」<br>③ 手機「設定」→「應用程式」→ Chrome →「權限」→「位置資訊」，選「允許」，並開啟「使用精確位置」<br>④ 若是從主畫面開啟：長按主畫面圖示 →「應用程式資訊」→「權限」→ 位置資訊 →「允許」<br>改完回來按「重新定位」。</div>${retry}`
-    :`<h3>沒有定位權限</h3><div class="gnote">請到 iPhone「設定」→ 隱私權與安全性 → 定位服務，允許此 App 或 Safari 使用定位，再回來打卡。</div>${retry}`);
-  else if(r.err===2)hDlg(`<h3>手機的定位功能沒開</h3><div class="gnote">${hAndroid?'請從螢幕上方下拉，開啟「位置資訊」（GPS），再按重新定位。':'請確認「定位服務」已開啟，再按重新定位。'}</div>${retry}`);
-  else hDlg(`<h3>抓不到定位</h3><div class="gnote">暫時取得不到 GPS，要再試一次嗎？${hAndroid?'（也請確認手機「位置資訊」已開啟）':''}</div>${retry}`);
+  else if(r.err===1)hDlg(`<h3>沒有定位權限</h3><div class="gnote">請到 iPhone「設定」→ 隱私權與安全性 → 定位服務，允許此 App 或 Safari 使用定位，再回來打卡。</div>${retry}`);
+  else hDlg(`<h3>抓不到定位</h3><div class="gnote">暫時取得不到 GPS，要再試一次嗎？</div>${retry}`);
+}
+/* ---- 定位失敗時：自己下錨點（錨點固定在地圖正中央，拖地圖選位置） ---- */
+function hAncOff(){const mv=$('#mapview');if(mv)mv.classList.remove('anch');['#hanc','#hancbar'].forEach(q=>{const e=$(q);if(e)e.remove()})}
+function hAnchor(){
+  hClose();closeView();forceMap();let n=0;
+  const go=()=>{if(!mapObj||!window.L){if(n++<20)setTimeout(go,300);return}
+    const mv=$('#mapview');hAncOff();mv.classList.add('anch');mapObj.invalidateSize();
+    const mp=H.pins[H.uid],st=H.man||(mp&&hLive(mp)?{la:mp.la,ln:mp.ln}:null);
+    if(st)mapObj.setView([st.la,st.ln],17);else if(mapObj.getZoom()<16)mapObj.setZoom(16);
+    const a=document.createElement('div');a.id='hanc';a.className='hanc';a.innerHTML='<b>📍</b><i></i>';mv.appendChild(a);
+    const bar=document.createElement('div');bar.id='hancbar';bar.className='hancbar';
+    bar.innerHTML='<div class="gnote"><b>拖曳地圖</b>，讓 📍 對準你現在的位置（可雙指縮放）</div><div class="row"><button class="hgo2" data-h="ancCancel">取消</button><button class="hgo" data-h="ancOk">✅ 確定這裡</button></div>';
+    mv.appendChild(bar)};
+  setTimeout(go,400);
+}
+function hAncOk(){
+  if(!mapObj)return;const c=mapObj.getCenter();
+  H.man={la:+c.lat.toFixed(5),ln:+c.lng.toFixed(5)};hAncOff();hForm(true);
 }
 function hOpen(){hRoom()?hForm():hJoin()}
 function hJoin(msg){hDlg(`<h3>👥 先加入群組</h3><div class="gnote" style="margin-bottom:10px">只有知道群組代碼的人才看得到彼此的打卡。請輸入夥伴給你的代碼，或建立新群組再把邀請連結傳給夥伴。</div>${msg?`<div class="gerr">${esc(msg)}</div>`:''}
@@ -1539,7 +1554,7 @@ function drawHere(){
       html:`<div class="hpin ${fresh?'new':''}" style="--h:${hHue(p.n)}"><div class="he">${esc(p.e||'🙂')}</div><div class="hl"><b>📍 ${esc(nm)}</b><div>${hClock(p.t)}${p.ph?' 📷':''}</div>${p.note?`<div class="hn">${esc(p.note)}</div>`:''}</div></div>`});
     H.mk[p.id]=L.marker([p.la,p.ln],{icon:ic,zIndexOffset:900}).addTo(H.lay);
     H.mk[p.id].on('popupopen',e=>{if(p.ph)hLoadPh(p.id,p.ph,e.popup)}).bindPopup(
-      `<b>${esc(p.e||'')} ${esc(nm)}</b><br>📍 ${hClock(p.t)} 打卡（${hAgo(p.t)}）${p.note?'<br>💬 '+esc(p.note):''}${p.ph?`<div class="hph2">📷 載入照片中…</div>`:''}<br><span style="color:var(--sub);font-size:12px">誤差約 ${p.ac||'?'} 公尺｜約 ${hLeft(p)} 分鐘後消失</span>
+      `<b>${esc(p.e||'')} ${esc(nm)}</b><br>📍 ${hClock(p.t)} 打卡（${hAgo(p.t)}）${p.note?'<br>💬 '+esc(p.note):''}${p.ph?`<div class="hph2">📷 載入照片中…</div>`:''}<br><span style="color:var(--sub);font-size:12px">${p.m?'📌 手動標記位置':'誤差約 '+(p.ac||'?')+' 公尺'}｜約 ${hLeft(p)} 分鐘後消失</span>
       <div class="acts"><a href="https://www.google.com/maps/dir/?api=1&destination=${p.la},${p.ln}&travelmode=walking" target="_blank" rel="noopener">🧭 導航過去</a></div>`);
   });
 }
@@ -1644,7 +1659,11 @@ document.addEventListener('click',e=>{
     if(!nm){if(n){n.focus();n.placeholder='請先填暱稱'}return}
     store.set('g:name',nm);H.pend=((o&&o.value)||'').trim().slice(0,30);hRun();
   }
-  else if(k==='retry')hRun();
+  else if(k==='retry'){H.man=null;hRun()}
+  else if(k==='send2')hRun();
+  else if(k==='anchor'){const o=$('#hnote');if(o)H.pend=o.value.trim().slice(0,30);hAnchor()}
+  else if(k==='ancOk')hAncOk();
+  else if(k==='ancCancel'){hAncOff();hForm(!!H.man)}
   else if(k==='emo'){store.set('g:emo',t.dataset.e);hPanel()}
   else if(k==='cancel'){if(confirm('取消目前的打卡？夥伴的地圖上也會消失。')){delete H.pins[H.uid];H.sig='';hDel(H.uid);hUi()}}
   else if(k==='see')hFocus(t.dataset.id);
