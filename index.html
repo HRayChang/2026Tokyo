@@ -1393,17 +1393,16 @@ const hDel=id=>{if(!hRoom())return;fetch(hUrl('pins/'+id),{method:'DELETE'}).cat
 /* ---- 打卡 ---- */
 async function hCheckin(note,photo,man){
   if(!hRoom())return{err:-1};
-  const p=man?{la:man.la,ln:man.ln,ac:0}:await hPos();
+  const p=man?{la:man.la,ln:man.ln,ac:1}:await hPos();   /* 手動錨點：ac=1 當標記，不新增欄位（避免被資料庫規則擋掉） */
   if(p.la==null)return{err:p.err};
   if(!man&&!(p.ac<=HERE_ACC))return{weak:p.ac};      /* 誤差超過約 100 公尺：不當作可靠位置 */
   const pin={n:hName()||'旅伴',e:hEmo(),la:p.la,ln:p.ln,ac:p.ac,t:Date.now(),note:note||''};
-  if(man)pin.m=1;      /* m＝使用者手動下的錨點（非 GPS） */
   if(photo)pin.ph=pin.t;      /* ph＝照片版本；照片另存 photos/<id>，夥伴點開標記才下載 */
   try{
-    if(photo){const r1=await fetch(hUrl('photos/'+H.uid),{method:'PUT',body:JSON.stringify(photo)});if(!r1.ok)throw 0}   /* 先傳照片，夥伴收到打卡時照片已就緒 */
+    if(photo){const r1=await fetch(hUrl('photos/'+H.uid),{method:'PUT',body:JSON.stringify(photo)});if(!r1.ok)throw new Error('照片 HTTP '+r1.status)}   /* 先傳照片，夥伴收到打卡時照片已就緒 */
     else fetch(hUrl('photos/'+H.uid),{method:'DELETE'}).catch(()=>{});                                                  /* 這次沒拍照：清掉上一次的照片 */
-    const r=await fetch(hUrl('pins/'+H.uid),{method:'PUT',body:JSON.stringify(pin)});if(!r.ok)throw 0
-  }catch(e){return{net:1}}
+    const r=await fetch(hUrl('pins/'+H.uid),{method:'PUT',body:JSON.stringify(pin)});if(!r.ok)throw new Error('HTTP '+r.status)
+  }catch(e){return{net:1,why:(e&&e.message)||'網路無回應'}}
   H.pins[H.uid]=pin;H.sig='';hUi();hSub();     /* 同一個 id 只有一筆：PUT 直接覆蓋舊位置 */
   return{ok:pin};
 }
@@ -1448,7 +1447,7 @@ async function hRun(){
   if(r.ok){H.photo='';H.man=null;hClose();hToast('✅ 已打卡 '+hClock(r.ok.t),r.ok.note||'夥伴會收到通知，地圖顯示 30 分鐘',H.uid);hFocus(H.uid);return}
   const retry='<button class="hgo" data-h="retry">🔄 重新定位</button>'+(r.net||r.err===-1?'':'<button class="hgo2" data-h="anchor" style="color:var(--ac)">📍 自己在地圖上下錨點</button>')+'<button class="hgo2" data-h="close">取消</button>';
   if(r.weak!=null)hDlg(`<h3>📡 定位不準，要再試一次嗎？</h3><div class="gnote">目前誤差${r.weak>0?'約 '+r.weak+' 公尺':'很大'}（超過 ${HERE_ACC} 公尺），位置可能不可靠。到空曠處或靠窗邊再試一次會更準。</div>${retry}`);
-  else if(r.net)hDlg(`<h3>連線失敗</h3><div class="gnote">打卡沒有送出，請確認網路後再試一次。</div><button class="hgo" data-h="${man?'send2':'retry'}">🔄 再試一次</button><button class="hgo2" data-h="close">取消</button>`);
+  else if(r.net)hDlg(`<h3>連線失敗</h3><div class="gnote">打卡沒有送出，請確認網路後再試一次。<br><small>原因：${esc(r.why||'')}</small></div><button class="hgo" data-h="${man?'send2':'retry'}">🔄 再試一次</button><button class="hgo2" data-h="close">取消</button>`);
   else if(r.err===-1)hJoin();
   else if(r.err===1)hDlg(`<h3>沒有定位權限</h3><div class="gnote">請到 iPhone「設定」→ 隱私權與安全性 → 定位服務，允許此 App 或 Safari 使用定位，再回來打卡。</div>${retry}`);
   else hDlg(`<h3>抓不到定位</h3><div class="gnote">暫時取得不到 GPS，要再試一次嗎？</div>${retry}`);
@@ -1554,7 +1553,7 @@ function drawHere(){
       html:`<div class="hpin ${fresh?'new':''}" style="--h:${hHue(p.n)}"><div class="he">${esc(p.e||'🙂')}</div><div class="hl"><b>📍 ${esc(nm)}</b><div>${hClock(p.t)}${p.ph?' 📷':''}</div>${p.note?`<div class="hn">${esc(p.note)}</div>`:''}</div></div>`});
     H.mk[p.id]=L.marker([p.la,p.ln],{icon:ic,zIndexOffset:900}).addTo(H.lay);
     H.mk[p.id].on('popupopen',e=>{if(p.ph)hLoadPh(p.id,p.ph,e.popup)}).bindPopup(
-      `<b>${esc(p.e||'')} ${esc(nm)}</b><br>📍 ${hClock(p.t)} 打卡（${hAgo(p.t)}）${p.note?'<br>💬 '+esc(p.note):''}${p.ph?`<div class="hph2">📷 載入照片中…</div>`:''}<br><span style="color:var(--sub);font-size:12px">${p.m?'📌 手動標記位置':'誤差約 '+(p.ac||'?')+' 公尺'}｜約 ${hLeft(p)} 分鐘後消失</span>
+      `<b>${esc(p.e||'')} ${esc(nm)}</b><br>📍 ${hClock(p.t)} 打卡（${hAgo(p.t)}）${p.note?'<br>💬 '+esc(p.note):''}${p.ph?`<div class="hph2">📷 載入照片中…</div>`:''}<br><span style="color:var(--sub);font-size:12px">${p.ac===1?'📌 手動標記位置':'誤差約 '+(p.ac||'?')+' 公尺'}｜約 ${hLeft(p)} 分鐘後消失</span>
       <div class="acts"><a href="https://www.google.com/maps/dir/?api=1&destination=${p.la},${p.ln}&travelmode=walking" target="_blank" rel="noopener">🧭 導航過去</a></div>`);
   });
 }
