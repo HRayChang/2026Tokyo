@@ -1790,5 +1790,257 @@ document.addEventListener('click',e=>{
 /* 提供的優惠券圖片：有網路時先載入一次，之後沒網路也看得到（Service Worker 會快取） */
 addEventListener('load',()=>setTimeout(()=>{if(navigator.onLine)COUPONS.forEach(c=>{if(c.img)fetch(c.img).catch(()=>{})})},3000));
 </script>
+<style id="wxcss">
+.wxchip{display:inline-flex;align-items:center;gap:6px;margin-top:8px;border:1.5px solid var(--ac);background:rgba(var(--acrgb),.12);color:var(--ac);border-radius:16px;padding:7px 12px;font-size:14px;font-weight:700;min-height:36px}
+.wxchip small{font-weight:600;opacity:.8}
+.wxb{margin-top:8px;padding:8px 10px;border-radius:12px;background:var(--warn);color:var(--warntx);font-size:13px;line-height:1.45}
+.wxb b{display:block}
+.wxo{position:fixed;inset:0;z-index:320;overflow:hidden;color:#fff;opacity:0;transition:opacity .45s;font-family:inherit}
+.wxo.in{opacity:1}
+.wxo[data-k=clear]{background:linear-gradient(180deg,#3d9bff,#86cdff 58%,#ffe9b8)}
+.wxo[data-k=partly]{background:linear-gradient(180deg,#5b9fe6,#a6cbee 60%,#e8f1f8)}
+.wxo[data-k=cloud]{background:linear-gradient(180deg,#6f869c,#a9b9c8 65%,#cfd8e0)}
+.wxo[data-k=drizzle]{background:linear-gradient(180deg,#5d7489,#93a8ba 65%,#b8c6d2)}
+.wxo[data-k=rain]{background:linear-gradient(180deg,#3e5066,#657b91 65%,#8397aa)}
+.wxo[data-k=storm]{background:linear-gradient(180deg,#1d2536,#3d485f 65%,#586479)}
+.wxo[data-k=snow]{background:linear-gradient(180deg,#7f98b2,#c9d8e6 65%,#eef3f8)}
+.wxo[data-k=fog]{background:linear-gradient(180deg,#98a6b2,#c5ced6 65%,#dde2e7)}
+.wxo[data-n="1"][data-k=clear],.wxo[data-n="1"][data-k=partly]{background:linear-gradient(180deg,#0a1433,#1c2e6a 60%,#3d2b6e)}
+.wxo[data-n="1"]:not([data-k=clear]):not([data-k=partly])::before{content:"";position:absolute;inset:0;background:rgba(6,10,28,.5)}
+.wxc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.wxp{position:relative;max-width:520px;margin:0 auto;height:100%;overflow-y:auto;padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px;text-shadow:0 1px 6px rgba(0,0,0,.25)}
+.wxtop{display:flex;align-items:center;gap:8px}
+.wxtop .wxnm{flex:1;text-align:center;line-height:1.25}
+.wxtop .wxnm b{font-size:18px;display:block}.wxtop .wxnm span{font-size:13px;opacity:.9}
+.wxtop button{border:0;width:40px;height:40px;border-radius:20px;background:rgba(255,255,255,.22);color:#fff;font-size:20px;backdrop-filter:blur(6px)}
+.wxtop button:disabled{opacity:.3}
+.wxbig{display:flex;align-items:center;justify-content:center;gap:14px;padding:6px 0}
+.wxi{font-size:76px;line-height:1;filter:drop-shadow(0 6px 14px rgba(0,0,0,.25))}
+.wxt{font-size:58px;font-weight:300;line-height:1}
+.wxs{font-size:15px;font-weight:600;margin-top:4px}
+.wxadv{background:rgba(255,255,255,.18);backdrop-filter:blur(8px);border-radius:16px;padding:10px 14px;font-size:15px;font-weight:600;line-height:1.5}
+.wxcard{background:rgba(255,255,255,.16);backdrop-filter:blur(10px);border-radius:20px;padding:10px 0 6px}
+.wxcard h4{margin:0 14px 6px;font-size:13px;font-weight:700;opacity:.9}
+.wxscroll{overflow-x:auto;scrollbar-width:none;padding:0 6px}
+.wxscroll::-webkit-scrollbar{display:none}
+.wxin{position:relative;display:flex}
+.wxcol{flex:0 0 58px;text-align:center;border-radius:14px;padding-bottom:4px}
+.wxcol.now{background:rgba(255,255,255,.22)}
+.wxh{height:22px;line-height:22px;font-size:12px;font-weight:700;opacity:.9}
+.wxic{height:34px;line-height:34px;font-size:22px}
+.wxsp{height:56px}
+.wxbar{height:32px;display:flex;align-items:flex-end;justify-content:center}
+.wxbar i{display:block;width:14px;border-radius:5px 5px 2px 2px;background:linear-gradient(180deg,#bfe3ff,#5aa8ff)}
+.wxpp{font-size:12px;font-weight:700;margin-top:2px}
+.wxsvg{position:absolute;left:0;top:56px;pointer-events:none}
+.wxalt{background:rgba(255,255,255,.2);backdrop-filter:blur(8px);border-radius:18px;padding:12px 14px;font-size:14px;line-height:1.5}
+.wxalt.ok{font-weight:600}
+.wxat{font-weight:800;margin-bottom:6px}
+.wxai{margin-top:8px}.wxai b{display:block;font-size:14px}.wxai div{font-size:13px;opacity:.95}
+.wxgo{margin-top:auto;border:0;border-radius:22px;background:#fff;color:#2a3a55;font-size:17px;font-weight:800;padding:14px;text-shadow:none;box-shadow:0 8px 22px rgba(0,0,0,.2)}
+.wxft{text-align:center;font-size:11px;opacity:.75}
+.wxft a{color:#fff}
+@media (prefers-reduced-motion:reduce){.wxo{transition:none}}
+</style>
+<script id="wxjs">
+/* ============ 🌤️ 天氣：每天第一次開啟的天氣畫面＋天氣特效＋雨天備案（資料：Open-Meteo，免 API key） ============ */
+(function(){
+if(window.__wx)return;window.__wx=1;
+var LOC={'2026-10-21':[35.7116,139.7965],'2026-10-22':[35.6267,139.8851],'2026-10-23':[35.66,139.70],'2026-10-24':[35.55,139.70],'2026-10-25':[35.7101,139.8107]};  /* 每天代表座標：淺草／舞濱／澀谷／豐洲橫濱／晴空塔 */
+var KEY='wx:v1',TTL=3600e3,CW=58;
+var WX={},wxT=0,loading=null,ovEl=null,stopFx=null,ovI=0;
+try{var c0=JSON.parse(store.get(KEY)||'null');if(c0&&c0.d){WX=c0.d;wxT=c0.t||0}}catch(e){}
+var pad=function(n){return String(n).padStart(2,'0')};
+var jstH=function(t){return new Date(t+9*36e5).getUTCHours()};
+var mins=function(s){return +s.slice(0,2)*60+ +s.slice(3,5)};
+var isNight=function(w,h){var m=h*60+30;return m<mins(w.sr)||m>mins(w.ss)};
+function kindOf(c){return c<=1?'clear':c===2?'partly':c===3?'cloud':(c===45||c===48)?'fog':(c>=51&&c<=57)?'drizzle':((c>=61&&c<=67)||(c>=80&&c<=82))?'rain':((c>=71&&c<=77)||c===85||c===86)?'snow':c>=95?'storm':'cloud'}
+var ICON={clear:'☀️',partly:'⛅',cloud:'☁️',fog:'🌫️',drizzle:'🌦️',rain:'🌧️',snow:'❄️',storm:'⛈️'};
+var LABEL={clear:'晴朗',partly:'多雲時晴',cloud:'陰天',fog:'有霧',drizzle:'毛毛雨',rain:'下雨',snow:'下雪',storm:'雷雨'};
+/* ---- 雨天備案：戶外項目（比對標題＋日文查詢字串）→ 建議 ---- */
+var ALT=[
+ [/仲見世|三鳩堂|鳴門鯛/,'新仲見世有拱廊可以避雨；也可改去離飯店近的晴空塔城（室內），或先逛 OS 藥妝、mille mele 等店內行程。'],
+ [/閃耀慶典|相信！|Believe|環境演出|夜間萬聖節/,'表演在戶外：備雨衣（園內有售）、鞋子防濕；雨天或強風時演出可能取消或縮小，以園方當天公告／App 為準。可把空檔改排室內設施（冰雪奇緣、玩具總動員、地心探險、人魚礁湖）。'],
+ [/觀光汽船|螢月|HOTALUNA/,'雨天視野較差，強風可能停航：出發前先確認營運公告；備案是把這段換成附近的室內商場或市場。'],
+ [/大棧橋|紅磚|Night Flowers/,'戶外景點：紅磚倉庫內有店家可避雨；夕陽與花火雨天可能看不到，花火以官方公告為準。備案：橫濱 Landmark Plaza 等港未來室內商場。'],
+ [/中華街|點心舖|江戶清/,'店家多可進店，雨天改成「進店吃」為主、少在路邊邊走邊吃，記得帶傘。'],
+ [/成田山|黑平|甘太郎|後藤糰子|林田仙貝/,'表參道是老街，帶傘邊逛邊進店避雨；新勝寺境內戶外較多，雨大時縮短停留。']
+];
+/* ---- 取資料：每天一支請求，1 小時內用快取，離線時沿用上次資料 ---- */
+function load(force){
+  if(loading)return loading;
+  var stale=Date.now()-wxT>TTL,need=DAYS.filter(function(d){return force||stale||!WX[d.d]});
+  if(!need.length)return Promise.resolve();
+  loading=Promise.all(need.map(function(d){
+    var ll=LOC[d.d]||[35.68,139.77];
+    var u='https://api.open-meteo.com/v1/forecast?latitude='+ll[0]+'&longitude='+ll[1]+'&hourly=temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset&timezone=Asia%2FTokyo&start_date='+d.d+'&end_date='+d.d;
+    return fetch(u).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){
+      var H=j.hourly,D=j.daily;
+      WX[d.d]={c:D.weather_code[0],hi:Math.round(D.temperature_2m_max[0]),lo:Math.round(D.temperature_2m_min[0]),p:D.precipitation_probability_max[0]||0,sr:D.sunrise[0].slice(11,16),ss:D.sunset[0].slice(11,16),
+        h:H.time.map(function(t,i){return {h:+t.slice(11,13),t:Math.round(H.temperature_2m[i]),a:Math.round(H.apparent_temperature[i]),p:H.precipitation_probability[i]||0,mm:H.precipitation[i]||0,c:H.weather_code[i],w:Math.round(H.wind_speed_10m[i])}})};
+      return 1}).catch(function(){return 0});
+  })).then(function(r){
+    if(r.some(Boolean)){wxT=Date.now();store.set(KEY,JSON.stringify({t:wxT,d:WX}));try{inject()}catch(e){}}
+  }).then(function(){loading=null},function(){loading=null});
+  return loading;
+}
+/* ---- 估每個景點的到達時間（沒有指定時間的，用前一個有時間的項目＋步行／停留推算）→ 找出雨天要注意的戶外項目 ---- */
+function flags(i){
+  var day=DAYS[i],w=WX[day.d],out={};if(!w)return out;
+  var t=null;
+  for(var n=0;n<day.items.length;n++){var it=day.items[n],ts;
+    if(it.k==='walk'){if(t!=null)t+=it.m*6e4;continue}
+    if(it.k!=='place'&&it.k!=='move')continue;
+    if(it.ts){ts=it.ts;t=ts+(it.k==='place'?30:0)*6e4}else if(t!=null){ts=t;t+=20*6e4}else continue;
+    if(it.k!=='place')continue;
+    var txt=(it.title||'')+' '+(it.q||''),a=null;
+    for(var j=0;j<ALT.length;j++)if(ALT[j][0].test(txt)){a=ALT[j];break}
+    if(!a||isDone(it.id)||jstDate(ts)!==day.d)continue;
+    var h=jstH(ts),a1=w.h[h],a2=w.h[Math.min(23,h+1)];
+    var p=Math.max(a1?a1.p:0,a2?a2.p:0),mm=Math.max(a1?a1.mm:0,a2?a2.mm:0);
+    if(p>=50||mm>=1)out[it.id]={h:h,p:p,mm:mm,tip:a[1],title:it.title};
+  }
+  return out;
+}
+/* ---- 行程頁：日期標題旁的天氣小標籤＋卡片上的雨天備案 ---- */
+function inject(){
+  var head=document.querySelector('.dayhead');if(!head)return;
+  document.querySelectorAll('.wxchip,.wxb').forEach(function(x){x.remove()});
+  var w=WX[DAYS[cur].d];if(!w)return;
+  head.insertAdjacentHTML('beforeend','<button class="wxchip" data-wx="'+cur+'">'+ICON[kindOf(w.c)]+' '+w.lo+'–'+w.hi+'°　💧'+w.p+'%　<small>逐時預報 ›</small></button>');
+  var fl=flags(cur);
+  Object.keys(fl).forEach(function(id){
+    var b=document.querySelector('.card[data-iid="'+id+'"] .body');if(!b)return;var f=fl[id];
+    b.insertAdjacentHTML('beforeend','<div class="wxb"><b>☔ 約 '+pad(f.h)+':00 降雨機率 '+f.p+'%</b>'+'備案：'+esc(f.tip)+'</div>');
+  });
+}
+var _render=window.render;
+window.render=function(){var r=_render.apply(this,arguments);try{inject()}catch(e){}return r};
+/* ---- 天氣特效（Canvas）：雨／雷雨／毛毛雨／雪／晴天陽光／夜晚星空流星／雲／霧 ---- */
+function sprite(dark){
+  var c=document.createElement('canvas');c.width=320;c.height=150;var x=c.getContext('2d');
+  [[90,95,52],[150,70,62],[215,92,56],[265,105,38],[55,112,34],[160,110,60]].forEach(function(p){
+    var g=x.createRadialGradient(p[0],p[1],0,p[0],p[1],p[2]);
+    g.addColorStop(0,dark?'rgba(70,82,104,.95)':'rgba(255,255,255,.95)');g.addColorStop(1,dark?'rgba(70,82,104,0)':'rgba(255,255,255,0)');
+    x.fillStyle=g;x.fillRect(0,0,320,150)});
+  return c;
+}
+function fx(cv,k,mm,night){
+  var ctx=cv.getContext&&cv.getContext('2d');if(!ctx)return function(){};
+  var dpr=Math.min(2,window.devicePixelRatio||1),R=Math.random,W,H;
+  function size(){W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}size();
+  var rain=k==='rain'||k==='storm'||k==='drizzle',dz=k==='drizzle';
+  var drops=rain?Array.from({length:dz?70:k==='storm'?230:mm>=4?210:mm>=1.5?150:110},function(){return {x:R()*(W+160)-80,y:R()*H,l:(dz?7:14)+R()*(dz?8:18),v:(dz?380:720)+R()*480}}):[];
+  var flakes=k==='snow'?Array.from({length:100},function(){return {x:R()*W,y:R()*H,r:1.5+R()*3,v:30+R()*55,ph:R()*6.28}}):[];
+  var cn={clear:0,partly:4,cloud:7,fog:0,drizzle:6,rain:7,storm:8,snow:5}[k]||0;
+  var spr=cn?sprite(rain||night):null;
+  var clouds=Array.from({length:cn},function(){return {x:R()*(W+300)-250,y:H*(.03+R()*.4),s:.7+R()*.9,v:5+R()*16,a:.55+R()*.4}});
+  var bands=k==='fog'?Array.from({length:6},function(_,i){return {y:H*(.1+i*.14),h:70+R()*60,x:R()*W,v:(i%2?1:-1)*(8+R()*10)}}):[];
+  var sunny=!night&&(k==='clear'||k==='partly'),starry=night&&(k==='clear'||k==='partly');
+  var stars=starry?Array.from({length:80},function(){return {x:R()*W,y:R()*H*.75,r:.6+R()*1.4,ph:R()*6.28}}):[];
+  var spark=k==='clear'&&!night?Array.from({length:26},function(){return {x:R()*W,y:R()*H,r:2+R()*3,ph:R()*6.28,v:6+R()*14}}):[];
+  var shoot=null,flash=0,time=0,raf=0,last=0,alive=true;
+  function draw(dt){
+    time+=dt;ctx.clearRect(0,0,W,H);
+    if(starry){stars.forEach(function(s){ctx.fillStyle='rgba(255,255,255,'+(.35+.65*Math.abs(Math.sin(time*1.4+s.ph)))+')';ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,6.3);ctx.fill()});
+      if(!shoot&&R()<dt*.22)shoot={x:W*(.15+R()*.6),y:H*R()*.25,t:0};
+      if(shoot){shoot.t+=dt;var px=shoot.x+shoot.t*520,py=shoot.y+shoot.t*280,g=ctx.createLinearGradient(px,py,px-110,py-60);g.addColorStop(0,'rgba(255,255,255,.95)');g.addColorStop(1,'rgba(255,255,255,0)');ctx.strokeStyle=g;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px-110,py-60);ctx.stroke();if(shoot.t>.9)shoot=null}}
+    if(sunny){var cx=W*.82,cy=H*.1,pulse=.5+.1*Math.sin(time*1.2),g2=ctx.createRadialGradient(cx,cy,0,cx,cy,300);
+      g2.addColorStop(0,'rgba(255,248,205,'+(pulse+.35)+')');g2.addColorStop(.25,'rgba(255,236,160,'+pulse*.55+')');g2.addColorStop(1,'rgba(255,230,150,0)');ctx.fillStyle=g2;ctx.fillRect(0,0,W,H);
+      ctx.save();ctx.translate(cx,cy);ctx.rotate(time*.12);ctx.fillStyle='rgba(255,246,200,.10)';
+      for(var i=0;i<9;i++){ctx.rotate(6.2832/9);ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(H*1.2,-26);ctx.lineTo(H*1.2,26);ctx.closePath();ctx.fill()}ctx.restore()}
+    spark.forEach(function(s){s.y-=s.v*dt;if(s.y<-10){s.y=H+10;s.x=R()*W}var a=.25+.6*Math.abs(Math.sin(time*2+s.ph));ctx.strokeStyle='rgba(255,255,255,'+a+')';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(s.x-s.r,s.y);ctx.lineTo(s.x+s.r,s.y);ctx.moveTo(s.x,s.y-s.r);ctx.lineTo(s.x,s.y+s.r);ctx.stroke()});
+    clouds.forEach(function(c){c.x+=c.v*dt;if(c.x>W+20)c.x=-330*c.s;ctx.globalAlpha=c.a;ctx.drawImage(spr,c.x,c.y,320*c.s,150*c.s)});ctx.globalAlpha=1;
+    bands.forEach(function(b){b.x+=b.v*dt;if(b.x>W)b.x=-W;if(b.x<-W*1.2)b.x=W*.2;var g3=ctx.createLinearGradient(b.x,0,b.x+W*1.4,0);g3.addColorStop(0,'rgba(255,255,255,0)');g3.addColorStop(.5,'rgba(255,255,255,.30)');g3.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=g3;ctx.fillRect(b.x,b.y,W*1.4,b.h)});
+    if(rain){ctx.strokeStyle=night?'rgba(180,205,240,.5)':'rgba(215,235,255,.6)';ctx.lineWidth=dz?1:1.4;ctx.beginPath();
+      drops.forEach(function(d){ctx.moveTo(d.x,d.y);ctx.lineTo(d.x-d.l*.25,d.y+d.l);d.y+=d.v*dt;d.x-=d.v*dt*.25;if(d.y>H){d.y=-20;d.x=R()*(W+160)-40}});ctx.stroke()}
+    if(flakes.length){ctx.fillStyle='rgba(255,255,255,.9)';flakes.forEach(function(f){f.y+=f.v*dt;f.x+=Math.sin(time+f.ph)*18*dt;if(f.y>H+5){f.y=-5;f.x=R()*W}ctx.beginPath();ctx.arc(f.x,f.y,f.r,0,6.3);ctx.fill()})}
+    if(k==='storm'){if(flash<=0&&R()<dt*.3)flash=1;if(flash>0){ctx.fillStyle='rgba(255,255,255,'+flash*.55+')';ctx.fillRect(0,0,W,H);flash-=dt*3.2}}
+  }
+  function loop(ts){if(!alive)return;raf=requestAnimationFrame(loop);var dt=last?Math.min(.05,(ts-last)/1000):0;last=ts;draw(dt)}
+  if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)draw(0);else raf=requestAnimationFrame(loop);
+  addEventListener('resize',size);
+  return function(){alive=false;cancelAnimationFrame(raf);removeEventListener('resize',size)};
+}
+/* ---- 天氣畫面 ---- */
+function advice(w){
+  var a=[];
+  a.push(w.p>=60?'☔ 降雨機率高，記得帶傘／雨衣':w.p>=30?'🌂 可能會下雨，包包放折疊傘':'😎 降雨機率低');
+  if(w.lo<=14)a.push('🧥 早晚偏涼，帶件外套');else if(w.hi>=27)a.push('🥵 偏熱，記得補水防曬');else if(w.hi-w.lo>=7)a.push('🧅 日夜溫差大，洋蔥式穿搭');
+  return a.join('<br>');
+}
+function repHour(w,nowH){
+  if(nowH>=0&&w.h[nowH])return w.h[nowH];
+  var b=null;for(var h=9;h<=20;h++){var x=w.h[h];if(x&&x.p>=60&&(!b||x.p>b.p))b=x}
+  return b||w.h[12]||w.h[0];
+}
+function closeOv(instant){
+  if(stopFx){stopFx();stopFx=null}
+  if(!ovEl)return;var el=ovEl;ovEl=null;
+  if(instant){el.remove();return}
+  el.classList.remove('in');setTimeout(function(){el.remove()},450);
+}
+function show(i){
+  var day=DAYS[i],w=day&&WX[day.d];if(!w)return false;
+  var had=!!ovEl;closeOv(true);ovI=i;
+  var today=liveDayIdx()===i,nowH=today?jstH(Date.now()):-1;
+  var r=repHour(w,nowH),k=kindOf(r.c),night=isNight(w,r.h);
+  var shown=w.h.filter(function(x){return x.h>=6});
+  var tt=shown.map(function(x){return x.t}),mn=Math.min.apply(0,tt),mx=Math.max.apply(0,tt);
+  var px=function(n){return (n+.5)*CW},py=function(v){return mx===mn?32:46-(v-mn)/(mx-mn)*28};
+  var d='M'+px(0)+' '+py(tt[0]);
+  for(var n=1;n<tt.length;n++){var mid=(px(n-1)+px(n))/2;d+=' C'+mid+' '+py(tt[n-1])+' '+mid+' '+py(tt[n])+' '+px(n)+' '+py(tt[n])}
+  var svg='<svg class="wxsvg" width="'+shown.length*CW+'" height="56" viewBox="0 0 '+shown.length*CW+' 56"><path d="'+d+'" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".9"/>'+
+    tt.map(function(v,j){return '<circle cx="'+px(j)+'" cy="'+py(v)+'" r="3.5" fill="#fff"/><text x="'+px(j)+'" y="'+(py(v)-9)+'" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">'+v+'°</text>'}).join('')+'</svg>';
+  var cols=shown.map(function(x){
+    var kk=kindOf(x.c),nn=isNight(w,x.h),ic=(kk==='clear'&&nn)?'🌙':(kk==='partly'&&nn)?'☁️':ICON[kk];
+    return '<div class="wxcol'+(nowH===x.h?' now':'')+'"><div class="wxh">'+pad(x.h)+'</div><div class="wxic">'+ic+'</div><div class="wxsp"></div><div class="wxbar"><i style="height:'+Math.max(2,Math.round(x.p*.3))+'px"></i></div><div class="wxpp">'+x.p+'%</div></div>'}).join('');
+  var fl=flags(i),ids=Object.keys(fl);
+  var gs=[];ids.forEach(function(id){var f=fl[id],g=gs.find(function(x){return x.tip===f.tip});if(!g){g={tip:f.tip,rows:[]};gs.push(g)}g.rows.push(f)});
+  var alt=ids.length?'<div class="wxalt"><div class="wxat">☔ 雨天備案</div>'+gs.map(function(g){return '<div class="wxai"><b>'+g.rows.map(function(f){return pad(f.h)+':00 '+esc(f.title)+'　💧'+f.p+'%'}).join('<br>')+'</b><div>'+esc(g.tip)+'</div></div>'}).join('')+'</div>':'<div class="wxalt ok">✅ 這天的戶外行程目前沒有降雨疑慮</div>';
+  var mo=day.d.split('-');
+  var big=today?'<div class="wxt">'+r.t+'°</div><div class="wxs">'+LABEL[k]+'｜體感 '+r.a+'°｜風 '+r.w+' km/h</div><div class="wxs">高 '+w.hi+'° / 低 '+w.lo+'°｜💧 '+w.p+'%</div>':
+    '<div class="wxt">'+w.hi+'°<span style="font-size:30px;opacity:.7"> / '+w.lo+'°</span></div><div class="wxs">'+LABEL[kindOf(w.c)]+'｜💧 最高 '+w.p+'%｜🌅 '+w.sr+'　🌇 '+w.ss+'</div>';
+  var el=document.createElement('div');el.className='wxo';el.id='wxo';el.dataset.k=k;el.dataset.n=night?'1':'0';
+  el.innerHTML='<canvas class="wxc"></canvas><div class="wxp">'+
+   '<div class="wxtop"><button data-wxn="-1"'+(i<=0?' disabled':'')+' aria-label="前一天">‹</button><div class="wxnm"><b>'+(today?'今天':(+mo[1])+'/'+(+mo[2])+'（'+day.wd+'）預報')+'</b><span>'+day.em+' '+esc(day.name)+'</span></div><button data-wxn="1"'+(i>=DAYS.length-1?' disabled':'')+' aria-label="後一天">›</button><button data-wxx="1" aria-label="關閉">✕</button></div>'+
+   '<div class="wxbig"><div class="wxi">'+((k==='clear'&&night)?'🌙':ICON[k])+'</div><div>'+big+'</div></div>'+
+   '<div class="wxadv">'+advice(w)+'</div>'+
+   '<div class="wxcard"><h4>🕒 逐時預報（氣溫／降雨機率）</h4><div class="wxscroll" id="wxsc"><div class="wxin">'+cols+svg+'</div></div></div>'+
+   alt+
+   '<button class="wxgo" data-wxgo="1">'+(today?'開始今天的行程 →':'看這天的行程 →')+'</button>'+
+   '<div class="wxft">天氣資料：<a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a>（CC BY 4.0）</div></div>';
+  document.body.appendChild(el);ovEl=el;
+  stopFx=fx(el.querySelector('canvas'),k,r.mm,night);
+  var sc=document.getElementById('wxsc');if(sc){var hh=nowH>=6?nowH:8;sc.scrollLeft=Math.max(0,(hh-6)*CW-CW)}
+  if(had)el.classList.add('in');else requestAnimationFrame(function(){requestAnimationFrame(function(){el.classList.add('in')})});
+  return true;
+}
+document.addEventListener('click',function(e){
+  var b=e.target.closest&&e.target.closest('button');if(!b)return;
+  if(b.dataset.wx!==undefined)show(+b.dataset.wx);
+  else if(b.dataset.wxm!==undefined){var m=document.getElementById('menu');if(m)m.hidden=true;if(!show(cur))alert('天氣資料載入中或目前離線，稍後再試')}
+  else if(b.dataset.wxn)show(Math.max(0,Math.min(DAYS.length-1,ovI+ +b.dataset.wxn)));
+  else if(b.dataset.wxx!==undefined)closeOv();
+  else if(b.dataset.wxgo!==undefined){var i=ovI;closeOv();if(i!==cur){cur=i;refit=true;render();scrollTo(0,0)}}
+});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&ovEl)closeOv()});
+var mt=document.querySelector('#menu [data-m="tour"]');
+if(mt)mt.insertAdjacentHTML('beforebegin','<button data-wxm="1">🌤️ 天氣預報</button>');
+/* ---- 每天第一次開啟（含從背景回到前景遇到新的一天）自動跳出 ---- */
+function auto(){
+  if(ovEl)return;
+  var now=new Date(),dk=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+  if(store.get('wx:seen')===dk)return;
+  if(jstDate(Date.now())>DAYS[DAYS.length-1].d)return;       /* 旅程結束後不再跳出 */
+  var li=liveDayIdx(),i=li>=0?li:cur,tries=0;
+  (function go(){var t=document.getElementById('tour');if(t&&!t.hidden&&tries++<180)return setTimeout(go,1000);
+    if(!ovEl&&show(i))store.set('wx:seen',dk)})();
+}
+document.addEventListener('visibilitychange',function(){if(!document.hidden)load().then(auto)});
+setTimeout(function(){load().then(auto)},700);
+inject();
+})();
+</script>
 </body>
 </html>
