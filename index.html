@@ -345,6 +345,26 @@ body.mapmode #hbtn{display:none}
 .htoast{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0));transform:translateX(-50%);z-index:320;width:min(420px,calc(100vw - 24px));display:flex;flex-direction:column;gap:8px;pointer-events:none}
 .ht{pointer-events:auto;background:var(--card);color:var(--tx);border:1.5px solid rgba(var(--acrgb),.4);border-radius:22px;padding:12px 14px;box-shadow:0 10px 30px rgba(0,0,0,.3);font-size:14px;font-weight:700;animation:hin .35s ease both}
 .ht small{display:block;color:var(--sub);font-weight:600;margin-top:2px;font-size:13px}
+/* 📣 呼叫大家 */
+.hcall{position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;padding:calc(20px + env(safe-area-inset-top,0)) 20px calc(20px + env(safe-area-inset-bottom,0));background:linear-gradient(160deg,#e5709a,#7f5bd6 55%,#4f8fe0);color:#fff;text-align:center;overflow-y:auto;animation:hcin .25s ease both}
+@keyframes hcin{from{opacity:0}}
+.hcb{width:min(420px,100%)}
+.hcr{font-size:84px;line-height:1.1;animation:hcsh 1s ease-in-out infinite;transform-origin:50% 80%}
+@keyframes hcsh{0%,100%{transform:rotate(0)}20%{transform:rotate(-14deg)}40%{transform:rotate(12deg)}60%{transform:rotate(-8deg)}80%{transform:rotate(6deg)}}
+.hcw{font-size:20px;font-weight:700;margin-top:10px;opacity:.95}
+.hcm{font-size:34px;font-weight:900;line-height:1.25;margin:6px 0 8px;word-break:break-word}
+.hcs{font-size:13px;opacity:.85;margin-bottom:22px}
+.hcbtn{display:block;width:100%;min-height:54px;border:2px solid rgba(255,255,255,.7);border-radius:999px;background:rgba(255,255,255,.16);color:#fff;font-size:17px;font-weight:800;margin-top:10px}
+.hcbtn.pri{background:#fff;color:#7f5bd6;border-color:#fff;box-shadow:0 8px 22px rgba(0,0,0,.25)}
+.hcbtn.ghost{border-color:transparent;background:transparent;font-size:15px;font-weight:700;opacity:.9}
+.hcpill{position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top,0));z-index:330;max-width:calc(100vw - 24px);border:0;border-radius:999px;background:linear-gradient(135deg,#e5709a,#7f5bd6);color:#fff;font-size:13px;font-weight:800;padding:10px 16px;box-shadow:0 8px 22px rgba(127,91,214,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:hcsh 1.6s ease-in-out infinite}
+.hcl{display:flex;flex-direction:column;gap:2px;margin:0 0 6px}
+.hcl label{display:flex;align-items:center;gap:8px;padding:7px 2px;font-size:15px}
+.hcl input{width:18px;height:18px;margin:0}
+.hcc{padding:10px 0;border-bottom:1px solid var(--line)}.hcc:last-child{border-bottom:0}
+.hwith{margin:2px 0 10px}.hwt{font-size:14px;font-weight:700;margin:2px 2px 4px}.hwt small{display:block;color:var(--sub);font-weight:600;font-size:12px}
+.hwl{max-height:150px;overflow-y:auto;border:1.5px solid var(--line);border-radius:14px;padding:2px 10px}
+.hwl label{display:flex;align-items:center;gap:8px;padding:7px 0;font-size:15px}.hwl input{width:18px;height:18px;margin:0}
 @keyframes hin{from{opacity:0;transform:translateY(-14px)}}
 </style>
 </head>
@@ -353,6 +373,7 @@ body.mapmode #hbtn{display:none}
 <div class="menu" id="menu" hidden>
   <button data-m="notif">🔔 開啟通知</button>
   <button data-m="here">📍 I'm here</button>
+  <button data-m="call">📣 呼叫大家</button>
   <button data-m="check">✅ 出發前清單</button>
   <button data-m="book">📋 已預訂</button>
   <button data-m="coupon">🎫 優惠券</button>
@@ -1196,6 +1217,7 @@ document.addEventListener('click',e=>{
   if(!t)return;
   if('menu' in t.dataset){const m=menuEl();m.hidden=!m.hidden;const r=t.getBoundingClientRect();m.style.top=(r.bottom+6)+'px'}
   else if(t.dataset.m==='notif'){menuEl().hidden=true;askNotif()}
+  else if(t.dataset.m==='call'){menuEl().hidden=true;closeView();hCallOpen()}
   else if(t.dataset.m==='tour'){menuEl().hidden=true;openTour()}
   else if(t.dataset.m)openView(t.dataset.m);
   else if(t.dataset.bk)openView('book',t.dataset.bk);
@@ -1375,9 +1397,9 @@ addEventListener('unhandledrejection',e=>{GLOG.push('Promise：'+((e.reason&&e.r
 const hClean=s=>String(s||'').trim().toLowerCase().replace(/[^a-z0-9]/g,'');
 const hRoom=()=>{const r=hClean(store.get('h:room'));return r.length>=10?r:''};
 {const q=new URLSearchParams(location.search),r=hClean(q.get('r'));   /* 邀請連結 ?r=代碼：自動加入後把代碼從網址拿掉 */
- if(r.length>=10){if(r!==hClean(store.get('h:room'))){store.set('h:room',r);store.set('h:seen',String(Date.now()))}
+ if(r.length>=10){if(r!==hClean(store.get('h:room'))){store.set('h:room',r);store.set('h:seen',String(Date.now()));store.set('h:cj',String(Date.now()))}
   q.delete('r');try{history.replaceState(null,'',location.pathname+(q.toString()?'?'+q:'')+location.hash)}catch(e){}}}
-const H={uid:store.get('g:uid')||(()=>{const u=rid(8);store.set('g:uid',u);return u})(),pins:{},es:null,ready:false,seen:+(store.get('h:seen')||0),lay:null,mk:{},sig:'',push:0,pend:'',photo:'',phc:{},hid:0,focus:new URLSearchParams(location.search).get('h')||''};
+const H={uid:store.get('g:uid')||(()=>{const u=rid(8);store.set('g:uid',u);return u})(),pins:{},es:null,ready:false,seen:+(store.get('h:seen')||0),lay:null,mk:{},sig:'',push:0,pend:'',photo:'',phc:{},hid:0,focus:new URLSearchParams(location.search).get('h')||'',calls:{},mem:{},memT:0,ces:null,cShow:'',cHide:0,cdraft:null,cReply:'',cwant:0,wsel:[]};
 const hName=()=>store.get('g:name')||'',hEmo=()=>store.get('g:emo')||GEMOJI[0];
 const hUrl=p=>HERE_DB.replace(/\/$/,'')+'/imhere/rooms/'+hRoom()+'/'+p+'.json';
 const hHue=s=>{let h=0;for(const c of String(s))h=(h*31+c.charCodeAt(0))%360;return h};
@@ -1391,19 +1413,24 @@ const hPos=()=>new Promise(res=>{if(!navigator.geolocation)return res({err:0});
 const hDel=id=>{if(!hRoom())return;fetch(hUrl('pins/'+id),{method:'DELETE'}).catch(()=>{});fetch(hUrl('photos/'+id),{method:'DELETE'}).catch(()=>{})};
 
 /* ---- 打卡 ---- */
-async function hCheckin(note,photo,man){
+async function hCheckin(note,photo,man,cid,wsel){
   if(!hRoom())return{err:-1};
   const p=man?{la:man.la,ln:man.ln,ac:1}:await hPos();   /* 手動錨點：ac=1 當標記，不新增欄位（避免被資料庫規則擋掉） */
   if(p.la==null)return{err:p.err};
   if(!man&&!(p.ac<=HERE_ACC))return{weak:p.ac};      /* 誤差超過約 100 公尺：不當作可靠位置 */
   const pin={n:hName()||'旅伴',e:hEmo(),la:p.la,ln:p.ln,ac:p.ac,t:Date.now(),note:note||''};
+  if(cid)pin.c=cid;      /* c＝這筆打卡是某則 📣 呼叫附的集合地（推播端據此不重複通知） */
+  const cp=(wsel||[]).filter(id=>id!==H.uid).map(id=>hMems().find(m=>m.id===id)).filter(Boolean).slice(0,10);   /* 一起的夥伴 */
+  if(cp.length)pin.wn=cp.map(m=>m.n||'旅伴').join('、').slice(0,60);
   if(photo)pin.ph=pin.t;      /* ph＝照片版本；照片另存 photos/<id>，夥伴點開標記才下載 */
   try{
     if(photo){const r1=await fetch(hUrl('photos/'+H.uid),{method:'PUT',body:JSON.stringify(photo)});if(!r1.ok)throw new Error('照片 HTTP '+r1.status)}   /* 先傳照片，夥伴收到打卡時照片已就緒 */
     else fetch(hUrl('photos/'+H.uid),{method:'DELETE'}).catch(()=>{});                                                  /* 這次沒拍照：清掉上一次的照片 */
-    const r=await fetch(hUrl('pins/'+H.uid),{method:'PUT',body:JSON.stringify(pin)});if(!r.ok)throw new Error('HTTP '+r.status)
+    const r=await fetch(hUrl('pins/'+H.uid),{method:'PUT',body:JSON.stringify(pin)});if(!r.ok)throw new Error('HTTP '+r.status);
+    await Promise.all(cp.map(async m=>{const q={n:(m.n||'旅伴').slice(0,12),e:m.e||'🙂',la:pin.la,ln:pin.ln,ac:pin.ac,t:pin.t,note:pin.note,w:H.uid};   /* 替夥伴寫入同一個位置（盡力而為，失敗不影響自己的打卡） */
+      try{const r2=await fetch(hUrl('pins/'+m.id),{method:'PUT',body:JSON.stringify(q)});if(r2.ok)H.pins[m.id]=q}catch(e2){}}))
   }catch(e){return{net:1,why:(e&&e.message)||'網路無回應'}}
-  H.pins[H.uid]=pin;H.sig='';hUi();hSub();     /* 同一個 id 只有一筆：PUT 直接覆蓋舊位置 */
+  H.pins[H.uid]=pin;H.sig='';hUi();hSub();hMemPut();     /* 同一個 id 只有一筆：PUT 直接覆蓋舊位置 */
   return{ok:pin};
 }
 
@@ -1435,11 +1462,12 @@ function hDlg(html){if(!hDlgEl){hDlgEl=document.createElement('div');hDlgEl.clas
   hDlgEl.innerHTML='<div class="hbox">'+html+'</div>';hDlgEl.hidden=false}
 function hClose(){if(hDlgEl)hDlgEl.hidden=true}
 function hForm(anc){
-  if(!anc){H.photo='';H.man=null;H.pend=''}
+  if(!anc){H.photo='';H.man=null;H.pend='';H.cdraft=null;H.wsel=[];hMemLoad()}
   hDlg(`<h3>${anc?'📍 確認錨點位置':"📍 I'm here"}</h3><div class="gnote" style="margin-bottom:10px">${anc?'會用你剛剛在地圖上選的位置打卡，可補充留言或照片。夥伴會收到通知，地圖上顯示 30 分鐘。':'會取得目前定位，夥伴會收到通知；地圖上顯示 30 分鐘，重新打卡會立即更新。'}</div>
   <input type="text" id="hname" placeholder="暱稱（夥伴會看到）" maxlength="12" value="${esc(hName())}">
   <input type="text" id="hnote" placeholder="位置備註（選填），例如：在 A 出口" maxlength="30" autocomplete="off" value="${esc(H.pend||'')}">
   <div class="hq">${HERE_QUICK.map(t=>`<button data-h="q" data-t="${esc(t)}">${esc(t)}</button>`).join('')}</div>
+  <div id="hwith" data-s="${hMems().map(m=>m.id).join()}">${hWithInner()}</div>
   <img class="hprev" id="hprev" ${H.photo?`src="${H.photo}"`:'hidden'} alt="">
   <input type="file" id="hfile" accept="image/*" capture="environment" hidden>
   <div class="gbtns" style="margin-bottom:4px"><button class="gbtn" data-h="pick">📷 拍照（選填，讓夥伴更好找）</button><button class="gbtn" id="hunpic" data-h="unpic" ${H.photo?'':'hidden'}>移除照片</button></div>
@@ -1450,8 +1478,8 @@ function hForm(anc){
 async function hRun(){
   const man=H.man;
   hDlg(man?'<h3>打卡中…</h3><div class="hspin"></div>':'<h3>定位中…</h3><div class="hspin"></div><div class="gnote" style="text-align:center">正在取得 GPS（最多 15 秒）</div>');
-  const r=await hCheckin(H.pend,H.photo,man);
-  if(r.ok){H.photo='';H.man=null;hClose();hToast('✅ 已打卡 '+hClock(r.ok.t),r.ok.note||'夥伴會收到通知，地圖顯示 30 分鐘',H.uid);hFocus(H.uid);return}
+  const r=await hCheckin(H.pend,H.photo,man,undefined,H.wsel);
+  if(r.ok){if(H.cReply){hCMark(H.cReply);H.cReply=''}H.wsel=[];H.photo='';H.man=null;hClose();hToast('✅ 已打卡 '+hClock(r.ok.t),(r.ok.wn?'也幫 '+r.ok.wn+' 一起打卡了':'')||r.ok.note||'夥伴會收到通知，地圖顯示 30 分鐘',H.uid);hFocus(H.uid);return}
   const retry='<button class="hgo" data-h="retry">🔄 重新定位</button>'+(r.net||r.err===-1?'':'<button class="hgo2" data-h="anchor" style="color:var(--ac)">📍 自己在地圖上下錨點</button>')+'<button class="hgo2" data-h="close">取消</button>';
   if(r.weak!=null)hDlg(`<h3>📡 定位不準，要再試一次嗎？</h3><div class="gnote">目前誤差${r.weak>0?'約 '+r.weak+' 公尺':'很大'}（超過 ${HERE_ACC} 公尺），位置可能不可靠。到空曠處或靠窗邊再試一次會更準。</div>${retry}`);
   else if(r.net)hDlg(`<h3>連線失敗</h3><div class="gnote">打卡沒有送出，請確認網路後再試一次。<br><small>原因：${esc(r.why||'')}</small></div><button class="hgo" data-h="${man?'send2':'retry'}">🔄 再試一次</button><button class="hgo2" data-h="close">取消</button>`);
@@ -1475,7 +1503,8 @@ function hAnchor(){
 }
 function hAncOk(){
   if(!mapObj)return;const c=mapObj.getCenter();
-  H.man={la:+c.lat.toFixed(5),ln:+c.lng.toFixed(5)};hAncOff();hForm(true);
+  H.man={la:+c.lat.toFixed(5),ln:+c.lng.toFixed(5)};hAncOff();
+  if(H.cdraft){H.cdraft.loc='anchor';hCallForm(1)}else hForm(true);
 }
 /* ---- 自動定時打卡（只在 App 前景運作；iOS 網頁無法在背景/關閉時取得定位） ---- */
 function hAutoCfg(){try{return JSON.parse(store.get('g:auto')||'null')}catch(e){return null}}
@@ -1498,10 +1527,11 @@ function hJoin(msg){hDlg(`<h3>👥 先加入群組</h3><div class="gnote" style=
   <button class="hgo" data-h="joinGo">加入群組</button><button class="hgo2" data-h="newGrp">✨ 建立新群組</button><button class="hgo2" data-h="close">取消</button>`)}
 function hSetRoom(code){
   const old=hRoom();
-  if(old&&old!==code){hDel(H.uid);fetch(hUrl('subs/'+H.uid),{method:'DELETE'}).catch(()=>{})}   /* 離開舊群組：刪掉我的打卡與推播訂閱 */
+  if(old&&old!==code){hDel(H.uid);fetch(hUrl('members/'+H.uid),{method:'DELETE'}).catch(()=>{});fetch(hUrl('subs/'+H.uid),{method:'DELETE'}).catch(()=>{})}   /* 離開舊群組：刪掉我的打卡與推播訂閱 */
   if(code)store.set('h:room',code);else store.del('h:room');
-  H.pins={};H.ready=false;H.sig='';H.push=0;H.seen=Date.now();store.set('h:seen',String(H.seen));
-  try{H.es&&H.es.close()}catch(e){}H.es=null;
+  H.pins={};H.ready=false;H.sig='';H.push=0;H.seen=Date.now();store.set('h:seen',String(H.seen));store.set('h:cj',String(H.seen));
+  H.calls={};H.mem={};H.memT=0;H.cShow='';H.cHide=0;hAlarm(0);hCOv(null);hCPill(null);
+  try{H.es&&H.es.close()}catch(e){}H.es=null;try{H.ces&&H.ces.close()}catch(e){}H.ces=null;
   if(code){hConnect(true);hSub()}
   hUi();hPanel();
 }
@@ -1519,13 +1549,14 @@ async function hSys(id,p,txt){
     reg?reg.showNotification(ti,o):new Notification(ti,o)}catch(e){}
 }
 function hAlert(id,p,late){
-  const txt=(p.n||'旅伴')+(late?'':'剛剛')+'在 '+hClock(p.t)+' 打卡，已更新位置。';
+  const txt=(p.n||'旅伴')+(p.wn?'（與 '+p.wn+' 一起）':'')+(late?'':'剛剛')+'在 '+hClock(p.t)+' 打卡，已更新位置。';
   if(document.hidden)hSys(id,p,txt);else hToast(txt,(p.note||'')+(p.ph?' 📷':''),id);
 }
 
 /* ---- 即時接收（Firebase 串流） ---- */
 function hConnect(force){
   if(!HERE_DB||!hRoom())return;
+  hCConnect(force);hMemSync();
   if(H.es&&!force&&H.es.readyState!==2)return;
   try{H.es&&H.es.close()}catch(e){}
   const es=H.es=new EventSource(hUrl('pins'));
@@ -1537,7 +1568,7 @@ function hConnect(force){
 function hEvt(ev,patch){
   let m;try{m=JSON.parse(ev.data)}catch(e){return}
   const parts=(m.path||'/').split('/').filter(Boolean),d=m.data,first=!H.ready,fresh=[];
-  const put=(k,v)=>{const was=H.pins[k];if(v==null)delete H.pins[k];else{H.pins[k]=v;if(k!==H.uid&&hLive(v)&&v.t>H.seen&&(!was||was.t!==v.t))fresh.push([k,v])}};
+  const put=(k,v)=>{const was=H.pins[k];if(v==null)delete H.pins[k];else{H.pins[k]=v;if(k!==H.uid&&!v.w&&hLive(v)&&v.t>H.seen&&(!was||was.t!==v.t))fresh.push([k,v]);else if(k===H.uid&&v.w&&v.w!==H.uid&&H.ready&&hLive(v)&&(!was||was.t!==v.t))hToast('👥 '+((H.mem[v.w]&&H.mem[v.w].n)||'夥伴')+' 幫你一起打卡了',v.note||'',H.uid)}};
   if(!parts.length){if(patch)Object.entries(d||{}).forEach(([k,v])=>put(k,v));else{const old=H.pins;H.pins={};Object.entries(d||{}).forEach(([k,v])=>put(k,v))}}
   else if(parts.length===1){if(patch&&d&&H.pins[parts[0]])put(parts[0],{...H.pins[parts[0]],...d});else put(parts[0],d)}
   else{const k=parts[0];if(H.pins[k]){const v={...H.pins[k]};v[parts[1]]=d;put(k,v)}}
@@ -1565,17 +1596,17 @@ setInterval(hPurge,20e3);
 /* ---- 地圖上的打卡點 ---- */
 function drawHere(){
   if(!mapObj||!window.L)return;
-  const L0=hList(),sig=L0.map(p=>p.id+p.t).join('|')+'|'+(mapObj===H.map?1:0);
+  const L0=hList().filter(p=>!(p.w&&hLive(H.pins[p.w])&&H.pins[p.w].t===p.t)),sig=L0.map(p=>p.id+p.t).join('|')+'|'+(mapObj===H.map?1:0);
   if(sig===H.sig&&H.lay)return;
   H.sig=sig;H.map=mapObj;
   if(!H.lay)H.lay=L.layerGroup().addTo(mapObj);
   H.lay.clearLayers();H.mk={};
   L0.forEach(p=>{const mine=p.id===H.uid,nm=mine?'我':(p.n||'旅伴'),fresh=Date.now()-p.t<120e3;
     const ic=L.divIcon({className:'',iconSize:[40,40],iconAnchor:[20,20],popupAnchor:[0,-22],
-      html:`<div class="hpin ${fresh?'new':''}" style="--h:${hHue(p.n)}"><div class="he">${esc(p.e||'🙂')}</div><div class="hl"><b>📍 ${esc(nm)}</b><div>${hClock(p.t)}${p.ph?' 📷':''}</div>${p.note?`<div class="hn">${esc(p.note)}</div>`:''}</div></div>`});
+      html:`<div class="hpin ${fresh?'new':''}" style="--h:${hHue(p.n)}"><div class="he">${esc(p.e||'🙂')}</div><div class="hl"><b>📍 ${esc(nm)}</b><div>${hClock(p.t)}${p.ph?' 📷':''}${p.wn?' 👥+'+p.wn.split('、').length:''}</div>${p.note?`<div class="hn">${esc(p.note)}</div>`:''}</div></div>`});
     H.mk[p.id]=L.marker([p.la,p.ln],{icon:ic,zIndexOffset:900}).addTo(H.lay);
     H.mk[p.id].on('popupopen',e=>{if(p.ph)hLoadPh(p.id,p.ph,e.popup)}).bindPopup(
-      `<b>${esc(p.e||'')} ${esc(nm)}</b><br>📍 ${hClock(p.t)} 打卡（${hAgo(p.t)}）${p.note?'<br>💬 '+esc(p.note):''}${p.ph?`<div class="hph2">📷 載入照片中…</div>`:''}<br><span style="color:var(--sub);font-size:12px">${p.ac===1?'📌 手動標記位置':'誤差約 '+(p.ac||'?')+' 公尺'}｜約 ${hLeft(p)} 分鐘後消失</span>
+      `<b>${esc(p.e||'')} ${esc(nm)}</b><br>📍 ${hClock(p.t)} 打卡（${hAgo(p.t)}）${p.wn?'<br>👥 一起：'+esc(p.wn):''}${p.note?'<br>💬 '+esc(p.note):''}${p.ph?`<div class="hph2">📷 載入照片中…</div>`:''}<br><span style="color:var(--sub);font-size:12px">${p.ac===1?'📌 手動標記位置':'誤差約 '+(p.ac||'?')+' 公尺'}｜約 ${hLeft(p)} 分鐘後消失</span>
       <div class="acts"><a href="https://www.google.com/maps/dir/?api=1&destination=${p.la},${p.ln}&travelmode=walking" target="_blank" rel="noopener">🧭 導航過去</a></div>`);
   });
 }
@@ -1589,7 +1620,7 @@ function hChip(){
 function hFocus(id){
   closeView();forceMap();let n=0;
   const go=()=>{if(!mapObj||!window.L){if(n++<15)setTimeout(go,300);return}
-    H.sig='';drawHere();const p=id&&H.pins[id];
+    H.sig='';drawHere();if(id&&H.pins[id]&&H.pins[id].w&&!H.mk[id]&&H.mk[H.pins[id].w])id=H.pins[id].w;const p=id&&H.pins[id];
     if(p&&hLive(p)){mapObj.flyTo([p.la,p.ln],17,{duration:.6});setTimeout(()=>H.mk[id]&&H.mk[id].openPopup(),700);return}
     const pts=hList().map(x=>[x.la,x.ln]);if(pts.length>1)mapObj.fitBounds(L.latLngBounds(pts),{padding:[60,60],maxZoom:17});else if(pts.length)mapObj.flyTo(pts[0],16)};
   setTimeout(go,400);
@@ -1599,14 +1630,22 @@ function hFocus(id){
 function hMeHtml(){
   const p=H.pins[H.uid];
   if(!hLive(p))return '<div class="gnote">目前沒有有效的打卡。</div>';
-  return `<div class="gm"><div class="ge" style="--h:${hHue(p.n)}">${esc(p.e||'🙂')}</div><div class="gi"><b>📍 ${hClock(p.t)} 已打卡</b><small>${p.note?'💬 '+esc(p.note)+'｜':''}約 ${hLeft(p)} 分鐘後消失</small></div><button class="gbtn" data-h="see" data-id="${H.uid}">看地圖</button></div>
+  return `<div class="gm"><div class="ge" style="--h:${hHue(p.n)}">${esc(p.e||'🙂')}</div><div class="gi"><b>📍 ${hClock(p.t)} 已打卡</b><small>${p.w&&p.w!==H.uid?'👥 '+esc((H.mem[p.w]&&H.mem[p.w].n)||'夥伴')+' 幫你打卡｜':''}${p.wn?'👥 與 '+esc(p.wn)+' 一起｜':''}${p.note?'💬 '+esc(p.note)+'｜':''}約 ${hLeft(p)} 分鐘後消失</small></div><button class="gbtn" data-h="see" data-id="${H.uid}">看地圖</button></div>
   <div class="gbtns" style="margin-top:6px"><button class="gbtn" data-h="cancel">取消打卡</button></div>`;
 }
 function hMemHtml(){
-  const L2=hList().filter(p=>p.id!==H.uid);
-  if(!L2.length)return '<div class="gnote">目前沒有夥伴的打卡。夥伴按「I\'m here」後，這裡和地圖會即時出現。</div>';
-  return L2.map(p=>`<div class="gm"><div class="ge" style="--h:${hHue(p.n)}">${esc(p.e||'🙂')}</div><div class="gi"><b>${esc(p.n||'旅伴')}　${hClock(p.t)}</b><small>${p.note?'💬 '+esc(p.note)+'｜':''}${hAgo(p.t)}｜約 ${hLeft(p)} 分鐘後消失</small></div><button class="gbtn" data-h="see" data-id="${p.id}">📍</button></div>`).join('')
-    +'<div class="gbtns" style="margin-top:10px"><button class="gbtn" data-h="all">🗺️ 在地圖看全部</button></div>';
+  const ms=hMems().filter(m=>m.id!==H.uid),ids=new Set(ms.map(m=>m.id));
+  const rows=[...ms.map(m=>({id:m.id,n:m.n,e:m.e,seen:m.t,p:hLive(H.pins[m.id])?H.pins[m.id]:null})),
+    ...hList().filter(p=>p.id!==H.uid&&!ids.has(p.id)).map(p=>({id:p.id,n:p.n,e:p.e,seen:p.t,p}))]
+    .sort((a,b)=>(b.p?b.p.t:0)-(a.p?a.p.t:0)||String(a.n).localeCompare(String(b.n),'zh-Hant'));
+  if(!rows.length)return '<div class="gnote">群組裡目前只有你。把邀請連結傳給夥伴，他們開啟 App 後會自動出現在這裡。</div>';
+  const n=rows.filter(x=>x.p).length;
+  return `<div class="gnote" style="margin-bottom:4px">群組共 ${rows.length+1} 人（含我）｜${n} 位夥伴打卡中</div>`+rows.map(x=>{
+    const p=x.p;
+    if(!p)return `<div class="gm"><div class="ge" style="--h:${hHue(x.n)};opacity:.5">${esc(x.e||'🙂')}</div><div class="gi"><b>${esc(x.n||'旅伴')}</b><small>尚未打卡｜最後上線 ${hAgo(x.seen)}</small></div></div>`;
+    const by=p.w&&p.w!==x.id?((H.mem[p.w]&&H.mem[p.w].n)||(H.pins[p.w]&&H.pins[p.w].n)||'夥伴'):'';
+    return `<div class="gm"><div class="ge" style="--h:${hHue(p.n)}">${esc(p.e||'🙂')}</div><div class="gi"><b>${esc(p.n||x.n||'旅伴')}　${hClock(p.t)}</b><small>${by?'👥 '+esc(by)+' 幫忙打卡｜':''}${p.wn?'👥 與 '+esc(p.wn)+' 一起｜':''}${p.note?'💬 '+esc(p.note)+'｜':''}${hAgo(p.t)}｜約 ${hLeft(p)} 分鐘後消失</small></div><button class="gbtn" data-h="see" data-id="${x.id}">📍</button></div>`}).join('')
+    +(n?'<div class="gbtns" style="margin-top:10px"><button class="gbtn" data-h="all">🗺️ 在地圖看全部</button></div>':'');
 }
 function hNotifHtml(){
   if(!('Notification' in window))return '<div class="gnote">此瀏覽器不支援通知。請先「加入主畫面」，用主畫面圖示開啟（需 iOS 16.4 以上）。</div>';
@@ -1621,11 +1660,13 @@ function hereHtml(){
     <input type="text" id="gname" placeholder="暱稱（夥伴會看到）" maxlength="12" value="${esc(hName())}">
     <div class="gemo">${GEMOJI.map(e=>`<button class="${e===hEmo()?'on':''}" data-h="emo" data-e="${e}">${e}</button>`).join('')}</div></div>
   <div class="gcard"><h4>👥 群組</h4>${hRoom()?`<div class="gnote">群組代碼</div><div style="font:700 18px ui-monospace,Menlo,monospace;letter-spacing:.06em;margin:4px 0 10px;-webkit-user-select:text;user-select:text;word-break:break-all">${esc(hRoom())}</div>
+    <div id="hmems" class="gnote" style="margin-bottom:10px">${hMemsHtml()}</div>
     <div class="gbtns"><button class="gbtn" data-h="invite">📤 分享邀請連結</button><button class="gbtn" data-h="join">換群組</button><button class="gbtn" data-h="leave">離開</button></div>`
     :`<div class="gnote">尚未加入群組，加入後才能打卡與看到夥伴。</div><div class="gbtns" style="margin-top:8px"><button class="gbtn" data-h="join">加入／建立群組</button></div>`}
     <div class="gnote" style="margin-top:8px">只有知道代碼的人看得到群組內的打卡，請只傳給同行夥伴。若用 iPhone 主畫面 App，邀請連結要在 App 內「換群組」手動輸入代碼（Safari 與主畫面 App 的資料是分開的）。</div></div>
   <div class="gcard"><h4>我的打卡</h4><div id="hme">${hMeHtml()}</div>
     <button class="hgo" data-h="open">📍 I'm here</button></div>
+  <div class="gcard"><h4>📣 呼叫大家</h4><div class="gnote" style="margin-bottom:6px">問大家「你們在哪？」，每個人可自己決定要不要回報。</div><button class="hgo" data-h="callopen" style="margin-top:0">📣 呼叫大家 I'm here</button><div id="hcalls" style="margin-top:10px">${hCallsHtml()}</div></div>
   <div class="gcard"><h4>🔔 通知</h4><div id="hnt">${hNotifHtml()}</div></div>
   <div class="gcard"><h4>夥伴打卡</h4><div id="hmem">${hMemHtml()}</div></div>
   ${GLOG.length?`<div class="gcard"><h4>除錯訊息</h4><div class="gnote">${GLOG.map(esc).join('<br>')}</div></div>`:''}
@@ -1634,8 +1675,8 @@ function hereHtml(){
 const hPanelOpen=()=>viewKind==='here'&&!$('#view').hidden;
 function hPanel(){if(!hPanelOpen())return;const v=$('#view'),y=v.scrollTop;$('#vbody').innerHTML=hereHtml();v.scrollTop=y}
 function hUi(){
-  if(hPanelOpen()&&$('#hmem')){$('#hmem').innerHTML=hMemHtml();$('#hme').innerHTML=hMeHtml();$('#hnt').innerHTML=hNotifHtml()}
-  drawHere();hChip();
+  if(hPanelOpen()&&$('#hmem')){$('#hmem').innerHTML=hMemHtml();$('#hme').innerHTML=hMeHtml();$('#hnt').innerHTML=hNotifHtml();if($('#hcalls'))$('#hcalls').innerHTML=hCallsHtml();if($('#hmems'))$('#hmems').innerHTML=hMemsHtml()}
+  hCheck();hWithRef();drawHere();hChip();
 }
 
 /* ---- 推播訂閱（App 關閉／鎖屏時由伺服器推送） ---- */
@@ -1651,11 +1692,212 @@ async function hSub(){
   }catch(e){GLOG.push('推播：'+(e.message||e))}
 }
 const _askNotif=askNotif;askNotif=async function(){await _askNotif();await hSub();hUi()};
-if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{const m=e.data;if(m&&m.imhere)hFocus(m.imhere)});
+if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{const m=e.data;if(m&&m.call){H.cHide=0;H.cShow='';hCheck()}else if(m&&m.imhere)hFocus(m.imhere)});
+
+/* ============ 📣 呼叫大家 I'm here ============
+   有人發出呼叫 → 同群組的人收到推播，點開是全螢幕「📣 某某在問：…」；App 開著時震動＋提示音，直到你決定回報或先不回報。
+   資料：/imhere/rooms/<群組>/calls/<呼叫id>（只有知道群組代碼的人讀得到，與打卡相同的安全措施）。
+   發呼叫時若附位置，會用「我的打卡」（同一個 id，一筆，有就覆蓋、沒有就新增）標在地圖上，並加上 c＝呼叫id。
+   回報＝照原本的 I'm here 打卡（GPS 或錨點）；回報結果整理在「I'm here」頁面的 📣 區塊。 */
+const HERE_CALLQ=['你們在哪？','集合囉，在哪？'];
+const hCLive=c=>!!c&&typeof c.t==='number'&&typeof c.m==='string'&&typeof c.by==='string'&&Date.now()-c.t<HERE_TTL;
+const hCDone=()=>{try{const a=JSON.parse(store.get('h:cd')||'[]');return Array.isArray(a)?a:[]}catch(e){return[]}};
+function hCMark(id){const a=hCDone();if(!a.includes(id)){a.push(id);store.set('h:cd',JSON.stringify(a.slice(-30)))}}
+const hCAll=()=>Object.entries(H.calls).map(([id,c])=>({id,...c})).filter(hCLive).sort((a,b)=>b.t-a.t);
+function hCPend(){   /* 等我決定的呼叫：還沒過期、不是我發的、加入群組之後發的、我沒按過「先不回報」、也還沒回報 */
+  const me=H.pins[H.uid],dn=hCDone(),cj=+(store.get('h:cj')||0);
+  return hCAll().filter(c=>c.by!==H.uid&&c.t>=cj&&!dn.includes(c.id)&&!(me&&typeof me.t==='number'&&me.t>=c.t));
+}
+
+/* ---- 震動＋提示音（App 開著且在前景時重複，直到決定為止；iOS 不支援網頁震動，且需先點過畫面才允許出聲） ---- */
+let hAC=null,hAT=0;
+function hAudio(){try{if(!hAC){const A=window.AudioContext||window.webkitAudioContext;if(A)hAC=new A()}if(hAC&&hAC.state==='suspended')hAC.resume()}catch(e){}return hAC}
+['pointerdown','touchend','keydown'].forEach(ev=>addEventListener(ev,()=>hAudio(),{passive:true}));
+function hBeep(){const a=hAudio();if(!a||a.state!=='running')return;const t0=a.currentTime;
+  [880,1175,880].forEach((f,i)=>{const o=a.createOscillator(),g=a.createGain(),s=t0+i*.24;o.type='sine';o.frequency.value=f;
+    g.gain.setValueAtTime(0.0001,s);g.gain.linearRampToValueAtTime(.35,s+.02);g.gain.exponentialRampToValueAtTime(.001,s+.21);
+    o.connect(g);g.connect(a.destination);o.start(s);o.stop(s+.23)})}
+function hRing(){if(document.hidden)return;hBeep();try{navigator.vibrate&&navigator.vibrate([300,120,300,120,300])}catch(e){}}
+function hAlarm(on){clearInterval(hAT);hAT=0;try{navigator.vibrate&&navigator.vibrate(0)}catch(e){}if(on){hRing();hAT=setInterval(hRing,3000)}}
+
+/* ---- 收到呼叫：全螢幕畫面＋待回報小膠囊 ---- */
+function hCheck(){
+  if(!H.ready||!hRoom())return;
+  const L=hCPend(),top=L[0];
+  if(!top){H.cShow='';H.cHide=0;hAlarm(0);hCOv(null);hCPill(null);return}
+  if(H.cShow!==top.id){H.cShow=top.id;H.cHide=0;hAlarm(1);if(document.hidden)hSysCall(top)}
+  hCOv(top);hCPill(top,L.length);
+}
+function hCOv(c){
+  let o=$('#hcall');
+  if(!c||H.cHide){if(o)o.remove();return}
+  const pin=H.pins[c.by],spot=!!(c.l&&hLive(pin)),key=c.id+'|'+(spot?1:0);
+  if(o&&o.dataset.k===key)return;
+  if(!o){o=document.createElement('div');o.id='hcall';o.className='hcall';o.setAttribute('role','alertdialog');document.body.appendChild(o)}
+  o.dataset.k=key;
+  o.innerHTML=`<div class="hcb"><div class="hcr">📣</div>
+    <div class="hcw">${esc(c.n||'旅伴')} 在問：</div><div class="hcm">${esc(c.m)}</div>
+    <div class="hcs">${hClock(c.t)}｜${hAgo(c.t)}${spot?'｜地圖上已標示集合地':''}</div>
+    <button class="hcbtn pri" data-h="crep" data-id="${c.id}">📍 回報我的位置</button>
+    <button class="hcbtn" data-h="canc" data-id="${c.id}">📌 用錨點標示位置</button>
+    ${spot?`<button class="hcbtn" data-h="cview" data-id="${c.id}">🗺️ 先看集合地（暫停提示音）</button>`:''}
+    <button class="hcbtn ghost" data-h="cno" data-id="${c.id}">先不回報</button></div>`;
+}
+function hCPill(c,n){
+  let p=$('#hcpill');
+  if(!c||!H.cHide){if(p)p.remove();return}
+  if(!p){p=document.createElement('button');p.id='hcpill';p.className='hcpill';p.dataset.h='cshow';document.body.appendChild(p)}
+  p.textContent='📣 '+(c.n||'旅伴')+' 在問：'+c.m+(n>1?'（共 '+n+' 則）':'')+'　點此回報';
+}
+async function hSysCall(c){
+  try{if(!('Notification' in window)||Notification.permission!=='granted')return;
+    const reg=await navigator.serviceWorker.getRegistration(),ti='📣 '+(c.n||'旅伴')+' 在問：'+c.m,
+      o={body:'點開回報你的位置，或選擇先不回報',icon:'icon-192.png',tag:'call:'+c.id,renotify:true,requireInteraction:true,vibrate:[300,150,300,150,300],data:{id:'',call:c.id}};
+    reg?reg.showNotification(ti,o):new Notification(ti,o)}catch(e){}
+}
+
+/* ---- 即時接收呼叫（Firebase 串流） ---- */
+function hCConnect(force){
+  if(H.ces&&!force&&H.ces.readyState!==2)return;
+  try{H.ces&&H.ces.close()}catch(e){}
+  const es=H.ces=new EventSource(hUrl('calls'));
+  es.addEventListener('put',e=>hCEvt(e,false));
+  es.addEventListener('patch',e=>hCEvt(e,true));
+  es.addEventListener('cancel',()=>es.close());
+  es.onerror=()=>{if(es.readyState===2)setTimeout(()=>hCConnect(),5000)};
+}
+function hCEvt(ev,patch){
+  let m;try{m=JSON.parse(ev.data)}catch(e){return}
+  const parts=(m.path||'/').split('/').filter(Boolean),d=m.data;
+  if(!parts.length){
+    if(patch)Object.entries(d||{}).forEach(([k,v])=>{if(v==null)delete H.calls[k];else H.calls[k]=v});
+    else H.calls=d&&typeof d==='object'?{...d}:{};
+  }else if(parts.length===1){
+    if(d==null)delete H.calls[parts[0]];else H.calls[parts[0]]=patch&&H.calls[parts[0]]?{...H.calls[parts[0]],...d}:d;
+  }else{const v={...(H.calls[parts[0]]||{})};if(d==null)delete v[parts[1]];else v[parts[1]]=d;H.calls[parts[0]]=v}
+  hUi();
+}
+
+/* ---- 發出呼叫 ---- */
+function hCallOpen(){if(hRoom())hCallForm();else{H.cwant=1;hJoin()}}
+function hCRead(){
+  const d=H.cdraft||(H.cdraft={msg:'',loc:'none'}),m=$('#hcmsg'),n=$('#hname'),r=document.querySelector('input[name=hcloc]:checked');
+  if(m)d.msg=m.value.trim().slice(0,24);if(r)d.loc=r.value;
+  if(n&&n.value.trim())store.set('g:name',n.value.trim().slice(0,12));
+  return d;
+}
+function hCallForm(keep){
+  if(!keep||!H.cdraft){H.cdraft={msg:HERE_CALLQ[0],loc:'none'};H.man=null}
+  const d=H.cdraft,anc=d.loc==='anchor'&&!!H.man,ck=v=>d.loc===v?'checked':'';
+  hDlg(`<h3>📣 呼叫大家 I'm here</h3><div class="gnote" style="margin-bottom:10px">同群組的夥伴會收到推播，點開就是全螢幕通知；每個人可以自己決定要不要回報。</div>
+  <input type="text" id="hname" placeholder="暱稱（夥伴會看到）" maxlength="12" value="${esc(hName())}">
+  <input type="text" id="hcmsg" placeholder="想問大家的一句話" maxlength="24" autocomplete="off" value="${esc(d.msg)}">
+  <div class="hq">${HERE_CALLQ.map(t=>`<button data-h="cq" data-t="${esc(t)}">${esc(t)}</button>`).join('')}</div>
+  <div class="hcl">
+    <label><input type="radio" name="hcloc" value="none" ${ck('none')}> 不附位置</label>
+    <label><input type="radio" name="hcloc" value="me" ${ck('me')}> 📍 附上我現在的位置</label>
+    <label><input type="radio" name="hcloc" value="anchor" ${ck('anchor')}> 📌 用錨點在地圖上標示集合地${anc?'（已選好 ✅）':''}</label></div>
+  <div class="gnote">附位置時，地圖上你的標記會更新（原本有就覆蓋，沒有就新增），顯示 30 分鐘。</div>
+  <button class="hgo" data-h="csend">📣 送出呼叫</button>${anc?'<button class="hgo2" data-h="anchor">↩︎ 回地圖重新選位置</button>':''}<button class="hgo2" data-h="close">取消</button>`);
+}
+function hCFail(r){
+  const man=H.cdraft&&H.cdraft.loc==='anchor',b=(k,t,c)=>`<button class="${c||'hgo2'}" data-h="${k}">${t}</button>`;
+  let msg;
+  if(r.weak!=null)msg=`定位誤差${r.weak>0?'約 '+r.weak+' 公尺':'很大'}（超過 ${HERE_ACC} 公尺），位置可能不可靠。`;
+  else if(r.net)msg='連線失敗，呼叫尚未送出。<br><small>原因：'+esc(r.why||'')+'</small>';
+  else if(r.err===1)msg='沒有定位權限。請到 iPhone「設定」→ 隱私權與安全性 → 定位服務，允許後再試。';
+  else msg='暫時取得不到 GPS。';
+  hDlg(`<h3>📣 還沒送出</h3><div class="gnote">${msg}</div>${b('csend2','🔄 再試一次','hgo')}${man||r.net?'':b('canc2','📌 改用錨點選集合地')}${r.net?'':b('cnoloc','不附位置，直接呼叫')}${b('cclose','取消')}`);
+}
+async function hCallSend(){
+  const d=H.cdraft;if(!d)return;
+  if(!d.cid)d.cid=rid(10);
+  hDlg(d.loc==='me'&&!d.pinned?'<h3>定位中…</h3><div class="hspin"></div><div class="gnote" style="text-align:center">正在取得 GPS（最多 15 秒）</div>':'<h3>送出中…</h3><div class="hspin"></div>');
+  if(d.loc!=='none'&&!d.pinned){
+    const r=await hCheckin(('📣 '+d.msg).slice(0,30),'',d.loc==='anchor'?H.man:null,d.cid);   /* 先標地圖，夥伴收到呼叫時集合地已就緒 */
+    if(!r.ok){hCFail(r);return}
+    d.pinned=1;
+  }
+  const call={by:H.uid,n:hName()||'旅伴',e:hEmo(),m:d.msg,t:Date.now(),l:d.pinned?1:0};
+  try{const r=await fetch(hUrl('calls/'+d.cid),{method:'PUT',body:JSON.stringify(call)});if(!r.ok)throw new Error('HTTP '+r.status)}
+  catch(e){hCFail({net:1,why:(e&&e.message)||'網路無回應'});return}
+  H.calls[d.cid]=call;const pinned=d.pinned;H.cdraft=null;H.man=null;hClose();hUi();
+  hToast('📣 已通知大家',pinned?'集合地已標在地圖上':call.m,pinned?H.uid:'');
+  if(pinned)hFocus(H.uid);
+}
+
+/* ---- 回報結果（I'm here 頁面的 📣 區塊；同群組都看得到） ---- */
+function hCallsHtml(){
+  const cs=hCAll();
+  if(!cs.length)return '<div class="gnote">目前沒有呼叫。按上面的按鈕問大家在哪，回報的結果會整理在這裡，同群組的人都看得到。</div>';
+  const dn=hCDone(),ls=hList();
+  return cs.map(c=>{
+    const mine=c.by===H.uid,cp=H.pins[c.by],spot=!!(c.l&&hLive(cp)&&cp.c===c.id),
+      reps=ls.filter(p=>p.id!==c.by&&p.t>=c.t),replied=reps.some(p=>p.id===H.uid),declined=!mine&&!replied&&dn.includes(c.id);
+    const row=(p,lab)=>`<div class="gm"><div class="ge" style="--h:${hHue(p.n)}">${esc(p.e||'🙂')}</div><div class="gi"><b>${lab||(p.id===H.uid?'我':esc(p.n||'旅伴'))}　${hClock(p.t)}</b><small>${p.note?'💬 '+esc(p.note)+'｜':''}${hAgo(p.t)}</small></div><button class="gbtn" data-h="see" data-id="${p.id}">📍</button></div>`;
+    return `<div class="hcc"><div style="font-size:15px;font-weight:800">📣 ${esc(mine?'我':c.n||'旅伴')} 在問：${esc(c.m)}</div>
+      <div class="gnote" style="margin-bottom:4px">${hClock(c.t)} 發出（${hAgo(c.t)}）｜約 ${hLeft(c)} 分鐘後消失${!mine?'｜'+(replied?'✅ 你已回報':declined?'你選擇先不回報':'⏳ 等你回報'):''}</div>
+      ${spot?row(cp,'📌 集合地（'+esc(mine?'我':c.n||'旅伴')+'）'):''}
+      ${reps.length?`<div class="gnote" style="margin-top:6px">已回報 ${reps.length} 人</div>`+reps.map(p=>row(p)).join(''):'<div class="gnote" style="margin-top:6px">還沒有人回報。</div>'}
+      ${(()=>{const ms=hMems().filter(m=>m.id!==c.by&&!reps.some(p=>p.id===m.id));return ms.length?`<div class="gnote" style="margin-top:6px">⏳ 尚未回報 ${ms.length} 人：${ms.map(m=>esc(m.e||'🙂')+esc(m.id===H.uid?'我':m.n)).join('、')}</div>`:''})()}
+      <div class="gbtns" style="margin-top:8px">${!mine&&!replied?`<button class="gbtn" data-h="crep" data-id="${c.id}">📍 回報我的位置</button><button class="gbtn" data-h="canc" data-id="${c.id}">📌 錨點回報</button>`:''}${mine?`<button class="gbtn" data-h="cdel" data-id="${c.id}">撤回呼叫</button>`:''}</div></div>`}).join('');
+}
+
+/* ---- 呼叫相關按鈕 ---- */
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-h]');if(!t)return;const k=t.dataset.h,id=t.dataset.id||H.cShow;
+  const away=()=>{if(id===H.cShow){H.cHide=1;hAlarm(0);hCheck()}};   /* 去回報時先收起全螢幕畫面，待回報小膠囊留著 */
+  if(k==='callopen'){closeView();hCallOpen()}
+  else if(k==='cq'){const m=$('#hcmsg');if(m)m.value=t.dataset.t}
+  else if(k==='csend'){
+    const d=hCRead(),n=$('#hname');
+    if(!hName()){if(n){n.focus();n.placeholder='請先填暱稱'}return}
+    if(!d.msg){const m=$('#hcmsg');if(m){m.focus();m.placeholder='請輸入一句話'}return}
+    if(d.loc==='anchor'&&!H.man){H.cdraft=d;hAnchor();return}
+    hCallSend();
+  }
+  else if(k==='csend2')hCallSend();
+  else if(k==='canc2'){if(H.cdraft){H.cdraft.loc='anchor';hAnchor()}}
+  else if(k==='cnoloc'){if(H.cdraft){H.cdraft.loc='none';hCallSend()}}
+  else if(k==='cclose'){H.cdraft=null;H.man=null;hClose()}
+  else if(k==='crep'){if(!id)return;H.cReply=id;away();H.pend='';H.photo='';H.man=null;H.cdraft=null;H.wsel=[];hRun()}
+  else if(k==='canc'){if(!id)return;H.cReply=id;away();H.pend='';H.photo='';H.man=null;H.cdraft=null;H.wsel=[];hAnchor()}
+  else if(k==='cno'){if(!id)return;hCMark(id);hCheck();hUi()}
+  else if(k==='cview'){const c=H.calls[id];away();if(c)hFocus(c.by)}
+  else if(k==='cshow'){H.cHide=0;H.cShow=H.cShow||'';hCheck()}
+  else if(k==='cdel'){if(!id||!confirm('撤回這則呼叫？'))return;delete H.calls[id];fetch(hUrl('calls/'+id),{method:'DELETE'}).catch(()=>{});hCheck();hUi()}
+  else if(k==='close'){H.cdraft=null;H.cwant=0}
+});
+
+/* ---- 👥 群組成員名單（members/<id>：暱稱、頭像、最後上線；用來顯示「尚未回報」） ---- */
+function hMemPut(force){
+  if(!hRoom())return;const now=Date.now();if(!force&&now-H.memT<10*60e3)return;H.memT=now;
+  fetch(hUrl('members/'+H.uid),{method:'PUT',body:JSON.stringify({n:(hName()||'旅伴').slice(0,12),e:hEmo(),t:now})}).catch(()=>{});
+}
+async function hMemLoad(){
+  if(!hRoom())return;
+  try{const r=await fetch(hUrl('members'),{cache:'no-store'});if(!r.ok)return;const d=await r.json();H.mem=d&&typeof d==='object'?d:{};hUi()}catch(e){}
+}
+function hMemSync(){hMemPut();hMemLoad()}
+const hMems=()=>Object.entries(H.mem).map(([id,m])=>({id,...m})).filter(m=>m&&typeof m.n==='string'&&typeof m.t==='number'&&Date.now()-m.t<2*864e5).sort((a,b)=>(a.id===H.uid?-1:b.id===H.uid?1:a.n.localeCompare(b.n)));
+function hMemsHtml(){
+  const L=hMems();if(!L.length)return '成員名單載入中…';
+  return '👥 成員 '+L.length+' 人：'+L.map(m=>esc(m.e||'🙂')+esc(m.id===H.uid?'我':m.n)).join('、');
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)hMemSync()});
+setInterval(()=>{if(!document.hidden)hMemLoad()},60e3);
+
+/* ---- 👥 跟誰在一起：勾選的夥伴一起打卡（替他們寫入同位置的打卡，w＝代打卡的人；地圖上合併成一個標記） ---- */
+function hWithInner(){
+  const L=hMems().filter(m=>m.id!==H.uid);if(!L.length)return '';
+  return `<div class="hwith"><div class="hwt">👥 跟誰在一起？<small>勾選的人會一起打卡（位置同步更新），不用各自打</small></div><div class="hwl">${L.map(m=>`<label><input type="checkbox" data-w="${m.id}" ${H.wsel.includes(m.id)?'checked':''}> ${esc(m.e||'🙂')} ${esc(m.n)}</label>`).join('')}</div></div>`;
+}
+function hWithRef(){const b=$('#hwith');if(!b)return;const s=hMems().map(m=>m.id).join();if(b.dataset.s!==s){b.dataset.s=s;b.innerHTML=hWithInner()}}
+document.addEventListener('change',e=>{const w=e.target.dataset&&e.target.dataset.w;if(!w)return;H.wsel=H.wsel.filter(x=>x!==w);if(e.target.checked)H.wsel.push(w)});
 
 /* ---- 事件 ---- */
 document.addEventListener('change',e=>{
-  if(e.target.id==='gname')store.set('g:name',e.target.value.trim());
+  if(e.target.id==='gname'){store.set('g:name',e.target.value.trim());hMemPut(1)}
   else if(e.target.id==='hfile'&&e.target.files&&e.target.files[0]){
     const f=e.target.files[0];e.target.value='';
     hShrink(f).then(d=>{H.photo=d;const pv=$('#hprev');if(pv){pv.src=d;pv.hidden=false}const u=$('#hunpic');if(u)u.hidden=false}).catch(()=>alert('照片讀取失敗（可能是手機記憶體不足），請先關閉其他 App 再拍一次'))}
@@ -1664,8 +1906,8 @@ document.addEventListener('click',e=>{
   const t=e.target.closest('[data-h]');if(!t)return;const k=t.dataset.h;
   if(k==='open')hOpen();
   else if(k==='join')hJoin();
-  else if(k==='joinGo'){const c=hClean(($('#hcode')||{}).value);if(c.length<10){hJoin('代碼至少 10 碼');return}hSetRoom(c);hForm()}
-  else if(k==='newGrp'){hSetRoom(rid(12));hForm();hToast('已建立群組','記得到「I\'m here」頁面分享邀請連結給夥伴')}
+  else if(k==='joinGo'){const c=hClean(($('#hcode')||{}).value);if(c.length<10){hJoin('代碼至少 10 碼');return}hSetRoom(c);if(H.cwant){H.cwant=0;hCallForm()}else hForm()}
+  else if(k==='newGrp'){hSetRoom(rid(12));if(H.cwant){H.cwant=0;hCallForm()}else hForm();hToast('已建立群組','記得到「I\'m here」頁面分享邀請連結給夥伴')}
   else if(k==='invite'){const u=location.origin+location.pathname+'?r='+hRoom();
     if(navigator.share)navigator.share({title:"I'm here 群組",text:'東京行程：點連結加入我們的群組（代碼 '+hRoom()+'）',url:u}).catch(()=>{});
     else if(navigator.clipboard)navigator.clipboard.writeText(u).then(()=>alert('已複製邀請連結'))}
@@ -1685,11 +1927,11 @@ document.addEventListener('click',e=>{
   }
   else if(k==='retry'){H.man=null;hRun()}
   else if(k==='send2')hRun();
-  else if(k==='anchor'){const o=$('#hnote');if(o)H.pend=o.value.trim().slice(0,30);hAnchor()}
+  else if(k==='anchor'){const o=$('#hnote');if(o)H.pend=o.value.trim().slice(0,30);if(H.cdraft)hCRead();hAnchor()}
   else if(k==='ancOk')hAncOk();
-  else if(k==='ancCancel'){hAncOff();hForm(!!H.man)}
-  else if(k==='emo'){store.set('g:emo',t.dataset.e);hPanel()}
-  else if(k==='cancel'){if(confirm('取消目前的打卡？夥伴的地圖上也會消失。')){delete H.pins[H.uid];H.sig='';hDel(H.uid);hUi()}}
+  else if(k==='ancCancel'){hAncOff();if(H.cdraft)hCallForm(1);else hForm(!!H.man)}
+  else if(k==='emo'){store.set('g:emo',t.dataset.e);hPanel();hMemPut(1)}
+  else if(k==='cancel'){if(confirm('取消目前的打卡？夥伴的地圖上也會消失。')){const mt=H.pins[H.uid];if(mt)Object.entries(H.pins).forEach(([k2,q])=>{if(q&&q.w===H.uid&&q.t===mt.t){delete H.pins[k2];hDel(k2)}});delete H.pins[H.uid];H.sig='';hDel(H.uid);hUi()}}
   else if(k==='see')hFocus(t.dataset.id);
   else if(k==='all')hFocus(null);
   else if(k==='notif'){askNotif()}
