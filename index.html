@@ -1626,7 +1626,7 @@ function hConnect(force){
 function hEvt(ev,patch){
   let m;try{m=JSON.parse(ev.data)}catch(e){return}
   const parts=(m.path||'/').split('/').filter(Boolean),d=m.data,first=!H.ready,fresh=[];
-  const put=(k,v)=>{const was=H.pins[k];if(v==null)delete H.pins[k];else{H.pins[k]=v;if(k!==H.uid&&!v.w&&hLive(v)&&v.t>H.seen&&(!was||was.t!==v.t))fresh.push([k,v]);else if(k===H.uid&&v.w&&v.w!==H.uid&&H.ready&&hLive(v)&&(!was||was.t!==v.t))hToast('👥 '+((H.mem[v.w]&&H.mem[v.w].n)||'夥伴')+' 幫你一起打卡了',v.note||'',H.uid)}};
+  const put=(k,v)=>{const was=H.pins[k];if(v==null)delete H.pins[k];else{H.pins[k]=v;if(k!==H.uid&&!v.w&&!v.c&&hLive(v)&&v.t>H.seen&&(!was||was.t!==v.t))fresh.push([k,v]);else if(k===H.uid&&v.w&&v.w!==H.uid&&H.ready&&hLive(v)&&(!was||was.t!==v.t))hToast('👥 '+((H.mem[v.w]&&H.mem[v.w].n)||'夥伴')+' 幫你一起打卡了',v.note||'',H.uid)}};
   if(!parts.length){if(patch)Object.entries(d||{}).forEach(([k,v])=>put(k,v));else{const old=H.pins;H.pins={};Object.entries(d||{}).forEach(([k,v])=>put(k,v))}}
   else if(parts.length===1){if(patch&&d&&H.pins[parts[0]])put(parts[0],{...H.pins[parts[0]],...d});else put(parts[0],d)}
   else{const k=parts[0];if(H.pins[k]){const v={...H.pins[k]};v[parts[1]]=d;put(k,v)}}
@@ -1757,17 +1757,17 @@ if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('messag
 
 /* ============ 📣 Where are you? ============
    有人發出呼叫 → 同群組的人收到推播，點開是全螢幕「📣 某某在問：…」；App 開著時震動＋提示音，直到你決定回報或先不回報。
-   資料：/imhere/rooms/<群組>/calls/<呼叫id>（只有知道群組代碼的人讀得到，與打卡相同的安全措施）。
+   資料：/imhere/rooms/main/calls/cur（只有一筆，新的覆蓋舊的；只有驗證過的成員讀得到）。
    發呼叫時若附位置，會用「我的打卡」（同一個 id，一筆，有就覆蓋、沒有就新增）標在地圖上，並加上 c＝呼叫id。
    回報＝照原本的 I'm here 打卡（GPS 或錨點）；回報結果整理在「I'm here」頁面的 📣 區塊。 */
 const HERE_CALLQ=['你們在哪？','集合囉，在哪？'];
 const hCLive=c=>!!c&&typeof c.t==='number'&&typeof c.m==='string'&&typeof c.by==='string'&&Date.now()-c.t<HERE_TTL;
 const hCDone=()=>{try{const a=JSON.parse(store.get('h:cd')||'[]');return Array.isArray(a)?a:[]}catch(e){return[]}};
 function hCMark(id){const a=hCDone();if(!a.includes(id)){a.push(id);store.set('h:cd',JSON.stringify(a.slice(-30)))}}
-const hCAll=()=>Object.entries(H.calls).map(([id,c])=>({id,...c})).filter(hCLive).sort((a,b)=>b.t-a.t);
-function hCPend(){   /* 等我決定的呼叫：還沒過期、不是我發的、加入群組之後發的、我沒按過「先不回報」、也還沒回報 */
+const hCAll=()=>{const c=H.calls.cur;return c&&hCLive(c)?[{...c,id:c.i||'cur'}]:[]};   /* 呼叫只有一筆（calls/cur），新的直接覆蓋舊的 */
+function hCPend(){   /* 等我決定的呼叫：還沒過期、不是我發的、我登入之後發的、我沒按過「先不回報」、我也沒有還在的打卡（有＝已回報） */
   const me=H.pins[H.uid],dn=hCDone(),cj=+(store.get('h:cj')||0);
-  return hCAll().filter(c=>c.by!==H.uid&&c.t>=cj&&!dn.includes(c.id)&&!(me&&typeof me.t==='number'&&me.t>=c.t));
+  return hCAll().filter(c=>c.by!==H.uid&&c.t>=cj&&!dn.includes(c.id)&&!hLive(me));   /* 我的打卡還沒消失＝已經回報，不用再問 */
 }
 
 /* ---- 震動＋提示音（App 開著且在前景時重複，直到決定為止；iOS 不支援網頁震動，且需先點過畫面才允許出聲） ---- */
@@ -1850,7 +1850,7 @@ function hCRead(){
 function hCallForm(keep){
   if(!keep||!H.cdraft){H.cdraft={msg:HERE_CALLQ[0],loc:'none'};H.man=null}
   const d=H.cdraft,anc=d.loc==='anchor'&&!!H.man,ck=v=>d.loc===v?'checked':'';
-  hDlg(`<h3>📣 Where are you?</h3><div class="gnote" style="margin-bottom:10px">同群組的夥伴會收到推播，點開就是全螢幕通知；每個人可以自己決定要不要回報。</div>
+  hDlg(`<h3>📣 Where are you?</h3><div class="gnote" style="margin-bottom:10px">同群組的夥伴會收到推播，點開就是全螢幕通知；每個人可以自己決定要不要回報。<br>一次只會有一則呼叫，新的會直接取代舊的；打卡還在的人視為已回報。</div>
   <input type="text" id="hcmsg" placeholder="想問大家的一句話" maxlength="24" autocomplete="off" value="${esc(d.msg)}">
   <div class="hq">${HERE_CALLQ.map(t=>`<button data-h="cq" data-t="${esc(t)}">${esc(t)}</button>`).join('')}</div>
   <div class="hcl">
@@ -1871,6 +1871,7 @@ function hCFail(r){
 }
 async function hCallSend(){
   const d=H.cdraft;if(!d)return;
+  if(!await hAuthFresh()){hCFail({net:1,why:'登入已過期，請重新驗證'});return}
   if(!d.cid)d.cid=rid(10);
   hDlg(d.loc==='me'&&!d.pinned?'<h3>定位中…</h3><div class="hspin"></div><div class="gnote" style="text-align:center">正在取得 GPS（最多 15 秒）</div>':'<h3>送出中…</h3><div class="hspin"></div>');
   if(d.loc!=='none'&&!d.pinned){
@@ -1878,10 +1879,10 @@ async function hCallSend(){
     if(!r.ok){hCFail(r);return}
     d.pinned=1;
   }
-  const call={by:H.uid,n:hName()||'旅伴',e:hEmo(),m:d.msg,t:Date.now(),l:d.pinned?1:0};
-  try{const r=await fetch(hUrl('calls/'+d.cid),{method:'PUT',body:JSON.stringify(call)});if(!r.ok)throw new Error('HTTP '+r.status)}
+  const call={i:d.cid,by:H.uid,n:hName()||'旅伴',e:hEmo(),m:d.msg,t:Date.now(),l:d.pinned?1:0};
+  try{const r=await fetch(hUrl('calls/cur'),{method:'PUT',body:JSON.stringify(call)});if(!r.ok)throw new Error('HTTP '+r.status)}
   catch(e){hCFail({net:1,why:(e&&e.message)||'網路無回應'});return}
-  H.calls[d.cid]=call;const pinned=d.pinned;H.cdraft=null;H.man=null;hClose();hUi();
+  H.calls={cur:call};const pinned=d.pinned;H.cdraft=null;H.man=null;hClose();hUi();
   hToast('📣 已通知大家',pinned?'集合地已標在地圖上':call.m,pinned?H.uid:'');
   if(pinned)hFocus(H.uid);
 }
@@ -1893,7 +1894,7 @@ function hCallsHtml(){
   const dn=hCDone(),ls=hList();
   return cs.map(c=>{
     const mine=c.by===H.uid,cp=H.pins[c.by],spot=!!(c.l&&hLive(cp)&&cp.c===c.id),
-      reps=ls.filter(p=>p.id!==c.by&&p.t>=c.t),replied=reps.some(p=>p.id===H.uid),declined=!mine&&!replied&&dn.includes(c.id);
+      reps=ls.filter(p=>p.id!==c.by),replied=reps.some(p=>p.id===H.uid),declined=!mine&&!replied&&dn.includes(c.id);
     const row=(p,lab)=>`<div class="gm"><div class="ge" style="--h:${hHue(p.n)}">${esc(p.e||'🙂')}</div><div class="gi"><b>${lab||(p.id===H.uid?'我':esc(p.n||'旅伴'))}　${hClock(p.t)}</b><small>${p.note?'💬 '+esc(p.note)+'｜':''}${hAgo(p.t)}</small></div><button class="gbtn" data-h="see" data-id="${p.id}">📍</button></div>`;
     return `<div class="hcc"><div style="font-size:15px;font-weight:800">📣 ${esc(mine?'我':c.n||'旅伴')} 在問：${esc(c.m)}</div>
       <div class="gnote" style="margin-bottom:4px">${hClock(c.t)} 發出（${hAgo(c.t)}）｜約 ${hLeft(c)} 分鐘後消失${!mine?'｜'+(replied?'✅ 你已回報':declined?'你選擇先不回報':'⏳ 等你回報'):''}</div>
@@ -1924,7 +1925,7 @@ document.addEventListener('click',e=>{
   else if(k==='cno'){if(!id)return;hCMark(id);hCheck();hUi()}
   else if(k==='cview'){const c=H.calls[id];away();if(c)hFocus(c.by)}
   else if(k==='cshow'){H.cHide=0;H.cShow=H.cShow||'';hCheck()}
-  else if(k==='cdel'){if(!id||!confirm('撤回這則呼叫？'))return;delete H.calls[id];fetch(hUrl('calls/'+id),{method:'DELETE'}).catch(()=>{});hCheck();hUi()}
+  else if(k==='cdel'){if(!id||!confirm('撤回這則呼叫？'))return;const cc=H.calls.cur;if(cc&&(cc.i||'cur')===id){delete H.calls.cur;fetch(hUrl('calls/cur'),{method:'DELETE'}).catch(()=>{})}hCheck();hUi()}
   else if(k==='close'){H.cdraft=null;H.cwant=0}
 });
 
