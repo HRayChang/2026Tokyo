@@ -362,7 +362,7 @@ body.mapmode .hdock{display:none}
 .htoast{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0));transform:translateX(-50%);z-index:320;width:min(420px,calc(100vw - 24px));display:flex;flex-direction:column;gap:8px;pointer-events:none}
 .ht{pointer-events:auto;background:var(--card);color:var(--tx);border:1.5px solid rgba(var(--acrgb),.4);border-radius:22px;padding:12px 14px;box-shadow:0 10px 30px rgba(0,0,0,.3);font-size:14px;font-weight:700;animation:hin .35s ease both}
 .ht small{display:block;color:var(--sub);font-weight:600;margin-top:2px;font-size:13px}
-/* 📣 呼叫大家 */
+/* 📣 Where are you? */
 .hcall{position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;padding:calc(20px + env(safe-area-inset-top,0)) 20px calc(20px + env(safe-area-inset-bottom,0));background:linear-gradient(160deg,var(--ac),var(--ac2));color:var(--onac);text-align:center;overflow-y:auto;animation:hcin .25s ease both}
 @keyframes hcin{from{opacity:0}}
 .hcb{width:min(420px,100%)}
@@ -413,13 +413,13 @@ html.dark .banner::before{background:linear-gradient(180deg,rgba(6,8,30,.6),rgba
 <body>
 <div class="banner"><button class="iconbtn" id="menuBtn" data-menu title="選單">☰</button></div>
 <div class="menu" id="menu" hidden>
-  <button data-m="notif">🔔 行程提醒</button>
+  <button data-m="notif">🔔 提醒</button>
   <button data-m="here">📍 I'm here</button>
-  <button data-m="call">📣 呼叫大家</button>
+  <button data-m="call">📣 Where are you?</button>
   <button data-m="check">🧳 行李清單</button>
-  <button data-m="book">🎟️ 我的預約</button>
+  <button data-m="book">🎟️ 預約</button>
   <button data-m="coupon">🎫 優惠券</button>
-  <button data-m="tour">🗝️ 使用導覽</button>
+  <button data-m="tour">🗝️ 導覽</button>
 </div>
 <div class="stick" id="stick"><nav class="tabs" id="tabs"></nav>
   <div class="seg"><div class="sg"><button data-seg="list">🗓️ 行程</button><button data-seg="map">🗺️ 地圖</button></div><button class="mb2" data-menu title="選單">☰</button></div></div>
@@ -430,7 +430,7 @@ html.dark .banner::before{background:linear-gradient(180deg,rgba(6,8,30,.6),rgba
   <div class="sheet" id="sheet"><div class="grab" id="grab"><i></i></div><div class="sh" id="sh"></div><div class="sl" id="sl"></div></div>
 </div>
 <button class="fab" id="fab" style="display:none">🧭 現在</button>
-<div class="hdock" id="hdock"><button class="hbtn" id="hbtn" data-h="open">📍 I'm here</button><button class="hcallb" id="hcallb" data-m="call" title="呼叫大家" aria-label="呼叫大家">📣</button></div>
+<div class="hdock" id="hdock"><button class="hcallb" id="hcallb" data-m="call" title="Where are you?" aria-label="Where are you?">📣</button><button class="hbtn" id="hbtn" data-h="open">📍 I'm here</button></div>
 <div class="view" id="view" hidden><div class="vh"><button id="vback">← 返回</button><b id="vt"></b></div><div class="vbody" id="vbody"></div></div>
 
 <div class="tour" id="tour" hidden role="dialog" aria-label="使用教學"><div class="tb"></div><div class="tb"></div><div class="tb"></div><div class="tb"></div><div class="tb"></div><div class="tspot" id="tspot"></div><div class="ttip" id="ttip"></div></div>
@@ -1230,7 +1230,7 @@ function checkCount(){let n=0,t=0;CHECK.forEach((g,gi)=>g.l.forEach((x,i)=>{t++;
 let viewKind='';
 function refreshBook(){if(viewKind==='book'&&!$('#view').hidden){const y=$('#view').scrollTop;$('#vbody').innerHTML=bookHtml();$('#view').scrollTop=y}}
 function openView(kind,anchor){viewKind=kind;
-  const v=$('#view');$('#vt').textContent=kind==='here'?'📍 I\'m here':kind==='coupon'?'🎫 優惠券':kind==='check'?'🧳 行李清單':'🎟️ 我的預約';
+  const v=$('#view');$('#vt').textContent=kind==='here'?'📍 I\'m here':kind==='coupon'?'🎫 優惠券':kind==='check'?'🧳 行李清單':'🎟️ 預約';
   $('#vbody').innerHTML=kind==='here'?hereHtml():kind==='coupon'?cpHtml():kind==='check'?checkHtml():bookHtml();
   v.hidden=false;document.body.style.overflow='hidden';v.scrollTop=0;menuEl().hidden=true;
   if(anchor){const el=document.getElementById('bk-'+anchor);if(el){el.scrollIntoView({block:'start'});v.scrollTop-=60;el.classList.add('flash')}}
@@ -1332,7 +1332,7 @@ const installText=()=>isIOS()
   ?'1. 請用 Chrome 開啟這個網頁\n2. 點右上角「⋮」選單\n3. 選「安裝應用程式」或「加到主畫面」\n4. 按「安裝／新增」\n之後從主畫面的圖示開啟，就會像 App 一樣全螢幕，行程有更新時也會自動載入新版。'
   :'手機：iPhone 用 Safari 點「分享」→「加入主畫面」；Android 用 Chrome 點「⋮」→「安裝應用程式」。\n電腦：Chrome／Edge 網址列右側的「安裝」圖示。\n加入後就能像 App 一樣從桌面開啟。';
 const TS=[
- {t:'歡迎來到東京旅程',x:'接下來先教你把它放到手機桌面變成 App，再直接在實際畫面上帶你操作一遍，約 1–2 分鐘。\n每一步都可以按「結束教學」離開，之後也能從選單 ☰ →「使用導覽」重看。'},
+ {t:'歡迎來到東京旅程',x:'接下來先教你把它放到手機桌面變成 App，再直接在實際畫面上帶你操作一遍，約 1–2 分鐘。\n每一步都可以按「結束教學」離開，之後也能從選單 ☰ →「導覽」重看。'},
  {when:()=>!isStandalone(),t:'📲 加到桌面變成 App',x:installText,act:'瀏覽器的按鈕在網頁之外，沒辦法框起來，請依上面步驟操作；完成後再回到這裡按「下一步」。'},
  {sel:'#tabs',pre:forceList,t:'📅 切換日期',x:'每一天一個分頁。打開 App 會自動跳到今天，出發前則顯示第一天。',act:'👆 請點一下其他日期試試',within:'#tabs'},
  {sel:'.dayhead',pre:forceList,t:'當天概況',x:'這裡有出發時間和完成進度條，走到哪、做完幾項一眼就知道。'},
@@ -1344,8 +1344,8 @@ const TS=[
  {sel:'[data-seg=list]',pre:forceMap,t:'回到行程',x:'要回到時間軸，就點「行程」。',act:'👆 請點一下「行程」',within:'[data-seg=list]'},
  {sel:'.tools',pre:forceList,t:'🧰 本日工具',x:'在每天頁面最下方：隱藏／顯示已完成項目、重置本日勾選。'},
  {sel:'#menuBtn',pre:forceList,t:'☰ 選單',x:'通知、清單、預訂資料都收在這裡。',act:'👆 請點一下開啟選單',within:'[data-menu]'},
- {sel:'#menu',pre:openMenuForTour,t:'選單內容',x:'📍 I\'m here：打卡目前位置，夥伴會收到通知\n🔔 行程提醒：事件前依各項設定提前提醒\n🧳 行李清單\n🎟️ 我的預約：可記訂位代號，只存在這支手機\n🎫 優惠券：存折價券截圖／條碼，結帳一鍵放大\n🗝️ 使用導覽：隨時重看'},
- {t:'準備出發 ✈️',x:'祝旅途愉快！之後想重看，點選單 ☰ →「使用導覽」。'}
+ {sel:'#menu',pre:openMenuForTour,t:'選單內容',x:'📍 I\'m here：打卡目前位置，夥伴會收到通知\n🔔 提醒：事件前依各項設定提前提醒\n🧳 行李清單\n🎟️ 預約：可記訂位代號，只存在這支手機\n🎫 優惠券：存折價券截圖／條碼，結帳一鍵放大\n🗝️ 導覽：隨時重看'},
+ {t:'準備出發 ✈️',x:'祝旅途愉快！之後想重看，點選單 ☰ →「導覽」。'}
 ];
 let tourI=0,tourSeen=false,tourCur=0,tourMode='list',tourTimer=null,tourTok=0;
 const tvis=e=>!!e&&e.getClientRects().length>0;
@@ -1657,7 +1657,7 @@ function drawHere(){
 const _showMap=showMap;showMap=async function(d){await _showMap.call(this,d);drawHere();hChip();hBtn2()};
 function hBtn2(){const mv=$('#mapview');if($('#hdock2'))return;
   const d=document.createElement('div');d.id='hdock2';
-  d.innerHTML='<button class="hbtn" id="hbtn2" data-h="open">📍 I\'m here</button><button class="hcallb" id="hcallb2" data-m="call" title="呼叫大家" aria-label="呼叫大家">📣</button>';
+  d.innerHTML='<button class="hcallb" id="hcallb2" data-m="call" title="Where are you?" aria-label="Where are you?">📣</button><button class="hbtn" id="hbtn2" data-h="open">📍 I\'m here</button>';
   mv.appendChild(d)}
 function hChip(){
   const mv=$('#mapview');let c=$('#gchip');
@@ -1713,7 +1713,7 @@ function hereHtml(){
     <div class="gnote" style="margin-top:8px">只有知道代碼的人看得到群組內的打卡，請只傳給同行夥伴。若用 iPhone 主畫面 App，邀請連結要在 App 內「換群組」手動輸入代碼（Safari 與主畫面 App 的資料是分開的）。</div></div>
   <div class="gcard"><h4>我的打卡</h4><div id="hme">${hMeHtml()}</div>
     <button class="hgo" data-h="open">📍 I'm here</button></div>
-  <div class="gcard"><h4>📣 呼叫大家</h4><div class="gnote" style="margin-bottom:6px">問大家「你們在哪？」，每個人可自己決定要不要回報。</div><button class="hgo" data-h="callopen" style="margin-top:0">📣 呼叫大家 I'm here</button><div id="hcalls" style="margin-top:10px">${hCallsHtml()}</div></div>
+  <div class="gcard"><h4>📣 Where are you?</h4><div class="gnote" style="margin-bottom:6px">問大家「你們在哪？」，每個人可自己決定要不要回報。</div><button class="hgo" data-h="callopen" style="margin-top:0">📣 Where are you?</button><div id="hcalls" style="margin-top:10px">${hCallsHtml()}</div></div>
   <div class="gcard"><h4>🔔 通知</h4><div id="hnt">${hNotifHtml()}</div></div>
   <div class="gcard"><h4>夥伴打卡</h4><div id="hmem">${hMemHtml()}</div></div>
   ${GLOG.length?`<div class="gcard"><h4>除錯訊息</h4><div class="gnote">${GLOG.map(esc).join('<br>')}</div></div>`:''}
@@ -1741,7 +1741,7 @@ async function hSub(){
 const _askNotif=askNotif;askNotif=async function(){await _askNotif();await hSub();hUi()};
 if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{const m=e.data;if(m&&m.call){H.cHide=0;H.cShow='';hCheck()}else if(m&&m.imhere)hFocus(m.imhere)});
 
-/* ============ 📣 呼叫大家 I'm here ============
+/* ============ 📣 Where are you? ============
    有人發出呼叫 → 同群組的人收到推播，點開是全螢幕「📣 某某在問：…」；App 開著時震動＋提示音，直到你決定回報或先不回報。
    資料：/imhere/rooms/<群組>/calls/<呼叫id>（只有知道群組代碼的人讀得到，與打卡相同的安全措施）。
    發呼叫時若附位置，會用「我的打卡」（同一個 id，一筆，有就覆蓋、沒有就新增）標在地圖上，並加上 c＝呼叫id。
@@ -1836,7 +1836,7 @@ function hCRead(){
 function hCallForm(keep){
   if(!keep||!H.cdraft){H.cdraft={msg:HERE_CALLQ[0],loc:'none'};H.man=null}
   const d=H.cdraft,anc=d.loc==='anchor'&&!!H.man,ck=v=>d.loc===v?'checked':'';
-  hDlg(`<h3>📣 呼叫大家 I'm here</h3><div class="gnote" style="margin-bottom:10px">同群組的夥伴會收到推播，點開就是全螢幕通知；每個人可以自己決定要不要回報。</div>
+  hDlg(`<h3>📣 Where are you?</h3><div class="gnote" style="margin-bottom:10px">同群組的夥伴會收到推播，點開就是全螢幕通知；每個人可以自己決定要不要回報。</div>
   <input type="text" id="hname" placeholder="暱稱（夥伴會看到）" maxlength="12" value="${esc(hName())}">
   <input type="text" id="hcmsg" placeholder="想問大家的一句話" maxlength="24" autocomplete="off" value="${esc(d.msg)}">
   <div class="hq">${HERE_CALLQ.map(t=>`<button data-h="cq" data-t="${esc(t)}">${esc(t)}</button>`).join('')}</div>
