@@ -21,11 +21,12 @@ self.addEventListener('fetch',e=>{
 /* ---- 📍 I'm here：伺服器推播（App 關閉／鎖屏也會收到）＋點通知回到地圖 ---- */
 self.addEventListener('push',e=>{
   let d={};try{d=e.data?e.data.json():{}}catch(x){}
-  e.waitUntil(self.registration.showNotification(d.title||"📍 I'm here",{body:d.body||'',icon:'icon-192.png',badge:'icon-192.png',tag:d.tag||'imhere',renotify:true,data:{id:d.id||''}}));
+  const call=d.call||'';   /* 📣 呼叫：不自動消失、較強的震動 */
+  e.waitUntil(self.registration.showNotification(d.title||"📍 I'm here",{body:d.body||'',icon:'icon-192.png',badge:'icon-192.png',tag:d.tag||'imhere',renotify:true,...(call?{requireInteraction:true,vibrate:[300,150,300,150,300]}:{}),data:{id:d.id||'',call}}));
 });
 self.addEventListener('notificationclick',e=>{
-  e.notification.close();const id=(e.notification.data||{}).id||'';
+  e.notification.close();const dt=e.notification.data||{},call=dt.call||'',id=call?'':(dt.id||'');
   e.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(cs=>{
-    const c=cs[0];if(c){c.postMessage({imhere:id});return c.focus()}
+    const c=cs[0];if(c){c.postMessage({imhere:id,call});return c.focus()}
     return clients.openWindow('./'+(id?'?h='+encodeURIComponent(id):''))}));
 });
