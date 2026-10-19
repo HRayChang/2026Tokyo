@@ -22,18 +22,18 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden){applyThem
 </script>
 
 <style>
-:root{--bg:#f1f7ff;--bgs:rgba(243,249,255,.94);--bgimg:linear-gradient(180deg,#eaf5ff,#f3f0ff 55%,#fff5e0);--card:#ffffff;--cardA:rgba(255,255,255,.92);--tx:#2f3f68;--sub:#6a7ca3;--line:#dde8f6;--ac:#e5709a;--acrgb:229,112,154;--green:#4fbf94;--blue:#6d8cff;--warn:#fff4dc;--warntx:#8a5f1a;--shadow:0 6px 20px rgba(90,150,215,.2)}
+:root{--bg:#f1f7ff;--bgs:rgba(243,249,255,.94);--bgimg:linear-gradient(180deg,#eaf5ff,#f3f0ff 55%,#fff5e0);--card:#ffffff;--cardA:rgba(255,255,255,.92);--tx:#2f3f68;--sub:#6a7ca3;--line:#dde8f6;--ac:#e5709a;--acrgb:229,112,154;--ac2:#f4a0cf;--ac2rgb:244,160,207;--onac:#fff;--orn:"✦";--grad:linear-gradient(135deg,var(--ac),var(--ac2));--green:#4fbf94;--blue:#6d8cff;--warn:#fff4dc;--warntx:#8a5f1a;--shadow:0 6px 20px rgba(90,150,215,.2)}
 @media all{html.dark{--bg:#0e1a38;--bgs:rgba(14,26,56,.94);--bgimg:linear-gradient(180deg,#14224a,#0e1a38 60%,#101c3a);--card:#1b2a54;--cardA:rgba(27,42,84,.92);--tx:#fdf3dc;--sub:#a9bbe0;--line:#2f4378;--blue:#9db4ff;--warn:#3a2f18;--warntx:#ffd98a;--shadow:0 6px 20px rgba(0,0,0,.35)}}
-html[data-day="0"]{--bg:#fff8e4;--bgs:rgba(255,249,230,.94);--bgimg:linear-gradient(180deg,#fff4cf,#fdeec2 55%,#fbe3cf);--card:#fff;--cardA:rgba(255,255,255,.93);--tx:#4f3a0e;--sub:#8a7040;--line:#f2e0a8;--ac:#d4930f;--acrgb:212,147,15;--g1:rgba(255,214,100,.55);--g2:rgba(255,236,170,.5);--g3:rgba(250,200,170,.45);--tc:#f6d27a;--shadow:0 6px 20px rgba(212,147,15,.2)}
-html[data-day="0"].dark{--bg:#150f2b;--bgs:rgba(21,15,43,.94);--bgimg:linear-gradient(180deg,#1d1438,#150f2b 60%,#1a1230);--card:#251a44;--cardA:rgba(37,26,68,.92);--tx:#f6e9dc;--sub:#b9a5c8;--line:#3b2a5e;--ac:#d4374d;--acrgb:212,55,77;--g1:rgba(160,40,70,.35);--g2:rgba(90,60,160,.35);--g3:rgba(60,40,120,.35);--tc:#2a1c4d;--shadow:0 6px 20px rgba(0,0,0,.4)}
-html[data-day="1"]{--bg:#eef7ff;--bgs:rgba(240,248,255,.94);--bgimg:linear-gradient(180deg,#e6f4ff,#eef3ff 55%,#fff3dc);--card:#fff;--cardA:rgba(255,255,255,.93);--tx:#25406a;--sub:#5f7ba2;--line:#d6e6f5;--ac:#1f93c9;--acrgb:31,147,201;--g1:rgba(255,225,150,.45);--g2:rgba(150,210,255,.55);--g3:rgba(110,190,240,.55);--tc:#8cc8f0;--shadow:0 6px 20px rgba(60,140,210,.2)}
-html[data-day="1"].dark{--bg:#0b1a3a;--bgs:rgba(11,26,58,.94);--bgimg:linear-gradient(180deg,#112456,#0b1a3a 60%,#0e1f45);--card:#172a58;--cardA:rgba(23,42,88,.92);--tx:#fdf1d6;--sub:#a8bbe3;--line:#2c4580;--ac:#f2b84b;--acrgb:242,184,75;--g1:rgba(240,170,60,.25);--g2:rgba(80,130,230,.3);--g3:rgba(40,90,190,.35);--tc:#0b1a3a;--shadow:0 6px 20px rgba(0,0,0,.4)}
-html[data-day="2"]{--bg:#eafaf6;--bgs:rgba(236,251,247,.94);--bgimg:linear-gradient(180deg,#e0f8f2,#e8f5fb 55%,#fdeee8);--card:#fff;--cardA:rgba(255,255,255,.93);--tx:#1f4a4d;--sub:#5b8a8c;--line:#cfeee6;--ac:#1fae9a;--acrgb:31,174,154;--g1:rgba(255,150,130,.3);--g2:rgba(130,230,210,.5);--g3:rgba(120,200,240,.5);--tc:#86dccb;--shadow:0 6px 20px rgba(31,174,154,.2)}
-html[data-day="2"].dark{--bg:#150a26;--bgs:rgba(21,10,38,.94);--bgimg:linear-gradient(180deg,#1e0e38,#150a26 60%,#1a0c2c);--card:#24123f;--cardA:rgba(36,18,63,.92);--tx:#f1e6fb;--sub:#b79ad0;--line:#3c2262;--ac:#b24bdb;--acrgb:178,75,219;--g1:rgba(170,60,200,.3);--g2:rgba(40,150,120,.22);--g3:rgba(90,40,150,.35);--tc:#24123f;--shadow:0 6px 20px rgba(0,0,0,.4)}
-html[data-day="3"]{--bg:#fbf3ff;--bgs:rgba(251,244,255,.94);--bgimg:linear-gradient(180deg,#f8eaff,#fdf0ff 55%,#fff4d6);--card:#fff;--cardA:rgba(255,255,255,.93);--tx:#46306a;--sub:#8268a8;--line:#ead8f7;--ac:#9b5fd0;--acrgb:155,95,208;--g1:rgba(255,215,110,.5);--g2:rgba(215,170,255,.5);--g3:rgba(255,190,220,.4);--tc:#d9b8f4;--shadow:0 6px 20px rgba(155,95,208,.2)}
-html[data-day="3"].dark{--bg:#0d0f35;--bgs:rgba(13,15,53,.94);--bgimg:linear-gradient(180deg,#151a4a,#0d0f35 60%,#101240);--card:#1a1e55;--cardA:rgba(26,30,85,.92);--tx:#fff2d0;--sub:#aeb4e6;--line:#2f3580;--ac:#f5c451;--acrgb:245,196,81;--g1:rgba(245,190,70,.25);--g2:rgba(120,90,220,.35);--g3:rgba(50,60,170,.4);--tc:#0d0f35;--shadow:0 6px 20px rgba(0,0,0,.4)}
-html[data-day="4"]{--bg:#eef9ff;--bgs:rgba(240,250,255,.94);--bgimg:linear-gradient(180deg,#e4f6ff,#f2f9ff 55%,#f4f0ff);--card:#fff;--cardA:rgba(255,255,255,.93);--tx:#234a6a;--sub:#5f89aa;--line:#d2eaf7;--ac:#3aa3dc;--acrgb:58,163,220;--g1:rgba(190,235,255,.7);--g2:rgba(215,230,255,.6);--g3:rgba(170,220,250,.5);--tc:#a9dcf5;--shadow:0 6px 20px rgba(58,163,220,.2)}
-html[data-day="4"].dark{--bg:#090c15;--bgs:rgba(9,12,21,.94);--bgimg:linear-gradient(180deg,#10141f,#090c15 60%,#0b0f1a);--card:#151b29;--cardA:rgba(21,27,41,.92);--tx:#e8f1fb;--sub:#93a6bf;--line:#28324a;--ac:#6aa8e8;--acrgb:106,168,232;--g1:rgba(120,170,230,.18);--g2:rgba(60,70,120,.3);--g3:rgba(20,30,60,.4);--tc:#090c15;--shadow:0 6px 20px rgba(0,0,0,.5)}
+html[data-day="0"]{--bg:#fffaf0;--bgs:rgba(255,250,238,.94);--bgimg:linear-gradient(180deg,#fff6dc,#ffedc8 55%,#ffe4d8);--card:#fffdf8;--cardA:rgba(255,253,246,.93);--tx:#5b3b12;--sub:#9a7a4a;--line:#f6e2b0;--ac:#e3a31d;--acrgb:227,163,29;--ac2:#f6cf72;--ac2rgb:246,207,114;--onac:#4a2f00;--orn:"❀";--g1:rgba(255,205,90,.6);--g2:rgba(255,225,160,.55);--g3:rgba(255,190,190,.4);--tc:#f8dd96;--shadow:0 8px 24px rgba(227,163,29,.25)}
+html[data-day="0"].dark{--bg:#14102a;--bgs:rgba(20,16,42,.94);--bgimg:linear-gradient(180deg,#201642,#14102a 60%,#190f2a);--card:#231a46;--cardA:rgba(35,26,70,.92);--tx:#f7ebe0;--sub:#bcaacb;--line:#3d2d66;--ac:#d63c56;--acrgb:214,60,86;--ac2:#8a4fd6;--ac2rgb:138,79,214;--onac:#ffffff;--orn:"❀";--g1:rgba(214,60,86,.30);--g2:rgba(120,80,210,.35);--g3:rgba(230,170,70,.15);--tc:#241a48;--shadow:0 8px 24px rgba(0,0,0,.45)}
+html[data-day="1"]{--bg:#eef8ff;--bgs:rgba(240,248,255,.94);--bgimg:linear-gradient(180deg,#e2f3ff,#eaf6ff 50%,#fff5de);--card:#ffffff;--cardA:rgba(255,255,255,.93);--tx:#1f3d6b;--sub:#5d7ca6;--line:#d3e7f8;--ac:#2e8fe0;--acrgb:46,143,224;--ac2:#46c8dc;--ac2rgb:70,200,220;--onac:#ffffff;--orn:"⚓︎";--g1:rgba(255,222,140,.5);--g2:rgba(140,205,255,.6);--g3:rgba(110,220,230,.45);--tc:#9fd2f5;--shadow:0 8px 24px rgba(46,143,224,.22)}
+html[data-day="1"].dark{--bg:#0a1838;--bgs:rgba(10,24,56,.94);--bgimg:linear-gradient(180deg,#12306a,#0a1838 60%,#0c1f48);--card:#14295a;--cardA:rgba(20,41,90,.92);--tx:#fff3d6;--sub:#a9bde8;--line:#2a4585;--ac:#f2b544;--acrgb:242,181,68;--ac2:#f28c5e;--ac2rgb:242,140,94;--onac:#2a1700;--orn:"⚓︎";--g1:rgba(240,170,60,.28);--g2:rgba(70,120,230,.35);--g3:rgba(238,111,160,.2);--tc:#0a1838;--shadow:0 8px 24px rgba(0,0,0,.45)}
+html[data-day="2"]{--bg:#eafbf6;--bgs:rgba(234,251,246,.94);--bgimg:linear-gradient(180deg,#d9f7f0,#e6f6fb 50%,#fde8e2);--card:#ffffff;--cardA:rgba(255,255,255,.93);--tx:#1b4750;--sub:#4f8a8e;--line:#c4ebe2;--ac:#e8473a;--acrgb:232,71,58;--ac2:#ff8f6e;--ac2rgb:255,143,110;--onac:#ffffff;--orn:"🐚";--g1:rgba(255,140,110,.38);--g2:rgba(120,230,205,.55);--g3:rgba(190,160,235,.35);--tc:#9fe3d3;--shadow:0 8px 24px rgba(232,71,58,.2)}
+html[data-day="2"].dark{--bg:#150a28;--bgs:rgba(21,10,40,.94);--bgimg:linear-gradient(180deg,#2a1250,#150a28 60%,#1c0b34);--card:#24103f;--cardA:rgba(36,16,63,.92);--tx:#f3e8fc;--sub:#bb9fd6;--line:#42246d;--ac:#b24ee6;--acrgb:178,78,230;--ac2:#e04aa8;--ac2rgb:224,74,168;--onac:#ffffff;--orn:"🐚";--g1:rgba(178,78,230,.32);--g2:rgba(224,74,168,.20);--g3:rgba(160,220,60,.10);--tc:#24103f;--shadow:0 8px 24px rgba(0,0,0,.45)}
+html[data-day="3"]{--bg:#fbf4ff;--bgs:rgba(251,244,255,.94);--bgimg:linear-gradient(180deg,#f6e9ff,#fdf0fb 50%,#fff3d4);--card:#ffffff;--cardA:rgba(255,255,255,.93);--tx:#472f6e;--sub:#8a6fb0;--line:#e9d6f8;--ac:#a560e6;--acrgb:165,96,230;--ac2:#f4a0cf;--ac2rgb:244,160,207;--onac:#ffffff;--orn:"☀︎";--g1:rgba(255,215,110,.55);--g2:rgba(205,160,255,.55);--g3:rgba(255,175,215,.45);--tc:#dcc0f6;--shadow:0 8px 24px rgba(165,96,230,.22)}
+html[data-day="3"].dark{--bg:#0e0f3a;--bgs:rgba(14,15,58,.94);--bgimg:linear-gradient(180deg,#1a1a5a,#0e0f3a 60%,#12134a);--card:#1b1d5c;--cardA:rgba(27,29,92,.92);--tx:#fff4d6;--sub:#b2b8ee;--line:#33398a;--ac:#f7c548;--acrgb:247,197,72;--ac2:#f59a4b;--ac2rgb:245,154,75;--onac:#35210a;--orn:"☀︎";--g1:rgba(255,200,90,.28);--g2:rgba(130,100,240,.38);--g3:rgba(60,70,190,.40);--tc:#0e0f3a;--shadow:0 8px 24px rgba(0,0,0,.45)}
+html[data-day="4"]{--bg:#eef9ff;--bgs:rgba(240,250,255,.94);--bgimg:linear-gradient(180deg,#e0f4ff,#f1f8ff 50%,#f3eeff);--card:#ffffff;--cardA:rgba(255,255,255,.93);--tx:#1f4468;--sub:#5b86ab;--line:#cfe8f6;--ac:#3c9be0;--acrgb:60,155,224;--ac2:#9aa8f5;--ac2rgb:154,168,245;--onac:#ffffff;--orn:"❄︎";--g1:rgba(185,235,255,.8);--g2:rgba(210,205,255,.6);--g3:rgba(160,215,250,.55);--tc:#b7e1f8;--shadow:0 8px 24px rgba(60,155,224,.22)}
+html[data-day="4"].dark{--bg:#080b14;--bgs:rgba(8,11,20,.94);--bgimg:linear-gradient(180deg,#121a2e,#080b14 60%,#0a0e1c);--card:#131a2b;--cardA:rgba(19,26,43,.92);--tx:#e6f0ff;--sub:#8fa3c4;--line:#26324f;--ac:#5f9eea;--acrgb:95,158,234;--ac2:#8b5fd6;--ac2rgb:139,95,214;--onac:#ffffff;--orn:"❄︎";--g1:rgba(95,158,234,.22);--g2:rgba(120,80,210,.28);--g3:rgba(20,40,90,.45);--tc:#080b14;--shadow:0 8px 24px rgba(0,0,0,.55)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;color:var(--tx);font:16px/1.45 -apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif}
 body{background:var(--bg) linear-gradient(180deg,rgba(120,190,240,.28),rgba(120,190,240,0) 420px) no-repeat}
@@ -224,7 +224,7 @@ html,body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans 
 .chk{border:2px solid rgba(var(--acrgb),.75);background:rgba(var(--acrgb),.07);transition:transform .15s,background .2s}
 .chk:active{background:linear-gradient(135deg,var(--ac),rgba(var(--acrgb),.7));transform:scale(.92)}
 .meal,.badge{border-radius:999px;font-weight:700}
-.badge{background:linear-gradient(135deg,var(--ac),rgba(var(--acrgb),.72))}
+.badge{background:var(--grad)}
 .badge.tent{background:transparent}
 .badge.now{background:var(--green)}
 .time{font-weight:700}
@@ -232,7 +232,7 @@ html,body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans 
 .acts a,.acts button{border-radius:999px;background:rgba(var(--acrgb),.13);font-weight:600;padding:9px 16px;transition:background .2s}
 .acts a:active,.acts button:active{background:rgba(var(--acrgb),.28)}
 .chip{border-radius:999px;border-width:1.5px;font-weight:600}
-.chip.on{background:linear-gradient(135deg,var(--ac),rgba(var(--acrgb),.72))}
+.chip.on{background:var(--grad)}
 .dyn{border-radius:20px;background:rgba(var(--acrgb),.07)}
 .grph{border-radius:24px;border-width:1.5px;background:rgba(var(--acrgb),.07)}
 .grp-body{border-left:3px dotted rgba(var(--acrgb),.4)}
@@ -244,10 +244,10 @@ details{border-radius:22px;border:1.5px solid rgba(var(--acrgb),.12)}
 .empty{font-weight:600}
 .bye{opacity:.9;font-weight:600}
 .bye::before,.bye::after{content:"✦";font-size:.5em;margin:0 .7em;vertical-align:middle;opacity:.7}
-.fab{border-radius:999px;background:linear-gradient(135deg,var(--ac),rgba(var(--acrgb),.72));border:2px solid rgba(255,255,255,.75);box-shadow:0 8px 22px rgba(var(--acrgb),.45);font-weight:700}
+.fab{border-radius:999px;background:var(--grad);border:2px solid rgba(255,255,255,.75);box-shadow:0 8px 22px rgba(var(--acrgb),.45);font-weight:700}
 .sg{border-radius:999px;border:1.5px solid rgba(var(--acrgb),.14);background:var(--cardA)}
 .sg button{border-radius:999px;font-weight:600}
-.sg button.on{background:linear-gradient(135deg,var(--ac),rgba(var(--acrgb),.72));box-shadow:0 3px 10px rgba(var(--acrgb),.35)}
+.sg button.on{background:var(--grad);box-shadow:0 3px 10px rgba(var(--acrgb),.35)}
 .mb2{border-radius:50%;background:var(--cardA)}
 .menu{border-radius:26px;border:1.5px solid rgba(var(--acrgb),.16);background:var(--cardA);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 14px 36px rgba(var(--acrgb),.28)}
 .menu button{border-radius:18px;font-weight:600}
@@ -261,7 +261,7 @@ details{border-radius:22px;border:1.5px solid rgba(var(--acrgb),.12)}
 .mapview.dk .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}
 .mapview .leaflet-popup-content-wrapper{border-radius:24px;box-shadow:0 10px 28px rgba(var(--acrgb),.3)}
 .mapview .leaflet-tooltip.rtt{border-radius:999px;padding:2px 9px}
-.mnow{border-radius:999px;background:linear-gradient(135deg,var(--ac),rgba(var(--acrgb),.72));border:2px solid rgba(255,255,255,.75);font-weight:700}
+.mnow{border-radius:999px;background:var(--grad);border:2px solid rgba(255,255,255,.75);font-weight:700}
 .pin{border:3px solid #fff;box-shadow:0 3px 10px rgba(var(--acrgb),.5)}
 .pin.done{background:#cbbfdc}
 .pin.now{background:var(--green)}
@@ -272,11 +272,11 @@ details{border-radius:22px;border:1.5px solid rgba(var(--acrgb),.12)}
 .srow.cu{background:rgba(79,191,148,.14);border-radius:18px}
 .sn{box-shadow:0 2px 6px rgba(0,0,0,.12)}
 /* 教學層 */
-.tb.dim{background:rgba(64,38,92,.55)}
-.tspot{border-radius:22px;box-shadow:0 0 0 3px var(--ac),0 0 0 7px rgba(var(--acrgb),.25),0 0 0 100vmax rgba(64,38,92,.55)}
-.ttip{border-radius:30px;border:1.5px solid rgba(var(--acrgb),.2);box-shadow:0 16px 44px rgba(64,38,92,.4)}
+.tb.dim{background:rgba(24,20,48,.55)}
+.tspot{border-radius:22px;box-shadow:0 0 0 3px var(--ac),0 0 0 7px rgba(var(--acrgb),.25),0 0 0 100vmax rgba(24,20,48,.55)}
+.ttip{border-radius:30px;border:1.5px solid rgba(var(--acrgb),.2);box-shadow:0 16px 44px rgba(24,20,48,.4)}
 .tbtn button{border-radius:999px}
-.tbtn button.pri{background:linear-gradient(135deg,var(--ac),rgba(var(--acrgb),.72))}
+.tbtn button.pri{background:var(--grad)}
 .tact{border-radius:18px}
 @media(prefers-reduced-motion:reduce){.card.now,.pin.now{animation:none}*{transition:none!important}}
 
@@ -308,23 +308,24 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .gm .gi{flex:1;min-width:0}.gm .gi b{display:block}.gm .gi small{display:block;color:var(--sub);font-size:12px}
 .gchip{position:absolute;top:8px;left:54px;max-width:calc(100% - 170px);z-index:500;border:0;border-radius:999px;background:var(--cardA);color:var(--tx);font-size:12px;font-weight:700;padding:7px 11px;box-shadow:0 3px 10px rgba(0,0,0,.25);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* 打卡按鈕（列表：左下角；地圖：面板上方） */
-.hbtn{position:fixed;left:16px;bottom:calc(18px + env(safe-area-inset-bottom,0));z-index:30;border:2px solid rgba(255,255,255,.75);border-radius:999px;background:linear-gradient(135deg,#3fb0c0,#4f8fe0);color:#fff;font-size:15px;font-weight:800;padding:12px 18px;box-shadow:0 8px 22px rgba(63,176,192,.5)}
+.hbtn{position:fixed;left:16px;bottom:calc(18px + env(safe-area-inset-bottom,0));z-index:30;border:2px solid rgba(255,255,255,.75);border-radius:999px;background:var(--grad);color:#fff;font-size:15px;font-weight:800;padding:12px 18px;box-shadow:0 8px 22px rgba(var(--acrgb),.45)}
 body.mapmode .hdock{display:none}
 .hdock{position:fixed;left:16px;bottom:calc(18px + env(safe-area-inset-bottom,0));z-index:30;display:flex;gap:8px;align-items:center}
 .hdock .hbtn{position:static}
-.hcallb{width:48px;height:48px;border-radius:50%;border:2px solid rgba(255,255,255,.75);background:linear-gradient(135deg,#e5709a,#7f5bd6);color:#fff;font-size:22px;line-height:1;padding:0;box-shadow:0 8px 22px rgba(127,91,214,.5)}
+.hcallb{width:48px;height:48px;border-radius:50%;border:2px solid rgba(255,255,255,.75);background:var(--grad);color:#fff;font-size:22px;line-height:1;padding:0;box-shadow:0 8px 22px rgba(var(--acrgb),.45)}
 .hcallb:active{transform:scale(.94)}
-.hcallb.m{position:absolute;left:150px;bottom:calc(80px + env(safe-area-inset-bottom,0));z-index:550}
-#hbtn2{position:absolute;left:12px;bottom:calc(80px + env(safe-area-inset-bottom,0));z-index:550}
+#hdock2{position:absolute;left:12px;bottom:calc(80px + env(safe-area-inset-bottom,0));z-index:550;display:flex;gap:8px;align-items:center}
+#hdock2 .hbtn{position:static}
+
 /* 打卡視窗 */
-.hdlg{position:fixed;inset:0;z-index:250;display:flex;align-items:flex-end;justify-content:center;background:rgba(64,38,92,.5);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.hdlg{position:fixed;inset:0;z-index:250;display:flex;align-items:flex-end;justify-content:center;background:rgba(24,20,48,.5);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
 .hdlg[hidden]{display:none}
 .hbox{width:min(440px,100%);background:var(--card);color:var(--tx);border-radius:30px 30px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0));box-shadow:0 -10px 34px rgba(0,0,0,.3);max-height:100dvh;overflow-y:auto}
 .hbox h3{margin:0 0 6px;font-size:20px}
 .hq{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
 .hq button{border:1.5px solid var(--ac);background:transparent;color:var(--ac);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:700;min-height:36px}
 .hgo,.hgo2{display:block;width:100%;border:0;border-radius:999px;min-height:50px;font-size:17px;font-weight:800;margin-top:8px}
-.hgo{color:#fff;background:linear-gradient(135deg,#3fb0c0,#4f8fe0);box-shadow:0 6px 16px rgba(63,176,192,.4)}
+.hgo{color:#fff;background:var(--grad);box-shadow:0 6px 16px rgba(var(--acrgb),.4)}
 .hgo2{color:var(--sub);background:rgba(var(--acrgb),.1);font-weight:700;font-size:15px}
 .hanc{position:absolute;left:50%;top:50%;z-index:700;width:0;height:0;pointer-events:none}
 .hanc i{position:absolute;left:-5px;top:-5px;width:10px;height:10px;border-radius:50%;background:rgba(229,112,154,.9);box-shadow:0 0 0 3px rgba(255,255,255,.9),0 0 0 6px rgba(229,112,154,.35)}
@@ -334,7 +335,7 @@ body.mapmode .hdock{display:none}
 .hancbar .gnote{margin-bottom:2px}
 .hancbar .row{display:flex;gap:8px}.hancbar .row button{flex:1}
 .hancbar .hgo,.hancbar .hgo2{margin-top:8px;min-height:46px}
-.mapview.anch .sheet,.mapview.anch .gchip,.mapview.anch #hbtn2,.mapview.anch #hcallb2,.mapview.anch #mapalert{display:none}
+.mapview.anch .sheet,.mapview.anch .gchip,.mapview.anch #hdock2,.mapview.anch #mapalert{display:none}
 .hspin{width:34px;height:34px;margin:12px auto;border-radius:50%;border:4px solid rgba(var(--acrgb),.2);border-top-color:var(--ac);animation:hsp 1s linear infinite}
 @keyframes hsp{to{transform:rotate(360deg)}}
 /* 地圖上的打卡點 */
@@ -362,7 +363,7 @@ body.mapmode .hdock{display:none}
 .ht{pointer-events:auto;background:var(--card);color:var(--tx);border:1.5px solid rgba(var(--acrgb),.4);border-radius:22px;padding:12px 14px;box-shadow:0 10px 30px rgba(0,0,0,.3);font-size:14px;font-weight:700;animation:hin .35s ease both}
 .ht small{display:block;color:var(--sub);font-weight:600;margin-top:2px;font-size:13px}
 /* 📣 呼叫大家 */
-.hcall{position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;padding:calc(20px + env(safe-area-inset-top,0)) 20px calc(20px + env(safe-area-inset-bottom,0));background:linear-gradient(160deg,#e5709a,#7f5bd6 55%,#4f8fe0);color:#fff;text-align:center;overflow-y:auto;animation:hcin .25s ease both}
+.hcall{position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;padding:calc(20px + env(safe-area-inset-top,0)) 20px calc(20px + env(safe-area-inset-bottom,0));background:linear-gradient(160deg,var(--ac),var(--ac2));color:var(--onac);text-align:center;overflow-y:auto;animation:hcin .25s ease both}
 @keyframes hcin{from{opacity:0}}
 .hcb{width:min(420px,100%)}
 .hcr{font-size:84px;line-height:1.1;animation:hcsh 1s ease-in-out infinite;transform-origin:50% 80%}
@@ -371,9 +372,9 @@ body.mapmode .hdock{display:none}
 .hcm{font-size:34px;font-weight:900;line-height:1.25;margin:6px 0 8px;word-break:break-word}
 .hcs{font-size:13px;opacity:.85;margin-bottom:22px}
 .hcbtn{display:block;width:100%;min-height:54px;border:2px solid rgba(255,255,255,.7);border-radius:999px;background:rgba(255,255,255,.16);color:#fff;font-size:17px;font-weight:800;margin-top:10px}
-.hcbtn.pri{background:#fff;color:#7f5bd6;border-color:#fff;box-shadow:0 8px 22px rgba(0,0,0,.25)}
+.hcbtn.pri{background:#fff;color:#3b2a5a;border-color:#fff;box-shadow:0 8px 22px rgba(0,0,0,.25)}
 .hcbtn.ghost{border-color:transparent;background:transparent;font-size:15px;font-weight:700;opacity:.9}
-.hcpill{position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top,0));z-index:330;max-width:calc(100vw - 24px);border:0;border-radius:999px;background:linear-gradient(135deg,#e5709a,#7f5bd6);color:#fff;font-size:13px;font-weight:800;padding:10px 16px;box-shadow:0 8px 22px rgba(127,91,214,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:hcsh 1.6s ease-in-out infinite}
+.hcpill{position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top,0));z-index:330;max-width:calc(100vw - 24px);border:0;border-radius:999px;background:var(--grad);color:#fff;font-size:13px;font-weight:800;padding:10px 16px;box-shadow:0 8px 22px rgba(var(--acrgb),.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:hcsh 1.6s ease-in-out infinite}
 .hcl{display:flex;flex-direction:column;gap:2px;margin:0 0 6px}
 .hcl label{display:flex;align-items:center;gap:8px;padding:7px 2px;font-size:15px}
 .hcl input{width:18px;height:18px;margin:0}
@@ -382,10 +383,35 @@ body.mapmode .hdock{display:none}
 .hwl{max-height:150px;overflow-y:auto;border:1.5px solid var(--line);border-radius:14px;padding:2px 10px}
 .hwl label{display:flex;align-items:center;gap:8px;padding:7px 0;font-size:15px}.hwl input{width:18px;height:18px;margin:0}
 @keyframes hin{from{opacity:0;transform:translateY(-14px)}}
+
+/* ===================== 統一主題：全部顏色來自當天的主色／副色 ===================== */
+.banner::before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(var(--acrgb),.26),rgba(var(--ac2rgb),.2));pointer-events:none}
+html.dark .banner::before{background:linear-gradient(180deg,rgba(6,8,30,.6),rgba(var(--acrgb),.26))}
+.banner::after{box-shadow:inset 0 -46px 46px -26px var(--bg)}
+.iconbtn{background:var(--cardA);color:var(--ac);border:1.5px solid rgba(var(--acrgb),.35);box-shadow:0 4px 12px rgba(var(--acrgb),.3)}
+.tab{border-color:rgba(var(--acrgb),.28);background:var(--cardA);box-shadow:0 3px 10px rgba(var(--acrgb),.12)}
+.tab small::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--c);margin-right:4px;vertical-align:1px}
+.tab.on{background:var(--grad);border-color:rgba(255,255,255,.7);color:var(--onac);box-shadow:0 5px 14px rgba(var(--acrgb),.4)}
+.tab.on small{color:var(--onac);opacity:.85}.tab.on small::before{background:var(--onac)}
+.dd{background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text}
+.bar i{background:linear-gradient(90deg,var(--ac),var(--ac2))}
+.sec::before,.cg::before{content:var(--orn);font-size:12px}
+.bye::before,.bye::after{content:var(--orn)}
+.sec,.cg{background:linear-gradient(90deg,rgba(var(--acrgb),.2),rgba(var(--ac2rgb),.18))}
+.badge,.chip.on,.sg button.on,.fab,.mnow,.hbtn,.hgo,.hcallb,.tbtn button.pri,.chk:active,.hcpill{color:var(--onac)}
+.badge.tent{color:var(--ac)}.badge.now{color:#fff}
+.pin,.sn{color:var(--onac)}
+.hbtn,.hcallb{border:2px solid rgba(255,255,255,.75);box-shadow:0 8px 22px rgba(var(--acrgb),.45);text-shadow:none}
+.hbtn{min-height:48px}
+.hcall,.hcbtn,.hcbtn.ghost{color:var(--onac)}.hcbtn.pri{color:#3b2a5a}
+.hcbtn{border-color:rgba(255,255,255,.7)}
+.card{border-color:rgba(var(--acrgb),.18)}
+.card.next,.card.now{border-color:rgba(var(--acrgb),.65)}
+.ttip .tt{color:var(--ac)}
 </style>
 </head>
 <body>
-<div class="banner"><button class="iconbtn" id="menuBtn" data-menu title="選單">🏰</button></div>
+<div class="banner"><button class="iconbtn" id="menuBtn" data-menu title="選單">☰</button></div>
 <div class="menu" id="menu" hidden>
   <button data-m="notif">🔔 行程提醒</button>
   <button data-m="here">📍 I'm here</button>
@@ -396,7 +422,7 @@ body.mapmode .hdock{display:none}
   <button data-m="tour">🗝️ 使用導覽</button>
 </div>
 <div class="stick" id="stick"><nav class="tabs" id="tabs"></nav>
-  <div class="seg"><div class="sg"><button data-seg="list">🗓️ 行程</button><button data-seg="map">🗺️ 地圖</button></div><button class="mb2" data-menu title="選單">🏰</button></div></div>
+  <div class="seg"><div class="sg"><button data-seg="list">🗓️ 行程</button><button data-seg="map">🗺️ 地圖</button></div><button class="mb2" data-menu title="選單">☰</button></div></div>
 <main id="main"></main>
 <div class="mapview" id="mapview" hidden>
   <div id="map"></div><div class="mapmsg" id="mapmsg"></div><div id="mapalert"></div>
@@ -420,7 +446,7 @@ const DS=s=>'東京ディズニーシー '+s;
 
 
 const DAYS=[
-{d:'2026-10-21',c:'#d4930f',rgb:'212,147,15',em:'🌹',wd:'三',name:'抵達・淺草・丸之內',start:'03:50',items:[
+{d:'2026-10-21',c:'#d9900a',rgb:'217,144,10',em:'🌹',wd:'三',name:'抵達・淺草・丸之內',start:'03:50',items:[
  P({at:'03:50',tz:8,rem:15,bk:'p1',title:'機場接送',badge:'‼️',q:'25.026706941264564,121.47842727069022',type:''}),
  P({at:'05:00',tz:8,rem:15,bk:'f1',title:'CHECK IN 報到',sub:'桃園機場 第1航廈',q:'桃園國際機場第一航廈',badge:'‼️',type:''}),
  P({at:'06:45',tz:8,rem:15,bk:'f1',nolink:1,title:'✈️ 酷航 Scoot TR866',sub:'06:45 桃園 T1 ➜ 11:15 成田 T1',q:'成田国際空港 第1ターミナル',note:'行李規定見下方 註1',type:''}),
@@ -455,7 +481,7 @@ const DAYS=[
  {h:'註2｜京成電鐵 成田機場 ➜ 押上 時刻表',l:'【快速】11:53 發 ➜ 13:23 抵達\n【Access特急】12:29 發 ➜ 13:35 抵達'},
  {h:'註3｜都營巴士 十間橋通 ➜ 淺草一丁目 時刻表',l:'13:59 發 ➜ 14:16 抵達\n14:28 發 ➜ 14:45 抵達'}]},
 
-{d:'2026-10-22',c:'#1f93c9',rgb:'31,147,201',em:'🌋',wd:'四',name:'東京迪士尼海洋',start:'04:45',items:[
+{d:'2026-10-22',c:'#2e8fe0',rgb:'46,143,224',em:'🌋',wd:'四',name:'東京迪士尼海洋',start:'04:45',items:[
  w(12),
  T({at:'05:00',rem:10,title:'都營地下鐵 淺草線',lines:['05:00 A20 押上 往西馬込・羽田機場・京急線方向','➜ 05:10 A14 人形町'],cost:'220日圓（IC卡）',dur:'10分',dir:['押上駅','人形町駅'],rt:'k5',type:''}),
  w(3),
@@ -496,7 +522,7 @@ const DAYS=[
 ],notes:[
  {h:'註1｜淺草線 寶町 ➜ 押上 時刻表',l:'23:03 發 ➜ 23:17 抵達\n23:14 發 ➜ 23:28 抵達\n23:21 發 ➜ 23:35 抵達\n23:27 發 ➜ 23:41 抵達\n23:33 發 ➜ 23:47 抵達\n23:44 發 ➜ 23:58 抵達\n23:56 發 ➜ 00:10 抵達\n00:13 發 ➜ 00:27 抵達（末班）'}]},
 
-{d:'2026-10-23',c:'#1fae9a',rgb:'31,174,154',em:'🐚',wd:'五',name:'新宿・原宿・澀谷',start:'09:00',items:[
+{d:'2026-10-23',c:'#e8473a',rgb:'232,71,58',em:'🐚',wd:'五',name:'新宿・原宿・澀谷',start:'09:00',items:[
  w(9),
  P({meal:'早餐',title:'摩斯漢堡 押上店',hrs:'08:00 - 21:00',q:'モスバーガー押上店',type:''}),
  w(4),
@@ -524,7 +550,7 @@ const DAYS=[
  P({title:'返回飯店',sub:HOTEL,q:'Season Hotel 押上',type:''})
 ],notes:[]},
 
-{d:'2026-10-24',c:'#9b5fd0',rgb:'155,95,208',em:'🏮',wd:'六',name:'豐洲・橫濱',start:'08:00',items:[
+{d:'2026-10-24',c:'#a560e6',rgb:'165,96,230',em:'🏮',wd:'六',name:'豐洲・橫濱',start:'08:00',items:[
  w(12),
  T({title:'都營地下鐵 淺草線',lines:['A20 押上 往西馬込・羽田機場・京急線方向','➜ A18 淺草 7號出口'],cost:'180日圓（IC卡）',dur:'3分',dir:['押上駅','浅草駅'],rt:'k14',type:''}),
  w(3),
@@ -576,7 +602,7 @@ const DAYS=[
  P({title:'返回飯店',sub:HOTEL,q:'Season Hotel 押上',type:''})
 ],notes:[]},
 
-{d:'2026-10-25',c:'#3aa3dc',rgb:'58,163,220',em:'❄️',wd:'日',name:'晴空塔・成田・返台',start:'10:00',items:[
+{d:'2026-10-25',c:'#52b6e8',rgb:'82,182,232',em:'❄️',wd:'日',name:'晴空塔・成田・返台',start:'10:00',items:[
  w(7),
  P({at:'08:00',rem:10,meal:'早餐',title:'PERTH Sandwiches & All Day Breakfast',sub:'‼️ 08:00 外帶',hrs:'08:00 - 15:00',q:'PERTH Sandwiches & All Day Breakfast 押上',type:''}),
  w(7),
@@ -926,6 +952,7 @@ function ensureLeaflet(){
     const sc=document.createElement('script');sc.src=LF_JS;sc.onload=ok;sc.onerror=()=>{lfp=null;no()};document.head.appendChild(sc)});
   return lfp;
 }
+const dc=()=>getComputedStyle(document.documentElement).getPropertyValue('--ac').trim()||'#e5709a';
 const darkMap=()=>document.documentElement.classList.contains('dark');
 const TILE=()=>'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'; /* 國土地理院 淡色地圖：免金鑰、日本全區、地名為日文 */
 function dayModel(day){
@@ -1006,12 +1033,12 @@ function drawRoutes(day){
 function drawMap(day){
   const M=dayModel(day);mapM=M;mapLayer.clearLayers();mapMarkers={};
   M.edges.forEach(e=>{if(e.rt)return;if(dist(e.a.ll[0],e.a.ll[1],e.b.ll[0],e.b.ll[1])>300000)return;
-    L.polyline([e.a.ll,e.b.ll],{color:day.c,weight:e.t?4:3,opacity:.8,dashArray:e.t?null:'6 8'}).addTo(mapLayer)});
+    L.polyline([e.a.ll,e.b.ll],{color:dc(),weight:e.t?4:3,opacity:.8,dashArray:e.t?null:'6 8'}).addTo(mapLayer)});
   drawRoutes(day);
   M.groups.forEach(g=>{
     const all=g.items.every(i=>isDone(i.id)),now=liveInfo&&g.items.some(i=>i.id===liveInfo.item.id),nx=!liveInfo&&g.items.some(i=>i.id===curNext)&&!all;
     const icon=L.divIcon({className:'',iconSize:[32,32],iconAnchor:[16,16],popupAnchor:[0,-18],
-      html:`<div class="pin ${all?'done':''} ${now?'now':''} ${nx?'nx':''}" style="--c:${day.c};--acrgb:${day.rgb}">${all?'✓':g.n}${g.items.length>1?`<b>${g.items.length}</b>`:''}</div>`});
+      html:`<div class="pin ${all?'done':''} ${now?'now':''} ${nx?'nx':''}" style="--c:${dc()}">${all?'✓':g.n}${g.items.length>1?`<b>${g.items.length}</b>`:''}</div>`});
     const mk=L.marker(g.ll,{icon,zIndexOffset:now?1000:all?-100:0}).addTo(mapLayer);
     mk.bindPopup(popupHtml(g),{maxWidth:290,autoPanPaddingBottomRight:[10,90],autoPanPaddingTopLeft:[10,64]});
     mapMarkers[g.key]=mk;
@@ -1039,7 +1066,7 @@ function buildSheet(day){
   const M=mapM||dayModel(day),cards=day.items.filter(i=>i.k==='place'||i.k==='move'),done=cards.filter(i=>isDone(i.id)).length;
   $('#sh').innerHTML=`<span>共 ${M.groups.length} 個地點｜完成 ${done}/${cards.length}</span><button id="tPre">📥 預載離線地圖</button>`;
   $('#sl').innerHTML=M.rows.map(({it,g})=>{const d=isDone(it.id),cu=liveInfo&&liveInfo.item.id===it.id;
-    return `<div class="srow ${d?'dn':''} ${cu?'cu':''}" data-focus="${it.id}"><span class="sn" style="--c:${day.c}">${g?g.n:'–'}</span>
+    return `<div class="srow ${d?'dn':''} ${cu?'cu':''}" data-focus="${it.id}"><span class="sn" style="--c:${dc()}">${g?g.n:'–'}</span>
     <div class="sm"><div class="st">${it.at?`<em>${it.at}</em>`:''}${esc(it.title)}</div><div class="ss">${esc(it.hrs||it.sub||'')}</div></div>
     <button class="sc ${d?'on':''}" data-${d?'undo':'done'}="${it.id}">✓</button></div>`}).join('');
 }
@@ -1305,7 +1332,7 @@ const installText=()=>isIOS()
   ?'1. 請用 Chrome 開啟這個網頁\n2. 點右上角「⋮」選單\n3. 選「安裝應用程式」或「加到主畫面」\n4. 按「安裝／新增」\n之後從主畫面的圖示開啟，就會像 App 一樣全螢幕，行程有更新時也會自動載入新版。'
   :'手機：iPhone 用 Safari 點「分享」→「加入主畫面」；Android 用 Chrome 點「⋮」→「安裝應用程式」。\n電腦：Chrome／Edge 網址列右側的「安裝」圖示。\n加入後就能像 App 一樣從桌面開啟。';
 const TS=[
- {t:'歡迎來到東京旅程',x:'接下來先教你把它放到手機桌面變成 App，再直接在實際畫面上帶你操作一遍，約 1–2 分鐘。\n每一步都可以按「結束教學」離開，之後也能從選單 🏰 →「使用導覽」重看。'},
+ {t:'歡迎來到東京旅程',x:'接下來先教你把它放到手機桌面變成 App，再直接在實際畫面上帶你操作一遍，約 1–2 分鐘。\n每一步都可以按「結束教學」離開，之後也能從選單 ☰ →「使用導覽」重看。'},
  {when:()=>!isStandalone(),t:'📲 加到桌面變成 App',x:installText,act:'瀏覽器的按鈕在網頁之外，沒辦法框起來，請依上面步驟操作；完成後再回到這裡按「下一步」。'},
  {sel:'#tabs',pre:forceList,t:'📅 切換日期',x:'每一天一個分頁。打開 App 會自動跳到今天，出發前則顯示第一天。',act:'👆 請點一下其他日期試試',within:'#tabs'},
  {sel:'.dayhead',pre:forceList,t:'當天概況',x:'這裡有出發時間和完成進度條，走到哪、做完幾項一眼就知道。'},
@@ -1316,9 +1343,9 @@ const TS=[
  {sel:'#sheet',pre:forceMap,miss:'center',t:'地點面板',x:'編號對應行程順序，點標記可看詳情、導航、標記完成。往上拖曳這個面板可展開清單。'},
  {sel:'[data-seg=list]',pre:forceMap,t:'回到行程',x:'要回到時間軸，就點「行程」。',act:'👆 請點一下「行程」',within:'[data-seg=list]'},
  {sel:'.tools',pre:forceList,t:'🧰 本日工具',x:'在每天頁面最下方：隱藏／顯示已完成項目、重置本日勾選。'},
- {sel:'#menuBtn',pre:forceList,t:'🏰 選單',x:'通知、清單、預訂資料都收在這裡。',act:'👆 請點一下開啟選單',within:'[data-menu]'},
+ {sel:'#menuBtn',pre:forceList,t:'☰ 選單',x:'通知、清單、預訂資料都收在這裡。',act:'👆 請點一下開啟選單',within:'[data-menu]'},
  {sel:'#menu',pre:openMenuForTour,t:'選單內容',x:'📍 I\'m here：打卡目前位置，夥伴會收到通知\n🔔 行程提醒：事件前依各項設定提前提醒\n🧳 行李清單\n🎟️ 我的預約：可記訂位代號，只存在這支手機\n🎫 優惠券：存折價券截圖／條碼，結帳一鍵放大\n🗝️ 使用導覽：隨時重看'},
- {t:'準備出發 ✈️',x:'祝旅途愉快！之後想重看，點選單 🏰 →「使用導覽」。'}
+ {t:'準備出發 ✈️',x:'祝旅途愉快！之後想重看，點選單 ☰ →「使用導覽」。'}
 ];
 let tourI=0,tourSeen=false,tourCur=0,tourMode='list',tourTimer=null,tourTok=0;
 const tvis=e=>!!e&&e.getClientRects().length>0;
@@ -1628,8 +1655,10 @@ function drawHere(){
   });
 }
 const _showMap=showMap;showMap=async function(d){await _showMap.call(this,d);drawHere();hChip();hBtn2()};
-function hBtn2(){const mv=$('#mapview');if(!$('#hbtn2')){const b=document.createElement('button');b.id='hbtn2';b.className='hbtn';b.dataset.h='open';b.textContent="📍 I'm here";mv.appendChild(b)}
-  if(!$('#hcallb2')){const c=document.createElement('button');c.id='hcallb2';c.className='hcallb m';c.dataset.m='call';c.title='呼叫大家';c.textContent='📣';mv.appendChild(c)}}
+function hBtn2(){const mv=$('#mapview');if($('#hdock2'))return;
+  const d=document.createElement('div');d.id='hdock2';
+  d.innerHTML='<button class="hbtn" id="hbtn2" data-h="open">📍 I\'m here</button><button class="hcallb" id="hcallb2" data-m="call" title="呼叫大家" aria-label="呼叫大家">📣</button>';
+  mv.appendChild(d)}
 function hChip(){
   const mv=$('#mapview');let c=$('#gchip');
   if(!c){c=document.createElement('button');c.id='gchip';c.className='gchip';c.dataset.m='here';mv.appendChild(c)}
