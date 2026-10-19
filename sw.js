@@ -1,7 +1,7 @@
 const C='tokyo-trip-cache',RT='tokyo-runtime-v2',MAXT=3000;
 self.addEventListener('install',e=>self.skipWaiting());
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.startsWith('tokyo-runtime')&&k!==RT).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-const EXT=/^cyberjapandata\.gsi\.go\.jp$|^cdnjs\.cloudflare\.com$/;
+const EXT=/^cyberjapandata\.gsi\.go\.jp$|^cdnjs\.cloudflare\.com$|^fonts\.googleapis\.com$|^fonts\.gstatic\.com$/;
 self.addEventListener('fetch',e=>{
   const r=e.request,u=new URL(r.url);
   if(r.method!=='GET')return;
