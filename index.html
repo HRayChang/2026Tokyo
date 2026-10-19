@@ -352,9 +352,9 @@ body.mapmode .hdock{display:none}
 .ht{pointer-events:auto;background:var(--card);color:var(--tx);border:1.5px solid rgba(var(--acrgb),.4);border-radius:22px;padding:12px 14px;box-shadow:0 10px 30px rgba(0,0,0,.3);font-size:14px;font-weight:700;animation:hin .35s ease both}
 .ht small{display:block;color:var(--sub);font-weight:600;margin-top:2px;font-size:13px}
 /* 📣 Where are you? */
-.hcall{position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;padding:calc(20px + env(safe-area-inset-top,0)) 20px calc(20px + env(safe-area-inset-bottom,0));background:linear-gradient(160deg,#e5709a,#7f5bd6 55%,#4f8fe0);color:#fff;text-align:center;overflow-y:auto;animation:hcin .25s ease both}
+.hcall{position:fixed;inset:0;z-index:400;display:flex;padding:calc(20px + max(env(safe-area-inset-top,0px),env(safe-area-inset-bottom,0px))) 20px;box-sizing:border-box;background:linear-gradient(160deg,#e5709a,#7f5bd6 55%,#4f8fe0);color:#fff;text-align:center;overflow-y:auto;animation:hcin .25s ease both}
 @keyframes hcin{from{opacity:0}}
-.hcb{width:min(420px,100%)}
+.hcb{width:min(420px,100%);margin:auto}   /* margin:auto＝內容放得下就正中央，太高（小螢幕）就從頂端開始可捲動，不會被切掉 */
 .hcr{font-size:84px;line-height:1.1;animation:hcsh 1s ease-in-out infinite;transform-origin:50% 80%}
 @keyframes hcsh{0%,100%{transform:rotate(0)}20%{transform:rotate(-14deg)}40%{transform:rotate(12deg)}60%{transform:rotate(-8deg)}80%{transform:rotate(6deg)}}
 .hcw{font-size:20px;font-weight:700;margin-top:10px;opacity:.95}
