@@ -1433,7 +1433,7 @@ addEventListener('resize',tourPos);
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#tour').hidden)tourClose()});
 {const m=location.hash.match(/^#fx(\d|check)$/);if(m)setTimeout(()=>{if(m[1]==='check')celebrate(CHECKT,{rgb:'229,112,154',title:'行李準備完成！'});else{const i=+m[1]-1,d=DAYS[i];if(d)celebrate(THEMES[i%THEMES.length],{rgb:d.rgb,title:`第 ${i+1} 天完成！`})}},900)}
 startLive();
-if(!tourSeen&&store.get('tour')!=='1')setTimeout(function(){if(!window.__wiping)openTour()},400);
+if((!tourSeen&&store.get('tour')!=='1')||/[?&]tour=1/.test(location.search))setTimeout(function(){if(!window.__wiping)openTour()},400);   /* 網址加 ?tour=1 可強制重看教學 */
 </script>
 <script>
 /* ============ 📍 I'm here（打卡定位：顯示 30 分鐘，重新打卡立即覆蓋） ============
@@ -2082,7 +2082,8 @@ function hWipeCheck(){
   if(!n){store.set('wiped',mark);return}   /* 本來就是全新：不用清，只記下這個時段已處理 */
   hWipe(mark);
 }
-if(Date.now()<WIPE_END){hWipeCheck();if(!window.__wiping){WIPES.forEach(w=>{const dt=w[1]-Date.now();if(dt>0&&dt<2e9)setTimeout(hWipeCheck,dt+500)});document.addEventListener('visibilitychange',()=>{if(!document.hidden)hWipeCheck()})}}
+if(/[?&]reset=1/.test(location.search))hWipe(store.get('wiped')||'');   /* 手動重置：網址後面加 ?reset=1，清完自動重開 */
+else if(Date.now()<WIPE_END){hWipeCheck();if(!window.__wiping){WIPES.forEach(w=>{const dt=w[1]-Date.now();if(dt>0&&dt<2e9)setTimeout(hWipeCheck,dt+500)});document.addEventListener('visibilitychange',()=>{if(!document.hidden)hWipeCheck()})}}
 hBtn2();
 (async()=>{if(!window.__wiping&&HA.rt&&await hAuthFresh()){hConnect();hSub()}})();   /* 開啟 App：用已存的登入換新憑證，再接上即時資料 */
 function hBoot(){   /* 一進來就先選身分：已登入或選過訪客就不再問；導覽畫面開著時等它關掉 */
