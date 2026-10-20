@@ -286,6 +286,8 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .gcard input[type=text],.hbox input[type=text]{width:100%;border:1.5px solid var(--line);background:transparent;color:var(--tx);border-radius:14px;padding:10px 12px;font:inherit;font-size:16px;margin-bottom:8px}
 .gemo{display:flex;flex-wrap:wrap;gap:6px}
 .gemo button{width:42px;height:42px;border-radius:21px;border:2px solid transparent;background:rgba(var(--acrgb),.1);font-size:22px}
+.gemo.sc{max-height:34vh;overflow-y:auto;padding:2px}
+.gemod{margin:4px 0 2px}.gemod summary{list-style:none;display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 10px;border:1.5px solid var(--line);border-radius:14px;font-size:14px;color:var(--sub)}.gemod summary::-webkit-details-marker{display:none}.gemod summary b{font-size:26px;font-weight:400}.gemod summary i{margin-left:auto;font-style:normal;transition:transform .2s}.gemod[open] summary i{transform:rotate(180deg)}.gemod .gemo{margin-top:8px}
 .gemo button.on{border-color:var(--ac);background:rgba(var(--acrgb),.25)}
 .gbtns{display:flex;gap:8px;flex-wrap:wrap}
 .gbtn{border:1.5px solid var(--ac);background:transparent;color:var(--ac);border-radius:999px;padding:8px 14px;font-size:14px;font-weight:700;min-height:38px}
@@ -1447,8 +1449,9 @@ const HERE_FN='https://asia-southeast1-tokyo-f332d.cloudfunctions.net/login',HER
 const ROSTER=[{id:'p1',n:'塗茵茵'},{id:'p2',n:'郭雅珍'},{id:'p3',n:'曹厚翎'},{id:'p4',n:'張先睿'},{id:'p5',n:'鄭翊宏'},{id:'p6',n:'江權倫'}];
 const HERE_TTL=30*60e3,HERE_ACC=100,HERE_QUICK=['在 A 出口','在 7-11 前','在一樓大廳','在捷運站出口'];
 const GEMOJI=[
- '👑','👸','🤴','🧚','🧜‍♀️','🧞','🧙','🧝','🪄','✨','🌟','💫','🏰','🎀','💎','🌹','🪞','👠','🍎','❄️','⛄','🌺','🪔','🦋','🌊','🐚','⛵','🏴‍☠️',
- '🐭','🐹','🦆','🐘','🦌','🦁','🐯','🐻','🐼','🐰','🦊','🐱','🐶','🐸','🐥','🦄','🐉','🐲','🦢','🦜','🦩','🐠','🐙','🦀','🐢','🐿️','🧸','🎃'];   /* 迪士尼／公主風頭像（都是一般 emoji） */
+ '🎃','👻','🦇','🕷️','🕸️','💀','☠️','🧛','🧛‍♀️','🧟','🧟‍♀️','🧙‍♀️','🧙‍♂️','🔮','🕯️','🪦','🍬','🍭','🍫','🌙','🐈‍⬛','🦉','🎭','🪄',
+ '👑','👸','🤴','🧚','🧜‍♀️','🧞','🧙','🧝','✨','🌟','💫','🏰','🎀','💎','🌹','🪞','👠','🍎','❄️','⛄','🌺','🪔','🦋','🌊','🐚','⛵','🏴‍☠️',
+ '🐭','🐹','🦆','🐘','🦌','🦁','🐯','🐻','🐼','🐰','🦊','🐱','🐶','🐸','🐥','🦄','🐉','🐲','🦢','🦜','🦩','🐠','🐙','🦀','🐢','🐿️','🧸'];   /* 迪士尼／公主風頭像（都是一般 emoji） */
 const rid=n=>{const a='abcdefghjkmnpqrstuvwxyz23456789',b=new Uint8Array(n);crypto.getRandomValues(b);return[...b].map(x=>a[x%a.length]).join('')};
 const GLOG=[];addEventListener('error',e=>{GLOG.push(new Date().toLocaleTimeString('zh-TW',{hour12:false})+' '+(e.message||'錯誤')+(e.lineno?' (行'+e.lineno+')':''));if(GLOG.length>8)GLOG.shift()});
 addEventListener('unhandledrejection',e=>{GLOG.push('Promise：'+((e.reason&&e.reason.message)||e.reason||'錯誤'));if(GLOG.length>8)GLOG.shift()});
@@ -1624,8 +1627,24 @@ async function hLogin(){
     HA.tok=sj.idToken;HA.rt=sj.refreshToken;HA.exp=Date.now()+(+sj.expiresIn)*1000;HA.uid=id;H.uid=id;store.set('g:rt',HA.rt);store.set('g:me',id);store.del('g:guest');
     hReset();hConnect(true);hSub();hUi();hPanel();
     hToast('✅ 驗證成功','歡迎 '+hName());
-    if(H.cwant){H.cwant=0;hCallForm()}else hForm();
+    hSetup();
   }catch(e){hLoginForm(id,'連線失敗：'+((e&&e.message)||'請稍後再試'))}
+}
+function hSetup(){   /* 驗證成功後：輸入想顯示的名稱（預設原名）與選頭像 */
+  H.sEmo=hEmo();
+  hDlg(`<h3>🎉 歡迎 ${esc(hName())}！</h3><div class="gnote" style="margin-bottom:6px">夥伴會看到你的名稱與頭像，之後也能在 I'm here 頁面修改。</div>
+  <div class="gnote" style="margin:6px 0 2px">名稱（預設為原名）</div>
+  <input type="text" id="hsn" maxlength="12" autocomplete="off" value="${esc(hName())}" placeholder="我的名字">
+  <div class="gnote" style="margin:8px 0 6px">選一個頭像（含萬聖節款 🎃）</div>
+  <div class="gemo sc" id="hsemo">${GEMOJI.map(e=>`<button class="${e===H.sEmo?'on':''}" data-h="semo" data-e="${e}">${e}</button>`).join('')}</div>
+  <button class="hgo" data-h="sdone">✅ 完成</button>`);
+}
+function hSetupDone(){
+  const v=(($('#hsn')||{}).value||'').trim().slice(0,12),me=hMe();
+  if(v&&(!me||v!==me.n))store.set('g:n:'+H.uid,v);else store.del('g:n:'+H.uid);
+  store.set('g:e:'+H.uid,H.sEmo||hEmo());
+  hMemPut(1);hClose();hUi();hPanel();
+  if(H.cwant){H.cwant=0;hCallForm()}else hForm();
 }
 function hReset(){   /* 換身分或登出：清掉本機的群組狀態、關閉即時連線 */
   H.pins={};H.ready=false;H.sig='';H.push=0;H.seen=Date.now();store.set('h:seen',String(H.seen));store.set('h:cj',String(H.seen));
@@ -1637,7 +1656,7 @@ function hLogout(auto){
   HA.tok='';HA.rt='';HA.exp=0;HA.uid='';H.uid='';store.del('g:rt');store.del('g:me');hAutoStop();hReset();hUi();hPanel();
   if(auto)setTimeout(()=>hJoin('登入已失效，請重新選擇角色並輸入生日',1),300);
 }
-document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='hbd')hLogin()});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='hbd')hLogin();if(e.key==='Enter'&&e.target.id==='hsn')hSetupDone()});
 /* ---- App 內提示 ---- */
 function hToast(t,sub,id){
   let b=$('#htoast');if(!b){b=document.createElement('div');b.id='htoast';b.className='htoast';document.body.appendChild(b)}
@@ -1763,9 +1782,8 @@ function hNotifHtml(){
 function hereHtml(){
   if(!HERE_DB)return `<div class="gcard"><h4>📍 I'm here</h4><div class="gnote">尚未設定資料庫（HERE_DB）。</div></div>`;
   return `<div class="gcard"><h4>👤 我的身分</h4>${hRoom()?`<div class="gm"><div class="ge" style="--h:${hHue(hName())}">${esc(hEmo())}</div><div class="gi"><b>${esc(hName())}</b><small>已通過生日驗證</small></div></div>
-    <input type="text" id="gname" placeholder="我的名字（夥伴會看到）" maxlength="12" value="${esc(hName())}" style="margin-top:10px">
-    <div class="gnote" style="margin:2px 0 6px">選一個自己的頭像：</div>
-    <div class="gemo">${GEMOJI.map(e=>`<button class="${e===hEmo()?'on':''}" data-h="emo" data-e="${e}">${e}</button>`).join('')}</div>
+    <input type="text" id="gname" placeholder="我的名字（夥伴會看到）" maxlength="12" aria-label="我的名字" value="${esc(hName())}" style="margin-top:10px">
+    <details class="gemod"><summary><b>${esc(hEmo())}</b>更換頭像<i>▾</i></summary><div class="gemo">${GEMOJI.map(e=>`<button class="${e===hEmo()?'on':''}" data-h="emo" data-e="${e}">${e}</button>`).join('')}</div></details>
     <div id="hmems" class="gnote" style="margin:10px 0">${hMemsHtml()}</div>
     <div class="gbtns"><button class="gbtn" data-h="leave">登出這支手機</button></div>`
     :`<div class="gnote">目前是訪客（尚未驗證身分）。成員驗證後才能打卡與看到夥伴。</div><div class="gbtns" style="margin-top:8px"><button class="gbtn" data-h="join">選擇角色並驗證</button></div>`}
@@ -2013,6 +2031,8 @@ document.addEventListener('click',e=>{
   else if(k==='join')hJoin();
   else if(k==='role'){H.lr=t.dataset.id;hLoginForm(H.lr)}
   else if(k==='lgo')hLogin();
+  else if(k==='semo'){H.sEmo=t.dataset.e;document.querySelectorAll('#hsemo button').forEach(b=>b.classList.toggle('on',b===t))}
+  else if(k==='sdone')hSetupDone();
   else if(k==='lback')hJoin();
   else if(k==='guest'){store.set('g:guest','1');H.cwant=0;hClose()}
   else if(k==='leave'){if(confirm('登出這支手機？你的打卡會從地圖移除，之後需要再輸入生日驗證。'))hLogout()}
