@@ -286,7 +286,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .gcard input[type=text],.hbox input[type=text]{width:100%;border:1.5px solid var(--line);background:transparent;color:var(--tx);border-radius:14px;padding:10px 12px;font:inherit;font-size:16px;margin-bottom:8px}
 .gemo{display:flex;flex-wrap:wrap;gap:6px}
 .gemo button{width:42px;height:42px;border-radius:21px;border:2px solid transparent;background:rgba(var(--acrgb),.1);font-size:22px}
-.gemo.sc{max-height:34vh;overflow-y:auto;padding:2px}
+.gemo.sc{gap:8px;justify-content:center}.gemo.sc button{width:48px;height:48px;border-radius:24px;font-size:26px}.hsdone{position:sticky;bottom:calc(-1 * (18px + env(safe-area-inset-bottom,0)));background:var(--card);padding:8px 0 calc(18px + env(safe-area-inset-bottom,0));margin-top:6px}.hsdone .hgo{margin:0}
 .gemod{margin:4px 0 2px}.gemod summary{list-style:none;display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 10px;border:1.5px solid var(--line);border-radius:14px;font-size:14px;color:var(--sub)}.gemod summary::-webkit-details-marker{display:none}.gemod summary b{font-size:26px;font-weight:400}.gemod summary i{margin-left:auto;font-style:normal;transition:transform .2s}.gemod[open] summary i{transform:rotate(180deg)}.gemod .gemo{margin-top:8px}
 .gemo button.on{border-color:var(--ac);background:rgba(var(--acrgb),.25)}
 .gbtns{display:flex;gap:8px;flex-wrap:wrap}
@@ -1637,7 +1637,7 @@ function hSetup(){   /* 驗證成功後：輸入想顯示的名稱（預設原�
   <input type="text" id="hsn" maxlength="12" autocomplete="off" value="${esc(hName())}" placeholder="我的名字">
   <div class="gnote" style="margin:8px 0 6px">選一個頭像（含萬聖節款 🎃）</div>
   <div class="gemo sc" id="hsemo">${GEMOJI.map(e=>`<button class="${e===H.sEmo?'on':''}" data-h="semo" data-e="${e}">${e}</button>`).join('')}</div>
-  <button class="hgo" data-h="sdone">✅ 完成</button>`);
+  <div class="hsdone"><button class="hgo" data-h="sdone">✅ 完成</button></div>`);
 }
 function hSetupDone(){
   const v=(($('#hsn')||{}).value||'').trim().slice(0,12),me=hMe();
