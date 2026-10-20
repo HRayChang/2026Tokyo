@@ -12,6 +12,70 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>東京旅程</title>
 <script>
+/* ============ 一次性整機重置 ============
+   部署新版後「第一次開啟」才會執行，清完把 WIPE_ID 記在 localStorage('wiped')；之後只要 WIPE_ID 沒變，就永遠不會再清。
+   下次想再重置一次：把 WIPE_ID 改成新的字串再部署。想完全停用：整段 <script> 拿掉即可。
+   全新安裝（手機裡本來就沒有這個 App 的任何資料）：不用清，只留記號，不會重新載入。
+   手動重置：網址後面加 ?reset=1（例如 https://你的網址/?reset=1）會強制重置一次，不管有沒有清過；完成後會自動去掉這個參數。
+   清除順序：伺服器上自己的資料 → 推播訂閱 → Service Worker → Cache Storage → IndexedDB → Cookie → OPFS → localStorage／sessionStorage。
+   連不上伺服器時不會清（避免角色被卡住），這次先正常使用，下次開啟再試。
+   清不掉的：通知與定位權限、主畫面圖示、瀏覽器 HTTP 快取（要到手機設定自己處理）。 */
+(function(){
+const WIPE_ID='20261020-1430';
+const DB='https://tokyo-f332d-default-rtdb.asia-southeast1.firebasedatabase.app',KEY='AIzaSyAXVBug1ArFJ1b-FdL3-P_nUrEAFhJg97U',ROOM='main';   /* 與下方 I'm here 的設定相同 */
+const MANUAL=/[?&]reset=1(&|#|$)/.test(location.search);
+const NEXT=()=>{try{const u=new URL(location.href);u.searchParams.delete('reset');return u.toString()}catch(e){return location.pathname}};   /* 重新載入時去掉 ?reset=1，避免一直重置 */
+try{
+  if(!MANUAL&&localStorage.getItem('wiped')===WIPE_ID)return;            /* 這個版本已經清過了 */
+  if(!MANUAL&&sessionStorage.getItem('wipe:skip')===WIPE_ID)return;      /* 這次連不上伺服器，先略過 */
+  localStorage.setItem('wipe:t','1');if(localStorage.getItem('wipe:t')!=='1')return;localStorage.removeItem('wipe:t');   /* 手機不能寫入儲存空間就不清，避免無限重載 */
+  if(!MANUAL&&localStorage.length===0){localStorage.setItem('wiped',WIPE_ID);return}                                   /* 全新安裝：本來就沒資料，只留記號，直接進 App */
+}catch(e){return}
+window.__WIPING=1;
+try{window.stop()}catch(e){}      /* 停止載入後面的 App 程式，讓舊資料不會被舊畫面繼續使用 */
+const ov=document.createElement('div');
+ov.style.cssText='position:fixed;left:0;top:0;right:0;bottom:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:linear-gradient(160deg,#e5709a,#7f5bd6 55%,#4f8fe0);color:#fff;font:700 20px -apple-system,BlinkMacSystemFont,"PingFang TC",sans-serif;text-align:center;padding:24px';
+ov.innerHTML='<div style="font-size:56px">✨</div><div id="wpt">正在整理 App…</div><div style="font-size:14px;font-weight:500;opacity:.9">新版第一次開啟，會把舊資料清乾淨，請稍等幾秒</div>';
+(document.body||document.documentElement).appendChild(ov);
+const T=(p,ms)=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),ms))]);
+const step=async f=>{try{await f()}catch(e){}};
+async function server(){      /* 先用還在的登入資料，把伺服器上自己的角色、訂閱、打卡、照片刪掉 */
+  const rt=localStorage.getItem('g:rt'),uid=localStorage.getItem('g:me');
+  if(!rt||!uid)return;
+  const r=await T(fetch('https://securetoken.googleapis.com/v1/token?key='+KEY,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'grant_type=refresh_token&refresh_token='+encodeURIComponent(rt)}),8000);
+  let j={};try{j=await r.json()}catch(e){}
+  if(!r.ok){if(/TOKEN_EXPIRED|INVALID_REFRESH_TOKEN|USER_DISABLED|USER_NOT_FOUND|INVALID_GRANT/.test((j.error&&j.error.message)||''))return;throw new Error('auth '+r.status)}   /* 登入早已失效：伺服器沒辦法再動，直接清本機 */
+  if(j.user_id!==uid)return;
+  const u=p=>DB+'/imhere/rooms/'+ROOM+'/'+p+'.json?auth='+encodeURIComponent(j.id_token);
+  const del=p=>T(fetch(u(p),{method:'DELETE'}),8000).then(x=>{if(x.status>=500)throw new Error('http '+x.status)});
+  await Promise.all(['pins/'+uid,'photos/'+uid,'members/'+uid,'subs/'+uid,'claims/'+uid].map(del));
+  await step(async()=>{const ps=await (await T(fetch(u('pins')),8000)).json();await Promise.all(Object.entries(ps||{}).filter(([k,v])=>v&&v.w===uid).map(([k])=>del('pins/'+k)))});   /* 我替夥伴代打的卡 */
+  await step(async()=>{const c=await (await T(fetch(u('calls/cur')),8000)).json();if(c&&c.by===uid)await del('calls/cur')});                                                           /* 我發出的呼叫 */
+}
+async function local(){
+  await step(async()=>{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(async r=>{try{const s=await r.pushManager.getSubscription();if(s)await s.unsubscribe()}catch(e){}try{await r.unregister()}catch(e){}}))});   /* 推播訂閱＋Service Worker */
+  await step(async()=>{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))});                                                                                                                                                    /* Cache Storage（頁面與離線地圖圖磚） */
+  await step(async()=>{if(!indexedDB.databases)return;const ds=await indexedDB.databases();await Promise.all(ds.map(d=>new Promise(res=>{try{const q=indexedDB.deleteDatabase(d.name);q.onsuccess=q.onerror=q.onblocked=()=>res();setTimeout(res,3000)}catch(e){res()}})))});                  /* IndexedDB */
+  await step(async()=>{                                                                                                                                                                                                                                  /* Cookie */
+    const names=document.cookie.split(';').map(s=>s.split('=')[0].trim()).filter(Boolean),h=location.hostname,pt=h.split('.'),ds=[''];
+    for(let i=0;i<pt.length-1;i++)ds.push('.'+pt.slice(i).join('.'));ds.push(h);
+    const ps=['/'],sg=location.pathname.split('/').filter(Boolean);let a='';sg.forEach(s=>{a+='/'+s;ps.push(a,a+'/')});
+    names.forEach(n=>ds.forEach(d=>ps.forEach(p=>{document.cookie=n+'=;expires=Thu, 01 Jan 1970 00:00:00 GMT;max-age=0;path='+p+(d?';domain='+d:'')})))});
+  await step(async()=>{if(!navigator.storage||!navigator.storage.getDirectory)return;const root=await navigator.storage.getDirectory();for await(const e of root.entries())await root.removeEntry(e[0],{recursive:true})});                                          /* 瀏覽器私有檔案空間 */
+  try{localStorage.clear()}catch(e){}try{sessionStorage.clear()}catch(e){}                                                                                                                                                                              /* 最後才清（上面要用登入資料） */
+}
+(async()=>{
+  try{await server()}catch(e){      /* 伺服器沒清成功：不動本機資料，這次正常使用，下次開啟再試 */
+    try{sessionStorage.setItem('wipe:skip',WIPE_ID)}catch(x){}
+    const t=document.getElementById('wpt');if(t)t.textContent='連不上伺服器，這次先不重置';
+    setTimeout(()=>location.replace(NEXT()),1200);return}
+  await local();
+  try{localStorage.setItem('wiped',WIPE_ID);if(localStorage.getItem('wiped')!==WIPE_ID)sessionStorage.setItem('wipe:skip',WIPE_ID)}catch(e){}
+  location.replace(NEXT());
+})();
+})();
+</script>
+<script>
 /* 依裝置當地時間切換主題：17:00～隔天 05:00 深色，其餘淺色（改 DARK_FROM / DARK_TO 即可調整） */
 const DARK_FROM=17,DARK_TO=5;
 function applyTheme(){const h=new Date().getHours(),d=h>=DARK_FROM||h<DARK_TO,r=document.documentElement;
@@ -1433,7 +1497,7 @@ addEventListener('resize',tourPos);
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#tour').hidden)tourClose()});
 {const m=location.hash.match(/^#fx(\d|check)$/);if(m)setTimeout(()=>{if(m[1]==='check')celebrate(CHECKT,{rgb:'229,112,154',title:'行李準備完成！'});else{const i=+m[1]-1,d=DAYS[i];if(d)celebrate(THEMES[i%THEMES.length],{rgb:d.rgb,title:`第 ${i+1} 天完成！`})}},900)}
 startLive();
-if((!tourSeen&&store.get('tour')!=='1')||/[?&]tour=1/.test(location.search))setTimeout(function(){if(!window.__wiping)openTour()},400);   /* 網址加 ?tour=1 可強制重看教學 */
+if((!tourSeen&&store.get('tour')!=='1')||/[?&]tour=1/.test(location.search))setTimeout(openTour,400);   /* 網址加 ?tour=1 可強制重看教學 */
 </script>
 <script>
 /* ============ 📍 I'm here（打卡定位：顯示 30 分鐘，重新打卡立即覆蓋） ============
@@ -2059,39 +2123,14 @@ document.addEventListener('click',e=>{
   else if(k==='all')hFocus(null);
   else if(k==='notif'){askNotif()}
 });
-/* ---- 🧹 重置：只有 2026/10/20（台灣時間）當天，14:00 與 17:00 各清一次；每支手機每個時段最多清一次，10/21 00:00 之後完全不再清 ---- */
-const WIPES=[['wipe-20261020-1400',Date.parse('2026-10-20T14:00:00+08:00')],['wipe-20261020-1700',Date.parse('2026-10-20T17:00:00+08:00')]],WIPE_END=Date.parse('2026-10-21T00:00:00+08:00');
-async function hWipe(mark){
-  if(window.__wiping)return;window.__wiping=1;
-  try{const o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:99999;background:#fff;color:#333;display:flex;align-items:center;justify-content:center;font:16px/1.6 -apple-system,sans-serif;text-align:center';o.innerHTML='🧹 正在重置資料…<br>完成後會自動重新開啟';document.body.appendChild(o)}catch(e){}
-  try{if(HA.rt&&HERE_DB&&await Promise.race([hAuthFresh(),new Promise(r=>setTimeout(()=>r(false),5000))])&&H.uid){   /* 先把伺服器上自己的角色／訂閱／打卡釋放掉，重新登入才不會被「角色已被選走」擋住 */
-    const id=H.uid;await Promise.race([Promise.all(['pins/','photos/','members/','subs/','claims/'].map(p=>fetch(hUrl(p+id),{method:'DELETE'}).catch(()=>{}))),new Promise(r=>setTimeout(r,5000))])}}catch(e){}
-  try{const reg=await navigator.serviceWorker.getRegistration();const sub=reg&&await reg.pushManager.getSubscription();if(sub)await sub.unsubscribe()}catch(e){}
-  try{localStorage.clear();sessionStorage.clear()}catch(e){}
-  try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}
-  try{if(indexedDB.databases){const dbs=await indexedDB.databases();dbs.forEach(d=>d.name&&indexedDB.deleteDatabase(d.name))}}catch(e){}
-  try{localStorage.setItem('wiped',mark)}catch(e){}
-  location.replace(location.pathname);
-}
-function hWipeCheck(){
-  if(window.__wiping)return;const now=Date.now();if(now>=WIPE_END)return;
-  const done=(store.get('wiped')||'').split(','),due=WIPES.filter(w=>w[1]<=now&&!done.includes(w[0])).map(w=>w[0]);
-  if(!due.length)return;
-  let n=0;try{n=localStorage.length}catch(e){}
-  const mark=done.concat(due).filter(Boolean).join(',');
-  if(!n){store.set('wiped',mark);return}   /* 本來就是全新：不用清，只記下這個時段已處理 */
-  hWipe(mark);
-}
-if(/[?&]reset=1/.test(location.search))hWipe(store.get('wiped')||'');   /* 手動重置：網址後面加 ?reset=1，清完自動重開 */
-else if(Date.now()<WIPE_END){hWipeCheck();if(!window.__wiping){WIPES.forEach(w=>{const dt=w[1]-Date.now();if(dt>0&&dt<2e9)setTimeout(hWipeCheck,dt+500)});document.addEventListener('visibilitychange',()=>{if(!document.hidden)hWipeCheck()})}}
 hBtn2();
-(async()=>{if(!window.__wiping&&HA.rt&&await hAuthFresh()){hConnect();hSub()}})();   /* 開啟 App：用已存的登入換新憑證，再接上即時資料 */
+(async()=>{if(HA.rt&&await hAuthFresh()){hConnect();hSub()}})();   /* 開啟 App：用已存的登入換新憑證，再接上即時資料 */
 function hBoot(){   /* 一進來就先選身分：已登入或選過訪客就不再問；導覽畫面開著時等它關掉 */
-  if(window.__wiping||HA.rt||store.get('g:guest')==='1')return;
+  if(HA.rt||store.get('g:guest')==='1')return;
   const tr=$('#tour');if(tr&&!tr.hidden){setTimeout(hBoot,400);return}
   hJoin('',1);
 }
-window.hGateOpen=()=>{if(window.__wiping)return false;if(hDlgEl&&!hDlgEl.hidden)return false;return !!(HA.rt||store.get('g:guest')==='1')||!HERE_DB};   /* 天氣要等：教學結束、登入（或選訪客）完成、視窗都關了 */
+window.hGateOpen=()=>{if(hDlgEl&&!hDlgEl.hidden)return false;return !!(HA.rt||store.get('g:guest')==='1')||!HERE_DB};   /* 天氣要等：教學結束、登入（或選訪客）完成、視窗都關了 */
 setTimeout(hBoot,1500);
 setInterval(()=>{if(HA.rt&&!hFresh())hAuthFresh().then(ok=>{if(ok)hConnect(true)})},60e3);
 </script>
@@ -2428,13 +2467,12 @@ if(mt)mt.insertAdjacentHTML('beforebegin','<button data-wxm="1">🌤️ 天氣�
 /* ---- 每天第一次開啟（含從背景回到前景遇到新的一天）自動跳出 ---- */
 var wxWait=0;
 function auto(){
-  if(ovEl||wxWait||window.__wiping)return;
+  if(ovEl||wxWait)return;
   var now=new Date(),dk=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
   if(store.get('wx:seen')===dk)return;
   if(jstDate(Date.now())>DAYS[DAYS.length-1].d)return;       /* 旅程結束後不再跳出 */
   var li=liveDayIdx(),i=li>=0?li:cur,tries=0;wxWait=1;
   (function go(){
-    if(window.__wiping){wxWait=0;return}
     var t=document.getElementById('tour'),gate=window.hGateOpen?window.hGateOpen():true;
     if(((t&&!t.hidden)||!gate)&&tries++<1200)return setTimeout(go,500);   /* 順序：教學 → 登入 → 天氣 */
     wxWait=0;
