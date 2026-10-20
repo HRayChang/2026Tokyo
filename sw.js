@@ -22,7 +22,7 @@ self.addEventListener('fetch',e=>{
 self.addEventListener('push',e=>{
   let d={};try{d=e.data?e.data.json():{}}catch(x){}
   const call=d.call||'';   /* 📣 呼叫：不自動消失、較強的震動 */
-  e.waitUntil(self.registration.showNotification(d.title||"📍 I'm here",{body:d.body||'',icon:'icon-192.png',badge:'icon-192.png',tag:d.tag||'imhere',renotify:true,...(call?{requireInteraction:true,vibrate:[300,150,300,150,300]}:{}),data:{id:d.id||'',call}}));
+  e.waitUntil(self.registration.showNotification(d.title||"📍 I'm here",{body:d.body||'',icon:'icon-192.png',badge:'icon-192.png',tag:d.tag||'imhere',renotify:true,data:{id:d.id||'',call}}));
 });
 self.addEventListener('notificationclick',e=>{
   e.notification.close();const dt=e.notification.data||{},call=dt.call||'',id=call?'':(dt.id||'');
