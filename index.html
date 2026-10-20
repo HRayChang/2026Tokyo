@@ -1433,7 +1433,7 @@ addEventListener('resize',tourPos);
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#tour').hidden)tourClose()});
 {const m=location.hash.match(/^#fx(\d|check)$/);if(m)setTimeout(()=>{if(m[1]==='check')celebrate(CHECKT,{rgb:'229,112,154',title:'行李準備完成！'});else{const i=+m[1]-1,d=DAYS[i];if(d)celebrate(THEMES[i%THEMES.length],{rgb:d.rgb,title:`第 ${i+1} 天完成！`})}},900)}
 startLive();
-if(!tourSeen&&store.get('tour')!=='1')setTimeout(openTour,400);
+if(!tourSeen&&store.get('tour')!=='1')setTimeout(function(){if(!window.__wiping)openTour()},400);
 </script>
 <script>
 /* ============ 📍 I'm here（打卡定位：顯示 30 分鐘，重新打卡立即覆蓋） ============
@@ -1591,7 +1591,7 @@ async function hAutoTick(){
 function hAutoResume(){const c=hAutoCfg();if(c&&c.min&&hRoom())hAutoStart(c,4000)}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&H.autoT){hWake();hAutoTick()}});
 setTimeout(hAutoResume,2500);
-function hOpen(){hRoom()?hForm():hJoin()}
+function hOpen(){if(hRoom())hForm();else{H.owant=1;hJoin()}}
 const hDev=()=>{let d=store.get('g:dev');if(!d){d=rid(16);store.set('g:dev',d)}return d};
 let hJoinSeq=0;
 async function hJoin(msg,boot){   /* 角色選單：只列出還沒被別人選走的角色；都不是就選「訪客」 */
@@ -1644,7 +1644,7 @@ function hSetupDone(){
   if(v&&(!me||v!==me.n))store.set('g:n:'+H.uid,v);else store.del('g:n:'+H.uid);
   store.set('g:e:'+H.uid,H.sEmo||hEmo());
   hMemPut(1);hClose();hUi();hPanel();
-  if(H.cwant){H.cwant=0;hCallForm()}else hForm();
+  if(H.cwant){H.cwant=0;hCallForm()}else if(H.owant){H.owant=0;hForm()}   /* 只有一開始就是為了打卡／呼叫才登入的，才接續；單純登入就回到原畫面 */
 }
 function hReset(){   /* 換身分或登出：清掉本機的群組狀態、關閉即時連線 */
   H.pins={};H.ready=false;H.sig='';H.push=0;H.seen=Date.now();store.set('h:seen',String(H.seen));store.set('h:cj',String(H.seen));
@@ -2034,7 +2034,7 @@ document.addEventListener('click',e=>{
   else if(k==='semo'){H.sEmo=t.dataset.e;document.querySelectorAll('#hsemo button').forEach(b=>b.classList.toggle('on',b===t))}
   else if(k==='sdone')hSetupDone();
   else if(k==='lback')hJoin();
-  else if(k==='guest'){store.set('g:guest','1');H.cwant=0;hClose()}
+  else if(k==='guest'){store.set('g:guest','1');H.cwant=0;H.owant=0;hClose()}
   else if(k==='leave'){if(confirm('登出這支手機？你的打卡會從地圖移除，之後需要再輸入生日驗證。'))hLogout()}
   else if(k==='close')hClose();
   else if(k==='pick'){const f=$('#hfile');if(f)f.click()}
@@ -2059,13 +2059,38 @@ document.addEventListener('click',e=>{
   else if(k==='all')hFocus(null);
   else if(k==='notif'){askNotif()}
 });
+/* ---- 🧹 重置：只有 2026/10/20（台灣時間）當天，14:00 與 17:00 各清一次；每支手機每個時段最多清一次，10/21 00:00 之後完全不再清 ---- */
+const WIPES=[['wipe-20261020-1400',Date.parse('2026-10-20T14:00:00+08:00')],['wipe-20261020-1700',Date.parse('2026-10-20T17:00:00+08:00')]],WIPE_END=Date.parse('2026-10-21T00:00:00+08:00');
+async function hWipe(mark){
+  if(window.__wiping)return;window.__wiping=1;
+  try{const o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:99999;background:#fff;color:#333;display:flex;align-items:center;justify-content:center;font:16px/1.6 -apple-system,sans-serif;text-align:center';o.innerHTML='🧹 正在重置資料…<br>完成後會自動重新開啟';document.body.appendChild(o)}catch(e){}
+  try{if(HA.rt&&HERE_DB&&await Promise.race([hAuthFresh(),new Promise(r=>setTimeout(()=>r(false),5000))])&&H.uid){   /* 先把伺服器上自己的角色／訂閱／打卡釋放掉，重新登入才不會被「角色已被選走」擋住 */
+    const id=H.uid;await Promise.race([Promise.all(['pins/','photos/','members/','subs/','claims/'].map(p=>fetch(hUrl(p+id),{method:'DELETE'}).catch(()=>{}))),new Promise(r=>setTimeout(r,5000))])}}catch(e){}
+  try{const reg=await navigator.serviceWorker.getRegistration();const sub=reg&&await reg.pushManager.getSubscription();if(sub)await sub.unsubscribe()}catch(e){}
+  try{localStorage.clear();sessionStorage.clear()}catch(e){}
+  try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}
+  try{if(indexedDB.databases){const dbs=await indexedDB.databases();dbs.forEach(d=>d.name&&indexedDB.deleteDatabase(d.name))}}catch(e){}
+  try{localStorage.setItem('wiped',mark)}catch(e){}
+  location.replace(location.pathname);
+}
+function hWipeCheck(){
+  if(window.__wiping)return;const now=Date.now();if(now>=WIPE_END)return;
+  const done=(store.get('wiped')||'').split(','),due=WIPES.filter(w=>w[1]<=now&&!done.includes(w[0])).map(w=>w[0]);
+  if(!due.length)return;
+  let n=0;try{n=localStorage.length}catch(e){}
+  const mark=done.concat(due).filter(Boolean).join(',');
+  if(!n){store.set('wiped',mark);return}   /* 本來就是全新：不用清，只記下這個時段已處理 */
+  hWipe(mark);
+}
+if(Date.now()<WIPE_END){hWipeCheck();if(!window.__wiping){WIPES.forEach(w=>{const dt=w[1]-Date.now();if(dt>0&&dt<2e9)setTimeout(hWipeCheck,dt+500)});document.addEventListener('visibilitychange',()=>{if(!document.hidden)hWipeCheck()})}}
 hBtn2();
-(async()=>{if(HA.rt&&await hAuthFresh()){hConnect();hSub()}})();   /* 開啟 App：用已存的登入換新憑證，再接上即時資料 */
+(async()=>{if(!window.__wiping&&HA.rt&&await hAuthFresh()){hConnect();hSub()}})();   /* 開啟 App：用已存的登入換新憑證，再接上即時資料 */
 function hBoot(){   /* 一進來就先選身分：已登入或選過訪客就不再問；導覽畫面開著時等它關掉 */
-  if(HA.rt||store.get('g:guest')==='1')return;
-  const tr=$('#tour');if(tr&&!tr.hidden){setTimeout(hBoot,1000);return}
+  if(window.__wiping||HA.rt||store.get('g:guest')==='1')return;
+  const tr=$('#tour');if(tr&&!tr.hidden){setTimeout(hBoot,400);return}
   hJoin('',1);
 }
+window.hGateOpen=()=>{if(window.__wiping)return false;if(hDlgEl&&!hDlgEl.hidden)return false;return !!(HA.rt||store.get('g:guest')==='1')||!HERE_DB};   /* 天氣要等：教學結束、登入（或選訪客）完成、視窗都關了 */
 setTimeout(hBoot,1500);
 setInterval(()=>{if(HA.rt&&!hFresh())hAuthFresh().then(ok=>{if(ok)hConnect(true)})},60e3);
 </script>
@@ -2400,13 +2425,18 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&ovEl)closeO
 var mt=document.querySelector('#menu [data-m="tour"]');
 if(mt)mt.insertAdjacentHTML('beforebegin','<button data-wxm="1">🌤️ 天氣預報</button>');
 /* ---- 每天第一次開啟（含從背景回到前景遇到新的一天）自動跳出 ---- */
+var wxWait=0;
 function auto(){
-  if(ovEl)return;
+  if(ovEl||wxWait||window.__wiping)return;
   var now=new Date(),dk=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
   if(store.get('wx:seen')===dk)return;
   if(jstDate(Date.now())>DAYS[DAYS.length-1].d)return;       /* 旅程結束後不再跳出 */
-  var li=liveDayIdx(),i=li>=0?li:cur,tries=0;
-  (function go(){var t=document.getElementById('tour');if(t&&!t.hidden&&tries++<180)return setTimeout(go,1000);
+  var li=liveDayIdx(),i=li>=0?li:cur,tries=0;wxWait=1;
+  (function go(){
+    if(window.__wiping){wxWait=0;return}
+    var t=document.getElementById('tour'),gate=window.hGateOpen?window.hGateOpen():true;
+    if(((t&&!t.hidden)||!gate)&&tries++<1200)return setTimeout(go,500);   /* 順序：教學 → 登入 → 天氣 */
+    wxWait=0;
     if(!ovEl&&show(i))store.set('wx:seen',dk)})();
 }
 document.addEventListener('visibilitychange',function(){if(!document.hidden)load().then(auto)});
